@@ -3,6 +3,6 @@ node_modules/
 npm*
 test/lib/
 test/typescript/definitions.js
-dist/
+
 openpgp.store/
 .nyc_output/
