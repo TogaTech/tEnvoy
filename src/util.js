@@ -26,10 +26,11 @@
  * @module util
  */
 
+import emailAddresses from 'email-addresses';
 import stream from 'web-stream-tools';
 import config from './config';
 import util from './util'; // re-import module to access util functions
-import { getBigInteger } from './biginteger';
+import b64 from './encoding/base64';
 
 export default {
   isString: function(data) {
@@ -40,57 +41,109 @@ export default {
     return Array.prototype.isPrototypeOf(data);
   },
 
-  isBigInteger: function(data) {
-    return data !== null && typeof data === 'object' && data.value &&
-      // eslint-disable-next-line valid-typeof
-      (typeof data.value === 'bigint' || this.isBN(data.value));
-  },
-
-  isBN: function(data) {
-    return data !== null && typeof data === 'object' &&
-      (data.constructor.name === 'BN' ||
-        (data.constructor.wordSize === 26 && Array.isArray(data.words))); // taken from BN.isBN()
-  },
-
   isUint8Array: stream.isUint8Array,
 
   isStream: stream.isStream,
+
+  /**
+   * Get transferable objects to pass buffers with zero copy (similar to "pass by reference" in C++)
+   *   See: https://developer.mozilla.org/en-US/docs/Web/API/Worker/postMessage
+   * Also, convert ReadableStreams to MessagePorts
+   * @param  {Object} obj           the options object to be passed to the web worker
+   * @returns {Array<ArrayBuffer>}   an array of binary data to be passed
+   */
+  getTransferables: function(obj, zero_copy) {
+    const transferables = [];
+    util.collectTransferables(obj, transferables, zero_copy);
+    return transferables.length ? transferables : undefined;
+  },
+
+  collectTransferables: function(obj, collection, zero_copy) {
+    if (!obj) {
+      return;
+    }
+
+    if (util.isUint8Array(obj)) {
+      if (zero_copy && collection.indexOf(obj.buffer) === -1 && !(
+        navigator.userAgent.indexOf('Version/11.1') !== -1 || // Safari 11.1
+        ((navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1] < 56 && navigator.userAgent.indexOf('Edge') === -1) // Chrome < 56
+      )) {
+        collection.push(obj.buffer);
+      }
+      return;
+    }
+    if (Object.prototype.isPrototypeOf(obj)) {
+      Object.entries(obj).forEach(([key, value]) => { // recursively search all children
+        if (util.isStream(value)) {
+          if (value.locked) {
+            obj[key] = null;
+          } else {
+            const transformed = stream.transformPair(value, async readable => {
+              const reader = stream.getReader(readable);
+              const { port1, port2 } = new MessageChannel();
+              port1.onmessage = async function({ data: { action } }) {
+                if (action === 'read') {
+                  try {
+                    const result = await reader.read();
+                    port1.postMessage(result, util.getTransferables(result));
+                  } catch (e) {
+                    port1.postMessage({ error: e.message });
+                  }
+                } else if (action === 'cancel') {
+                  await transformed.cancel();
+                  port1.postMessage();
+                }
+              };
+              obj[key] = port2;
+              collection.push(port2);
+            });
+          }
+          return;
+        }
+        if (Object.prototype.toString.call(value) === '[object MessagePort]') {
+          throw new Error("Can't transfer the same stream twice.");
+        }
+        util.collectTransferables(value, collection, zero_copy);
+      });
+    }
+  },
 
   /**
    * Convert MessagePorts back to ReadableStreams
    * @param  {Object} obj
    * @returns {Object}
    */
-  restoreStreams: function(obj, streaming) {
-    if (Object.prototype.toString.call(obj) === '[object MessagePort]') {
-      return new (streaming === 'web' ? globalThis.ReadableStream : stream.ReadableStream)({
-        pull(controller) {
-          return new Promise(resolve => {
-            obj.onmessage = evt => {
-              const { done, value, error } = evt.data;
-              if (error) {
-                controller.error(new Error(error));
-              } else if (!done) {
-                controller.enqueue(value);
-              } else {
-                controller.close();
-              }
-              resolve();
-            };
-            obj.postMessage({ action: 'read' });
-          });
-        },
-        cancel() {
-          return new Promise(resolve => {
-            obj.onmessage = resolve;
-            obj.postMessage({ action: 'cancel' });
-          });
-        }
-      }, { highWaterMark: 0 });
-    }
+  restoreStreams: function(obj) {
     if (Object.prototype.isPrototypeOf(obj) && !Uint8Array.prototype.isPrototypeOf(obj)) {
       Object.entries(obj).forEach(([key, value]) => { // recursively search all children
-        obj[key] = util.restoreStreams(value, streaming);
+        if (Object.prototype.toString.call(value) === '[object MessagePort]') {
+          obj[key] = new ReadableStream({
+            pull(controller) {
+              return new Promise(resolve => {
+                value.onmessage = evt => {
+                  const { done, value, error } = evt.data;
+                  if (error) {
+                    controller.error(new Error(error));
+                  } else if (!done) {
+                    controller.enqueue(value);
+                  } else {
+                    controller.close();
+                  }
+                  resolve();
+                };
+                value.postMessage({ action: 'read' });
+              });
+            },
+            cancel() {
+              return new Promise(resolve => {
+                value.onmessage = resolve;
+                value.postMessage({ action: 'cancel' });
+              });
+            }
+          }, { highWaterMark: 0 });
+          return;
+        }
+        util.restoreStreams(value);
       });
     }
     return obj;
@@ -134,7 +187,7 @@ export default {
    * @param {String} str String to convert
    * @returns {String} String containing the hexadecimal values
    */
-  strToHex: function (str) {
+  str_to_hex: function (str) {
     if (str === null) {
       return "";
     }
@@ -157,7 +210,7 @@ export default {
    * @param {String} str Hex string to convert
    * @returns {String}
    */
-  hexToStr: function (hex) {
+  hex_to_str: function (hex) {
     let str = '';
     for (let i = 0; i < hex.length; i += 2) {
       str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
@@ -166,44 +219,42 @@ export default {
   },
 
   /**
-   * Read one MPI from bytes in input
-   * @param {Uint8Array} bytes  input data to parse
-   * @returns {Uint8Array} parsed MPI
-   */
-  readMPI: function (bytes) {
-    const bits = (bytes[0] << 8) | bytes[1];
-    const bytelen = (bits + 7) >>> 3;
-    return bytes.subarray(2, 2 + bytelen);
-  },
-
-  /**
-   * Left-pad Uint8Array to length by adding 0x0 bytes
-   * @param {Uint8Array} bytes      data to pad
-   * @param {Number}     length     padded length
-   * @return {Uint8Array} padded bytes
-   */
-  leftPad(bytes, length) {
-    const padded = new Uint8Array(length);
-    const offset = length - bytes.length;
-    padded.set(bytes, offset);
-    return padded;
-  },
-
-  /**
    * Convert a Uint8Array to an MPI-formatted Uint8Array.
+   * Note: the output is **not** an MPI object.
+   * @see {@link module:type/mpi/MPI.fromUint8Array}
+   * @see {@link module:type/mpi/MPI.toUint8Array}
    * @param {Uint8Array} bin An array of 8-bit integers to convert
    * @returns {Uint8Array} MPI-formatted Uint8Array
    */
-  uint8ArrayToMpi: function (bin) {
-    let i; // index of leading non-zero byte
-    for (i = 0; i < bin.length; i++) if (bin[i] !== 0) break;
-    if (i === bin.length) {
-      throw new Error('Zero MPI');
-    }
-    const stripped = bin.subarray(i);
-    const size = (stripped.length - 1) * 8 + util.nbits(stripped[0]);
+  Uint8Array_to_MPI: function (bin) {
+    const size = (bin.length - 1) * 8 + util.nbits(bin[0]);
     const prefix = Uint8Array.from([(size & 0xFF00) >> 8, size & 0xFF]);
-    return util.concatUint8Array([prefix, stripped]);
+    return util.concatUint8Array([prefix, bin]);
+  },
+
+  /**
+   * Convert a Base-64 encoded string an array of 8-bit integer
+   *
+   * Note: accepts both Radix-64 and URL-safe strings
+   * @param {String} base64 Base-64 encoded string to convert
+   * @returns {Uint8Array} An array of 8-bit integers
+   */
+  b64_to_Uint8Array: function (base64) {
+    return b64.decode(base64.replace(/-/g, '+').replace(/_/g, '/'));
+  },
+
+  /**
+   * Convert an array of 8-bit integer to a Base-64 encoded string
+   * @param {Uint8Array} bytes An array of 8-bit integers to convert
+   * @param {bool}       url   If true, output is URL-safe
+   * @returns {String}          Base-64 encoded string
+   */
+  Uint8Array_to_b64: function (bytes, url) {
+    let encoded = b64.encode(bytes).replace(/[\r\n]/g, '');
+    if (url) {
+      encoded = encoded.replace(/[+]/g, '-').replace(/[/]/g, '_').replace(/[=]/g, '');
+    }
+    return encoded;
   },
 
   /**
@@ -211,7 +262,7 @@ export default {
    * @param {String} hex  A hex string to convert
    * @returns {Uint8Array} An array of 8-bit integers
    */
-  hexToUint8Array: function (hex) {
+  hex_to_Uint8Array: function (hex) {
     const result = new Uint8Array(hex.length >> 1);
     for (let k = 0; k < hex.length >> 1; k++) {
       result[k] = parseInt(hex.substr(k << 1, 2), 16);
@@ -224,7 +275,7 @@ export default {
    * @param {Uint8Array} bytes Array of 8-bit integers to convert
    * @returns {String} Hexadecimal representation of the array
    */
-  uint8ArrayToHex: function (bytes) {
+  Uint8Array_to_hex: function (bytes) {
     const r = [];
     const e = bytes.length;
     let c = 0;
@@ -244,10 +295,10 @@ export default {
    * @param {String} str String to convert
    * @returns {Uint8Array} An array of 8-bit integers
    */
-  strToUint8Array: function (str) {
+  str_to_Uint8Array: function (str) {
     return stream.transform(str, str => {
       if (!util.isString(str)) {
-        throw new Error('strToUint8Array: Data must be in the form of a string');
+        throw new Error('str_to_Uint8Array: Data must be in the form of a string');
       }
 
       const result = new Uint8Array(str.length);
@@ -263,7 +314,7 @@ export default {
    * @param {Uint8Array} bytes An array of 8-bit integers to convert
    * @returns {String} String representation of the array
    */
-  uint8ArrayToStr: function (bytes) {
+  Uint8Array_to_str: function (bytes) {
     bytes = new Uint8Array(bytes);
     const result = [];
     const bs = 1 << 14;
@@ -280,7 +331,7 @@ export default {
    * @param {String|ReadableStream} str The string to convert
    * @returns {Uint8Array|ReadableStream} A valid squence of utf8 bytes
    */
-  encodeUtf8: function (str) {
+  encode_utf8: function (str) {
     const encoder = new TextEncoder('utf-8');
     // eslint-disable-next-line no-inner-declarations
     function process(value, lastChunk = false) {
@@ -294,7 +345,7 @@ export default {
    * @param {Uint8Array|ReadableStream} utf8 A valid squence of utf8 bytes
    * @returns {String|ReadableStream} A native javascript string
    */
-  decodeUtf8: function (utf8) {
+  decode_utf8: function (utf8) {
     const decoder = new TextDecoder('utf-8');
     // eslint-disable-next-line no-inner-declarations
     function process(value, lastChunk = false) {
@@ -320,8 +371,8 @@ export default {
 
   /**
    * Check Uint8Array equality
-   * @param {Uint8Array} array1 first array
-   * @param {Uint8Array} array2 second array
+   * @param {Uint8Array} first array
+   * @param {Uint8Array} second array
    * @returns {Boolean} equality
    */
   equalsUint8Array: function (array1, array2) {
@@ -347,7 +398,7 @@ export default {
    * @param {Uint8Array} Uint8Array to create a sum of
    * @returns {Uint8Array} 2 bytes containing the sum of all charcodes % 65535
    */
-  writeChecksum: function (text) {
+  write_checksum: function (text) {
     let s = 0;
     for (let i = 0; i < text.length; i++) {
       s = (s + text[i]) & 0xFFFF;
@@ -361,7 +412,7 @@ export default {
    * @link module:config/config.debug is set to true.
    * @param {String} str String of the debug message
    */
-  printDebug: function (str) {
+  print_debug: function (str) {
     if (config.debug) {
       console.log(str);
     }
@@ -371,12 +422,12 @@ export default {
    * Helper function to print a debug message. Debug
    * messages are only printed if
    * @link module:config/config.debug is set to true.
-   * Different than print_debug because will call Uint8ArrayToHex iff necessary.
+   * Different than print_debug because will call Uint8Array_to_hex iff necessary.
    * @param {String} str String of the debug message
    */
-  printDebugHexArrayDump: function (str, arrToHex) {
+  print_debug_hexarray_dump: function (str, arrToHex) {
     if (config.debug) {
-      str += ': ' + util.uint8ArrayToHex(arrToHex);
+      str += ': ' + util.Uint8Array_to_hex(arrToHex);
       console.log(str);
     }
   },
@@ -385,12 +436,12 @@ export default {
    * Helper function to print a debug message. Debug
    * messages are only printed if
    * @link module:config/config.debug is set to true.
-   * Different than print_debug because will call strToHex iff necessary.
+   * Different than print_debug because will call str_to_hex iff necessary.
    * @param {String} str String of the debug message
    */
-  printDebugHexStrDump: function (str, strToHex) {
+  print_debug_hexstr_dump: function (str, strToHex) {
     if (config.debug) {
-      str += util.strToHex(strToHex);
+      str += util.str_to_hex(strToHex);
       console.log(str);
     }
   },
@@ -401,7 +452,7 @@ export default {
    * @link module:config/config.debug is set to true.
    * @param {String} str String of the debug message
    */
-  printDebugError: function (error) {
+  print_debug_error: function (error) {
     if (config.debug) {
       console.error(error);
     }
@@ -413,7 +464,7 @@ export default {
    * @param {ReadableStream|Uint8array|String} input Stream to print
    * @param {Function} concat Function to concatenate chunks of the stream (defaults to util.concat).
    */
-  printEntireStream: function (str, input, concat) {
+  print_entire_stream: function (str, input, concat) {
     stream.readToEnd(stream.clone(input), concat).then(result => {
       console.log(str + ': ', result);
     });
@@ -491,35 +542,35 @@ export default {
   /**
    * Get native Web Cryptography api, only the current version of the spec.
    * The default configuration is to use the api when available. But it can
-   * be deactivated with config.useNative
+   * be deactivated with config.use_native
    * @returns {Object}   The SubtleCrypto api or 'undefined'
    */
   getWebCrypto: function() {
-    if (!config.useNative) {
+    if (!config.use_native) {
       return;
     }
 
-    return typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle;
+    return typeof global !== 'undefined' && global.crypto && global.crypto.subtle;
   },
 
   /**
    * Get native Web Cryptography api for all browsers, including legacy
    * implementations of the spec e.g IE11 and Safari 8/9. The default
    * configuration is to use the api when available. But it can be deactivated
-   * with config.useNative
+   * with config.use_native
    * @returns {Object}   The SubtleCrypto api or 'undefined'
    */
   getWebCryptoAll: function() {
-    if (!config.useNative) {
+    if (!config.use_native) {
       return;
     }
 
-    if (typeof globalThis !== 'undefined') {
-      if (globalThis.crypto) {
-        return globalThis.crypto.subtle || globalThis.crypto.webkitSubtle;
+    if (typeof global !== 'undefined') {
+      if (global.crypto) {
+        return global.crypto.subtle || global.crypto.webkitSubtle;
       }
-      if (globalThis.msCrypto) {
-        return globalThis.msCrypto.subtle;
+      if (global.msCrypto) {
+        return global.msCrypto.subtle;
       }
     }
   },
@@ -528,43 +579,45 @@ export default {
    * Detect Node.js runtime.
    */
   detectNode: function() {
-    return typeof globalThis.process === 'object' &&
-      typeof globalThis.process.versions === 'object';
+    return typeof global.process === 'object' &&
+      typeof global.process.versions === 'object';
   },
 
   /**
-   * Detect native BigInt support
+   * Get native Node.js module
+   * @param {String}     The module to require
+   * @returns {Object}   The required module or 'undefined'
    */
-  detectBigInt: () => typeof BigInt !== 'undefined',
+  nodeRequire: function(module) {
+    if (!util.detectNode()) {
+      return;
+    }
 
-  /**
-   * Get BigInteger class
-   * It wraps the native BigInt type if it's available
-   * Otherwise it relies on bn.js
-   * @returns {BigInteger}
-   * @async
-   */
-  getBigInteger,
+    // Requiring the module dynamically allows us to access the native node module.
+    // otherwise, it gets replaced with the browserified version
+    // eslint-disable-next-line import/no-dynamic-require
+    return require(module);
+  },
 
   /**
    * Get native Node.js crypto api. The default configuration is to use
-   * the api when available. But it can also be deactivated with config.useNative
+   * the api when available. But it can also be deactivated with config.use_native
    * @returns {Object}   The crypto module or 'undefined'
    */
   getNodeCrypto: function() {
-    if (!config.useNative) {
+    if (!config.use_native) {
       return;
     }
 
-    return require('crypto');
+    return util.nodeRequire('crypto');
   },
 
   getNodeZlib: function() {
-    if (!config.useNative) {
+    if (!config.use_native) {
       return;
     }
 
-    return require('zlib');
+    return util.nodeRequire('zlib');
   },
 
   /**
@@ -573,16 +626,16 @@ export default {
    * @returns {Function}   The Buffer constructor or 'undefined'
    */
   getNodeBuffer: function() {
-    return (require('buffer') || {}).Buffer;
+    return (util.nodeRequire('buffer') || {}).Buffer;
   },
 
   getNodeStream: function() {
-    return (require('stream') || {}).Readable;
+    return (util.nodeRequire('stream') || {}).Readable;
   },
 
   getHardwareConcurrency: function() {
     if (util.detectNode()) {
-      const os = require('os');
+      const os = util.nodeRequire('os');
       return os.cpus().length;
     }
 
@@ -595,6 +648,44 @@ export default {
     }
     const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+([a-zA-Z]{2,}|xn--[a-zA-Z\-0-9]+)))$/;
     return re.test(data);
+  },
+
+  /**
+   * Format user id for internal use.
+   */
+  formatUserId: function(id) {
+    // name, email address and comment can be empty but must be of the correct type
+    if ((id.name && !util.isString(id.name)) ||
+        (id.email && !util.isEmailAddress(id.email)) ||
+        (id.comment && !util.isString(id.comment))) {
+      throw new Error('Invalid user id format');
+    }
+    const components = [];
+    if (id.name) {
+      components.push(id.name);
+    }
+    if (id.comment) {
+      components.push(`(${id.comment})`);
+    }
+    if (id.email) {
+      components.push(`<${id.email}>`);
+    }
+    return components.join(' ');
+  },
+
+  /**
+   * Parse user id.
+   */
+  parseUserId: function(userid) {
+    if (userid.length > config.max_userid_length) {
+      throw new Error('User id string is too long');
+    }
+    try {
+      const { name, address: email, comments } = emailAddresses.parseOneAddress({ input: userid, atInDisplayName: true });
+      return { name, email, comment: comments.replace(/^\(|\)$/g, '') };
+    } catch (e) {
+      throw new Error('Invalid user id format');
+    }
   },
 
   /**

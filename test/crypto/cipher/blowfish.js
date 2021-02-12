@@ -1,16 +1,16 @@
-const BF = require('../../../src/crypto/cipher/blowfish');
-const util = require('../../../src/util');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../../dist/openpgp');
 
 const chai = require('chai');
 
+const { util } = openpgp;
 const { expect } = chai;
 
-module.exports = () => it('Blowfish cipher test with test vectors from https://www.schneier.com/code/vectors.txt', function(done) {
+it('Blowfish cipher test with test vectors from https://www.schneier.com/code/vectors.txt', function(done) {
   function test_bf(input, key, output) {
-    const blowfish = new BF(util.uint8ArrayToStr(key));
-    const result = util.uint8ArrayToStr(blowfish.encrypt(input));
+    const blowfish = new openpgp.crypto.cipher.blowfish(util.Uint8Array_to_str(key));
+    const result = util.Uint8Array_to_str(blowfish.encrypt(input));
 
-    return (util.strToHex(result) === util.strToHex(util.uint8ArrayToStr(output)));
+    return (util.str_to_hex(result) === util.str_to_hex(util.Uint8Array_to_str(output)));
   }
 
   const testvectors = [[[0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00],[0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00],[0x4E,0xF9,0x97,0x45,0x61,0x98,0xDD,0x78]],
@@ -50,9 +50,9 @@ module.exports = () => it('Blowfish cipher test with test vectors from https://w
 
   for (let i = 0; i < testvectors.length; i++) {
     const res = test_bf(testvectors[i][1],testvectors[i][0],testvectors[i][2]);
-    expect(res, 'vector ' + i + '" with block ' + util.uint8ArrayToHex(testvectors[i][0]) +
-                ' and key ' + util.uint8ArrayToHex(testvectors[i][1]) +
-                ' should be ' + util.uint8ArrayToHex(testvectors[i][2]), false);
+    expect(res, 'vector ' + i + '" with block ' + util.Uint8Array_to_hex(testvectors[i][0]) +
+                ' and key ' + util.Uint8Array_to_hex(testvectors[i][1]) +
+                ' should be ' + util.Uint8Array_to_hex(testvectors[i][2]), false);
   }
   done();
 });

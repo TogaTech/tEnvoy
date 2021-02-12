@@ -2,9 +2,7 @@
 
 // Adapted from https://github.com/artjomb/cryptojs-extension/blob/8c61d159/test/eax.js
 
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
-const EAX = require('../../src/crypto/eax');
-const util = require('../../src/util');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -90,21 +88,21 @@ function testAESEAX() {
     const cipher = 'aes128';
 
     await Promise.all(vectors.map(async vec => {
-      const keyBytes = util.hexToUint8Array(vec.key);
-      const msgBytes = util.hexToUint8Array(vec.msg);
-      const nonceBytes = util.hexToUint8Array(vec.nonce);
-      const headerBytes = util.hexToUint8Array(vec.header);
-      const ctBytes = util.hexToUint8Array(vec.ct);
+      const keyBytes = openpgp.util.hex_to_Uint8Array(vec.key);
+      const msgBytes = openpgp.util.hex_to_Uint8Array(vec.msg);
+      const nonceBytes = openpgp.util.hex_to_Uint8Array(vec.nonce);
+      const headerBytes = openpgp.util.hex_to_Uint8Array(vec.header);
+      const ctBytes = openpgp.util.hex_to_Uint8Array(vec.ct);
 
-      const eax = await EAX(cipher, keyBytes);
+      const eax = await openpgp.crypto.eax(cipher, keyBytes);
 
       // encryption test
       let ct = await eax.encrypt(msgBytes, nonceBytes, headerBytes);
-      expect(util.uint8ArrayToHex(ct)).to.equal(vec.ct.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(ct)).to.equal(vec.ct.toLowerCase());
 
       // decryption test with verification
       let pt = await eax.decrypt(ctBytes, nonceBytes, headerBytes);
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.msg.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.msg.toLowerCase());
 
       // tampering detection test
       ct = await eax.encrypt(msgBytes, nonceBytes, headerBytes);
@@ -115,40 +113,38 @@ function testAESEAX() {
       // testing without additional data
       ct = await eax.encrypt(msgBytes, nonceBytes, new Uint8Array());
       pt = await eax.decrypt(ct, nonceBytes, new Uint8Array());
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.msg.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.msg.toLowerCase());
 
       // testing with multiple additional data
-      ct = await eax.encrypt(msgBytes, nonceBytes, util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
-      pt = await eax.decrypt(ct, nonceBytes, util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.msg.toLowerCase());
+      ct = await eax.encrypt(msgBytes, nonceBytes, openpgp.util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
+      pt = await eax.decrypt(ct, nonceBytes, openpgp.util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.msg.toLowerCase());
     }));
   });
 }
 
-module.exports = () => {
-  describe('Symmetric AES-EAX (native)', function() {
-    let useNativeVal;
-    beforeEach(function() {
-      useNativeVal = openpgp.config.useNative;
-      openpgp.config.useNative = true;
-    });
-    afterEach(function() {
-      openpgp.config.useNative = useNativeVal;
-    });
-
-    testAESEAX();
+describe('Symmetric AES-EAX (native)', function() {
+  let use_nativeVal;
+  beforeEach(function() {
+    use_nativeVal = openpgp.config.use_native;
+    openpgp.config.use_native = true;
+  });
+  afterEach(function() {
+    openpgp.config.use_native = use_nativeVal;
   });
 
-  describe('Symmetric AES-EAX (asm.js fallback)', function() {
-    let useNativeVal;
-    beforeEach(function() {
-      useNativeVal = openpgp.config.useNative;
-      openpgp.config.useNative = false;
-    });
-    afterEach(function() {
-      openpgp.config.useNative = useNativeVal;
-    });
+  testAESEAX();
+});
 
-    testAESEAX();
+describe('Symmetric AES-EAX (asm.js fallback)', function() {
+  let use_nativeVal;
+  beforeEach(function() {
+    use_nativeVal = openpgp.config.use_native;
+    openpgp.config.use_native = false;
   });
-};
+  afterEach(function() {
+    openpgp.config.use_native = use_nativeVal;
+  });
+
+  testAESEAX();
+});

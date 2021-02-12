@@ -4,73 +4,76 @@
  * @module packet/all_packets
  */
 
+import enums from '../enums.js';
+import * as packets from './all_packets.js'; // re-import module to parse packets from tag
+
 export {
-  /** @see CompressedDataPacket */
-  default as CompressedDataPacket
-} from './compressed_data.js';
+  /** @see module:packet.Compressed */
+  default as Compressed
+} from './compressed.js';
 export {
-  /** @see SymEncryptedIntegrityProtectedDataPacket */
-  default as SymEncryptedIntegrityProtectedDataPacket
-} from './sym_encrypted_integrity_protected_data.js';
+  /** @see module:packet.SymEncryptedIntegrityProtected */
+  default as SymEncryptedIntegrityProtected
+} from './sym_encrypted_integrity_protected.js';
 export {
-  /** @see AEADEncryptedDataPacket */
-  default as AEADEncryptedDataPacket
-} from './aead_encrypted_data.js';
+  /** @see module:packet.SymEncryptedAEADProtected */
+  default as SymEncryptedAEADProtected
+} from './sym_encrypted_aead_protected.js';
 export {
-  /** @see PublicKeyEncryptedSessionKeyPacket */
-  default as PublicKeyEncryptedSessionKeyPacket
+  /** @see module:packet.PublicKeyEncryptedSessionKey */
+  default as PublicKeyEncryptedSessionKey
 } from './public_key_encrypted_session_key.js';
 export {
-  /** @see SymEncryptedSessionKeyPacket */
-  default as SymEncryptedSessionKeyPacket
+  /** @see module:packet.SymEncryptedSessionKey */
+  default as SymEncryptedSessionKey
 } from './sym_encrypted_session_key.js';
 export {
-  /** @see LiteralDataPacket */
-  default as LiteralDataPacket
-} from './literal_data.js';
+  /** @see module:packet.Literal */
+  default as Literal
+} from './literal.js';
 export {
-  /** @see PublicKeyPacket */
-  default as PublicKeyPacket
+  /** @see module:packet.PublicKey */
+  default as PublicKey
 } from './public_key.js';
 export {
-  /** @see SymmetricallyEncryptedDataPacket */
-  default as SymmetricallyEncryptedDataPacket
-} from './symmetrically_encrypted_data.js';
+  /** @see module:packet.SymmetricallyEncrypted */
+  default as SymmetricallyEncrypted
+} from './symmetrically_encrypted.js';
 export {
-  /** @see MarkerPacket */
-  default as MarkerPacket
+  /** @see module:packet.Marker */
+  default as Marker
 } from './marker.js';
 export {
-  /** @see PublicSubkeyPacket */
-  default as PublicSubkeyPacket
+  /** @see module:packet.PublicSubkey */
+  default as PublicSubkey
 } from './public_subkey.js';
 export {
-  /** @see UserAttributePacket */
-  default as UserAttributePacket
+  /** @see module:packet.UserAttribute */
+  default as UserAttribute
 } from './user_attribute.js';
 export {
-  /** @see OnePassSignaturePacket */
-  default as OnePassSignaturePacket
+  /** @see module:packet.OnePassSignature */
+  default as OnePassSignature
 } from './one_pass_signature.js';
 export {
-  /** @see SecretKeyPacket */
-  default as SecretKeyPacket
+  /** @see module:packet.SecretKey */
+  default as SecretKey
 } from './secret_key.js';
 export {
-  /** @see UserIDPacket */
-  default as UserIDPacket
+  /** @see module:packet.Userid */
+  default as Userid
 } from './userid.js';
 export {
-  /** @see SecretSubkeyPacket */
-  default as SecretSubkeyPacket
+  /** @see module:packet.SecretSubkey */
+  default as SecretSubkey
 } from './secret_subkey.js';
 export {
-  /** @see SignaturePacket */
-  default as SignaturePacket
+  /** @see module:packet.Signature */
+  default as Signature
 } from './signature.js';
 export {
-  /** @see TrustPacket */
-  default as TrustPacket
+  /** @see module:packet.Trust */
+  default as Trust
 } from './trust.js';
 
 /**
@@ -80,12 +83,26 @@ export {
  * @param {String} tag property name from {@link module:enums.packet}
  * @returns {Object} new packet object with type based on tag
  */
-export function newPacketFromTag(tag, allowedPackets) {
-  const className = packetClassFromTagName(tag);
-  if (!allowedPackets[className]) {
-    throw new Error('Packet not allowed in this context: ' + className);
+export function newPacketFromTag(tag) {
+  return new packets[packetClassFromTagName(tag)]();
+}
+
+/**
+ * Allocate a new packet from structured packet clone
+ * @see {@link https://w3c.github.io/html/infrastructure.html#safe-passing-of-structured-data}
+ * @function fromStructuredClone
+ * @memberof module:packet
+ * @param {Object} packetClone packet clone
+ * @returns {Object} new packet object with data from packet clone
+ */
+export function fromStructuredClone(packetClone) {
+  const tagName = enums.read(enums.packet, packetClone.tag);
+  const packet = newPacketFromTag(tagName);
+  Object.assign(packet, packetClone);
+  if (packet.postCloneTypeFix) {
+    packet.postCloneTypeFix();
   }
-  return new allowedPackets[className]();
+  return packet;
 }
 
 /**
@@ -95,5 +112,5 @@ export function newPacketFromTag(tag, allowedPackets) {
  * @private
  */
 function packetClassFromTagName(tag) {
-  return tag.substr(0, 1).toUpperCase() + tag.substr(1) + 'Packet';
+  return tag.substr(0, 1).toUpperCase() + tag.substr(1);
 }

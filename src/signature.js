@@ -22,37 +22,30 @@
  * @module signature
  */
 
-import { armor, unarmor } from './encoding/armor';
-import { PacketList, SignaturePacket } from './packet';
+import armor from './encoding/armor';
+import packet from './packet';
 import enums from './enums';
 
 /**
- * Class that represents an OpenPGP signature.
+ * @class
+ * @classdesc Class that represents an OpenPGP signature.
+ * @param  {module:packet.List} packetlist The signature packets
  */
-export class Signature {
-  /**
-   * @param  {PacketList} packetlist The signature packets
-   */
-  constructor(packetlist) {
-    this.packets = packetlist || new PacketList();
+export function Signature(packetlist) {
+  if (!(this instanceof Signature)) {
+    return new Signature(packetlist);
   }
-
-  /**
-   * Returns binary encoded signature
-   * @returns {ReadableStream<Uint8Array>} binary signature
-   */
-  write() {
-    return this.packets.write();
-  }
-
-  /**
-   * Returns ASCII armored text of signature
-   * @returns {ReadableStream<String>} ASCII armor
-   */
-  armor() {
-    return armor(enums.armor.signature, this.write());
-  }
+  this.packets = packetlist || new packet.List();
 }
+
+
+/**
+ * Returns ASCII armored text of signature
+ * @returns {ReadableStream<String>} ASCII armor
+ */
+Signature.prototype.armor = function() {
+  return armor.encode(enums.armor.signature, this.packets.write());
+};
 
 /**
  * reads an OpenPGP armored signature and returns a signature object
@@ -61,9 +54,9 @@ export class Signature {
  * @async
  * @static
  */
-export async function readArmoredSignature(armoredText) {
-  const input = await unarmor(armoredText);
-  return readSignature(input.data);
+export async function readArmored(armoredText) {
+  const input = await armor.decode(armoredText);
+  return read(input.data);
 }
 
 /**
@@ -73,8 +66,8 @@ export async function readArmoredSignature(armoredText) {
  * @async
  * @static
  */
-export async function readSignature(input) {
-  const packetlist = new PacketList();
-  await packetlist.read(input, { SignaturePacket });
+export async function read(input) {
+  const packetlist = new packet.List();
+  await packetlist.read(input);
   return new Signature(packetlist);
 }

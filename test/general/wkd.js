@@ -1,10 +1,10 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 
 const { expect } = chai;
 
-module.exports = () => describe.skip('WKD unit tests', function() {
+describe.skip('WKD unit tests', function() {
   this.timeout(60000);
 
   let wkd;
@@ -20,26 +20,27 @@ module.exports = () => describe.skip('WKD unit tests', function() {
       return wkd.lookup({
         email: 'test-wkd@metacode.biz',
         rawBytes: true
-      }).then(function(keys) {
-        expect(keys).to.exist;
-        expect(keys).to.be.an.instanceof(Uint8Array);
+      }).then(function(key) {
+        expect(key).to.exist;
+        expect(key).to.be.an.instanceof(Uint8Array);
       });
     });
 
     it('by email address should work', function() {
       return wkd.lookup({
         email: 'test-wkd@metacode.biz'
-      }).then(function(keys) {
-        expect(keys).to.exist;
-        expect(keys).to.have.length(1);
+      }).then(function(key) {
+        expect(key).to.exist;
+        expect(key).to.have.property('keys');
+        expect(key.keys).to.have.length(1);
       });
     });
 
     it('by email address should not find a key', function() {
       return wkd.lookup({
         email: 'test-wkd-does-not-exist@metacode.biz'
-      }).then(function(keys) {
-        expect(keys).to.be.undefined;
+      }).then(function(key) {
+        expect(key).to.be.undefined;
       });
     });
   });

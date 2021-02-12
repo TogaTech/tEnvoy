@@ -1,7 +1,6 @@
 /* globals tryTests: true */
 
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
-const util = require('../../src/util');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -9,9 +8,9 @@ const input = require('./testInputs.js');
 
 const expect = chai.expect;
 
-module.exports = () => (openpgp.config.ci ? describe.skip : describe)('Brainpool Cryptography @lightweight', function () {
+(openpgp.config.ci ? describe.skip : describe)('Brainpool Cryptography @lightweight', function () {
   //only x25519 crypto is fully functional in lightbuild
-  if (!openpgp.config.useIndutnyElliptic && !util.getNodeCrypto()) {
+  if (!openpgp.config.use_indutny_elliptic && !openpgp.util.getNodeCrypto()) {
     before(function() {
       this.skip();
     });
@@ -173,21 +172,26 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
     if (data[name].pub_key) {
       return data[name].pub_key;
     }
-    const pub = await openpgp.readArmoredKey(data[name].pub);
-    expect(pub.getKeyId().toHex()).to.equal(data[name].id);
-    data[name].pub_key = pub;
-    return pub;
+    const pub = await openpgp.key.readArmored(data[name].pub);
+    expect(pub).to.exist;
+    expect(pub.err).to.not.exist;
+    expect(pub.keys).to.have.length(1);
+    expect(pub.keys[0].getKeyId().toHex()).to.equal(data[name].id);
+    data[name].pub_key = pub.keys[0];
+    return data[name].pub_key;
   }
   async function load_priv_key(name) {
     if (data[name].priv_key) {
       return data[name].priv_key;
     }
-    const pk = await openpgp.readArmoredKey(data[name].priv);
+    const pk = await openpgp.key.readArmored(data[name].priv);
     expect(pk).to.exist;
-    expect(pk.getKeyId().toHex()).to.equal(data[name].id);
-    await pk.decrypt(data[name].pass);
-    data[name].priv_key = pk;
-    return pk;
+    expect(pk.err).to.not.exist;
+    expect(pk.keys).to.have.length(1);
+    expect(pk.keys[0].getKeyId().toHex()).to.equal(data[name].id);
+    expect(await pk.keys[0].decrypt(data[name].pass)).to.be.true;
+    data[name].priv_key = pk.keys[0];
+    return data[name].priv_key;
   }
   it('Load public key', async function () {
     await load_pub_key('romeo');
@@ -200,7 +204,7 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
   });
   it('Verify clear signed message', async function () {
     const pub = await load_pub_key('juliet');
-    const msg = await openpgp.readArmoredCleartextMessage(data.juliet.message_signed);
+    const msg = await openpgp.cleartext.readArmored(data.juliet.message_signed);
     return openpgp.verify({publicKeys: [pub], message: msg}).then(function(result) {
       expect(result).to.exist;
       expect(result.data).to.equal(data.juliet.message);
@@ -210,9 +214,9 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
   });
   it('Sign message', async function () {
     const romeoPrivate = await load_priv_key('romeo');
-    const signed = await openpgp.sign({privateKeys: [romeoPrivate], message: openpgp.CleartextMessage.fromText(data.romeo.message)});
+    const signed = await openpgp.sign({privateKeys: [romeoPrivate], message: openpgp.cleartext.fromText(data.romeo.message)});
     const romeoPublic = await load_pub_key('romeo');
-    const msg = await openpgp.readArmoredCleartextMessage(signed);
+    const msg = await openpgp.cleartext.readArmored(signed.data);
     const result = await openpgp.verify({publicKeys: [romeoPublic], message: msg});
 
     expect(result).to.exist;
@@ -223,7 +227,7 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
   it('Decrypt and verify message', async function () {
     const juliet = await load_pub_key('juliet');
     const romeo = await load_priv_key('romeo');
-    const msg = await openpgp.readArmoredMessage(data.romeo.message_encrypted);
+    const msg = await openpgp.message.readArmored(data.romeo.message_encrypted);
     const result = await openpgp.decrypt({ privateKeys: romeo, publicKeys: [juliet], message: msg });
 
     expect(result).to.exist;
@@ -234,7 +238,7 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
   it('Decrypt and verify message with leading zero in hash', async function () {
     const juliet = await load_priv_key('juliet');
     const romeo = await load_pub_key('romeo');
-    const msg = await openpgp.readArmoredMessage(data.romeo.message_encrypted_with_leading_zero_in_hash);
+    const msg = await openpgp.message.readArmored(data.romeo.message_encrypted_with_leading_zero_in_hash);
     const result = await openpgp.decrypt({privateKeys: juliet, publicKeys: [romeo], message: msg});
 
     expect(result).to.exist;
@@ -243,14 +247,14 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
     expect(result.signatures[0].valid).to.be.true;
   });
   it('Decrypt and verify message with leading zero in hash signed with old elliptic algorithm', async function () {
-    //this test would not work with nodeCrypto, since message is signed with leading zero stripped from the hash
-    const useNative = openpgp.config.useNative;
-    openpgp.config.useNative = false;
+    //this test would not work with nodeCrypto, since message is signed with leading zero stripped from the hash 
+    const use_native = openpgp.config.use_native;
+    openpgp.config.use_native = false;
     const juliet = await load_priv_key('juliet');
     const romeo = await load_pub_key('romeo');
-    const msg = await openpgp.readArmoredMessage(data.romeo. message_encrypted_with_leading_zero_in_hash_signed_by_elliptic_with_old_implementation);
+    const msg = await openpgp.message.readArmored(data.romeo. message_encrypted_with_leading_zero_in_hash_signed_by_elliptic_with_old_implementation);
     const result = await openpgp.decrypt({privateKeys: juliet, publicKeys: [romeo], message: msg});
-    openpgp.config.useNative = useNative;
+    openpgp.config.use_native = use_native;
     expect(result).to.exist;
     expect(result.data).to.equal(data.romeo.message_with_leading_zero_in_hash_old_elliptic_implementation);
     expect(result.signatures).to.have.length(1);
@@ -260,9 +264,9 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
   it('Encrypt and sign message', async function () {
     const romeoPrivate = await load_priv_key('romeo');
     const julietPublic = await load_pub_key('juliet');
-    const encrypted = await openpgp.encrypt({publicKeys: [julietPublic], privateKeys: [romeoPrivate], message: openpgp.Message.fromText(data.romeo.message)});
+    const encrypted = await openpgp.encrypt({publicKeys: [julietPublic], privateKeys: [romeoPrivate], message: openpgp.message.fromText(data.romeo.message)});
 
-    const message = await openpgp.readArmoredMessage(encrypted);
+    const message = await openpgp.message.readArmored(encrypted.data);
     const romeoPublic = await load_pub_key('romeo');
     const julietPrivate = await load_priv_key('juliet');
     const result = await openpgp.decrypt({privateKeys: julietPrivate, publicKeys: [romeoPublic], message: message});
@@ -271,10 +275,6 @@ EJ4QcD/oQ6x1M/8X/iKQCtxZP8RnlrbH7ExkNON5s5g=
     expect(result.data).to.equal(data.romeo.message);
     expect(result.signatures).to.have.length(1);
     expect(result.signatures[0].valid).to.be.true;
-  });
-
-  tryTests('Brainpool Omnibus Tests @lightweight', omnibus, {
-    if: openpgp.config.useIndutnyElliptic || util.getNodeCrypto()
   });
 });
 
@@ -295,9 +295,9 @@ function omnibus() {
         return Promise.all([
           // Signing message
           openpgp.sign(
-            { message: openpgp.CleartextMessage.fromText(testData), privateKeys: hi }
+            { message: openpgp.cleartext.fromText(testData), privateKeys: hi }
           ).then(async signed => {
-            const msg = await openpgp.readArmoredCleartextMessage(signed);
+            const msg = await openpgp.cleartext.readArmored(signed.data);
             // Verifying signed message
             return Promise.all([
               openpgp.verify(
@@ -306,9 +306,9 @@ function omnibus() {
               // Verifying detached signature
               openpgp.verify(
                 {
-                  message: openpgp.CleartextMessage.fromText(testData),
+                  message: openpgp.cleartext.fromText(testData),
                   publicKeys: pubHi,
-                  signature: await openpgp.readArmoredSignature(signed)
+                  signature: await openpgp.signature.readArmored(signed.data)
                 }
               ).then(output => expect(output.signatures[0].valid).to.be.true)
             ]);
@@ -316,12 +316,12 @@ function omnibus() {
           // Encrypting and signing
           openpgp.encrypt(
             {
-              message: openpgp.Message.fromText(testData2),
+              message: openpgp.message.fromText(testData2),
               publicKeys: [pubBye],
               privateKeys: [hi]
             }
           ).then(async encrypted => {
-            const msg = await openpgp.readArmoredMessage(encrypted);
+            const msg = await openpgp.message.readArmored(encrypted.data);
             // Decrypting and verifying
             return openpgp.decrypt(
               {
@@ -339,5 +339,22 @@ function omnibus() {
     });
   });
 }
+
+tryTests('Brainpool Omnibus Tests @lightweight', omnibus, {
+  if: !openpgp.config.ci && (openpgp.config.use_indutny_elliptic || openpgp.util.getNodeCrypto())
+});
+
+tryTests('Brainpool Omnibus Tests - Worker @lightweight', omnibus, {
+  if: typeof window !== 'undefined' && window.Worker && (openpgp.config.use_indutny_elliptic || openpgp.util.getNodeCrypto()),
+  before: async function() {
+    await openpgp.initWorker({ path: '../dist/openpgp.worker.js' });
+  },
+  beforeEach: function() {
+    openpgp.config.use_native = true;
+  },
+  after: function() {
+    openpgp.destroyWorker();
+  }
+});
 
 // TODO find test vectors

@@ -96,11 +96,11 @@ export default {
    */
   publicKey: {
     /** RSA (Encrypt or Sign) [HAC] */
-    rsaEncryptSign: 1,
+    rsa_encrypt_sign: 1,
     /** RSA (Encrypt only) [HAC] */
-    rsaEncrypt: 2,
+    rsa_encrypt: 2,
     /** RSA (Sign only) [HAC] */
-    rsaSign: 3,
+    rsa_sign: 3,
     /** Elgamal (Encrypt only) [ELGAMAL] [HAC] */
     elgamal: 16,
     /** DSA (Sign only) [FIPS186] [HAC] */
@@ -126,6 +126,7 @@ export default {
     plaintext: 0,
     /** Not implemented! */
     idea: 1,
+    '3des': 2,
     tripledes: 2,
     cast5: 3,
     blowfish: 4,
@@ -180,7 +181,7 @@ export default {
   aead: {
     eax: 1,
     ocb: 2,
-    experimentalGcm: 100 // Private algorithm
+    experimental_gcm: 100 // Private algorithm
   },
 
   /** A list of packet types and numeric tags associated with them.
@@ -195,17 +196,17 @@ export default {
     secretKey: 5,
     publicKey: 6,
     secretSubkey: 7,
-    compressedData: 8,
-    symmetricallyEncryptedData: 9,
+    compressed: 8,
+    symmetricallyEncrypted: 9,
     marker: 10,
-    literalData: 11,
+    literal: 11,
     trust: 12,
-    userID: 13,
+    userid: 13,
     publicSubkey: 14,
     userAttribute: 17,
-    symEncryptedIntegrityProtectedData: 18,
+    symEncryptedIntegrityProtected: 18,
     modificationDetectionCode: 19,
-    AEADEncryptedData: 20 // see IETF draft: https://tools.ietf.org/html/draft-ford-openpgp-format-00#section-2.1
+    symEncryptedAEADProtected: 20 // see IETF draft: https://tools.ietf.org/html/draft-ford-openpgp-format-00#section-2.1
   },
 
   /** Data types in the literal packet
@@ -247,17 +248,17 @@ export default {
      * The issuer of this certification does not make any particular
      * assertion as to how well the certifier has checked that the owner
      * of the key is in fact the person described by the User ID. */
-    certGeneric: 16,
+    cert_generic: 16,
     /** 0x11: Persona certification of a User ID and Public-Key packet.
      *
      * The issuer of this certification has not done any verification of
      * the claim that the owner of this key is the User ID specified. */
-    certPersona: 17,
+    cert_persona: 17,
     /** 0x12: Casual certification of a User ID and Public-Key packet.
      *
      * The issuer of this certification has done some casual
      * verification of the claim of identity. */
-    certCasual: 18,
+    cert_casual: 18,
     /** 0x13: Positive certification of a User ID and Public-Key packet.
      *
      * The issuer of this certification has done substantial
@@ -266,7 +267,7 @@ export default {
      * Most OpenPGP implementations make their "key signatures" as 0x10
      * certifications.  Some implementations can issue 0x11-0x13
      * certifications, but few differentiate between the types. */
-    certPositive: 19,
+    cert_positive: 19,
     /** 0x30: Certification revocation signature
      *
      * This signature revokes an earlier User ID certification signature
@@ -276,7 +277,7 @@ export default {
      * is computed over the same data as the certificate that it
      * revokes, and should have a later creation date than that
      * certificate. */
-    certRevocation: 48,
+    cert_revocation: 48,
     /** 0x18: Subkey Binding Signature
      *
      * This signature is a statement by the top-level signing key that
@@ -286,7 +287,7 @@ export default {
      * an Embedded Signature subpacket in this binding signature that
      * contains a 0x19 signature made by the signing subkey on the
      * primary key and subkey. */
-    subkeyBinding: 24,
+    subkey_binding: 24,
     /** 0x19: Primary Key Binding Signature
      *
      * This signature is a statement by a signing subkey, indicating
@@ -301,7 +302,7 @@ export default {
      * (type 0x18) or primary key binding signature (type 0x19) then hashes
      * the subkey using the same format as the main key (also using 0x99 as
      * the first octet). */
-    keyBinding: 25,
+    key_binding: 25,
     /** 0x1F: Signature directly on a key
      *
      * This signature is calculated directly on a key.  It binds the
@@ -318,7 +319,7 @@ export default {
      * revoked key is not to be used.  Only revocation signatures by the
      * key being revoked, or by an authorized revocation key, should be
      * considered valid revocation signatures.a */
-    keyRevocation: 32,
+    key_revocation: 32,
     /** 0x28: Subkey revocation signature
      *
      * The signature is calculated directly on the subkey being revoked.
@@ -329,7 +330,7 @@ export default {
      *
      * Key revocation signatures (types 0x20 and 0x28)
      * hash only the key being revoked. */
-    subkeyRevocation: 40,
+    subkey_revocation: 40,
     /** 0x40: Timestamp signature.
      * This signature is only meaningful for the timestamp contained in
      * it. */
@@ -343,7 +344,7 @@ export default {
      * mean SHOULD.  There are plausible uses for this (such as a blind
      * party that only sees the signature, not the key or source
      * document) that cannot include a target subpacket. */
-    thirdParty: 80
+    third_party: 80
   },
 
   /** Signature subpacket type
@@ -351,32 +352,32 @@ export default {
    * @readonly
    */
   signatureSubpacket: {
-    signatureCreationTime: 2,
-    signatureExpirationTime: 3,
-    exportableCertification: 4,
-    trustSignature: 5,
-    regularExpression: 6,
+    signature_creation_time: 2,
+    signature_expiration_time: 3,
+    exportable_certification: 4,
+    trust_signature: 5,
+    regular_expression: 6,
     revocable: 7,
-    keyExpirationTime: 9,
-    placeholderBackwardsCompatibility: 10,
-    preferredSymmetricAlgorithms: 11,
-    revocationKey: 12,
+    key_expiration_time: 9,
+    placeholder_backwards_compatibility: 10,
+    preferred_symmetric_algorithms: 11,
+    revocation_key: 12,
     issuer: 16,
-    notationData: 20,
-    preferredHashAlgorithms: 21,
-    preferredCompressionAlgorithms: 22,
-    keyServerPreferences: 23,
-    preferredKeyServer: 24,
-    primaryUserId: 25,
-    policyUri: 26,
-    keyFlags: 27,
-    signersUserId: 28,
-    reasonForRevocation: 29,
+    notation_data: 20,
+    preferred_hash_algorithms: 21,
+    preferred_compression_algorithms: 22,
+    key_server_preferences: 23,
+    preferred_key_server: 24,
+    primary_user_id: 25,
+    policy_uri: 26,
+    key_flags: 27,
+    signers_user_id: 28,
+    reason_for_revocation: 29,
     features: 30,
-    signatureTarget: 31,
-    embeddedSignature: 32,
-    issuerFingerprint: 33,
-    preferredAeadAlgorithms: 34
+    signature_target: 31,
+    embedded_signature: 32,
+    issuer_fingerprint: 33,
+    preferred_aead_algorithms: 34
   },
 
   /** Key flags
@@ -385,21 +386,21 @@ export default {
    */
   keyFlags: {
     /** 0x01 - This key may be used to certify other keys. */
-    certifyKeys: 1,
+    certify_keys: 1,
     /** 0x02 - This key may be used to sign data. */
-    signData: 2,
+    sign_data: 2,
     /** 0x04 - This key may be used to encrypt communications. */
-    encryptCommunication: 4,
+    encrypt_communication: 4,
     /** 0x08 - This key may be used to encrypt storage. */
-    encryptStorage: 8,
+    encrypt_storage: 8,
     /** 0x10 - The private component of this key may have been split
      *        by a secret-sharing mechanism. */
-    splitPrivateKey: 16,
+    split_private_key: 16,
     /** 0x20 - This key may be used for authentication. */
     authentication: 32,
     /** 0x80 - The private component of this key may be in the
      *        possession of more than one person. */
-    sharedPrivateKey: 128
+    shared_private_key: 128
   },
 
   /** Armor type
@@ -407,12 +408,12 @@ export default {
    * @readonly
    */
   armor: {
-    multipartSection: 0,
-    multipartLast: 1,
+    multipart_section: 0,
+    multipart_last: 1,
     signed: 2,
     message: 3,
-    publicKey: 4,
-    privateKey: 5,
+    public_key: 4,
+    private_key: 5,
     signature: 6
   },
 
@@ -422,15 +423,15 @@ export default {
    */
   reasonForRevocation: {
     /** No reason specified (key revocations or cert revocations) */
-    noReason: 0,
+    no_reason: 0,
     /** Key is superseded (key revocations) */
-    keySuperseded: 1,
+    key_superseded: 1,
     /** Key material has been compromised (key revocations) */
-    keyCompromised: 2,
+    key_compromised: 2,
     /** Key is retired and no longer used (key revocations) */
-    keyRetired: 3,
+    key_retired: 3,
     /** User ID information is no longer valid (cert revocations) */
-    userIdInvalid: 32
+    userid_invalid: 32
   },
 
   /** {@link https://tools.ietf.org/html/draft-ietf-openpgp-rfc4880bis-04#section-5.2.3.25|RFC4880bis-04, section 5.2.3.25}
@@ -439,13 +440,13 @@ export default {
    */
   features: {
     /** 0x01 - Modification Detection (packets 18 and 19) */
-    modificationDetection: 1,
+    modification_detection: 1,
     /** 0x02 - AEAD Encrypted Data Packet (packet 20) and version 5
      *         Symmetric-Key Encrypted Session Key Packets (packet 3) */
     aead: 2,
     /** 0x04 - Version 5 Public-Key Packet format and corresponding new
       *        fingerprint format */
-    v5Keys: 4
+    v5_keys: 4
   },
 
   /** Asserts validity and converts from string/integer to integer. */

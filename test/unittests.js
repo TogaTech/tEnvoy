@@ -1,4 +1,13 @@
-(typeof window !== 'undefined' ? window : global).globalThis = (typeof window !== 'undefined' ? window : global);
+// Old browser polyfills
+if (typeof Symbol === 'undefined') {
+  require('core-js/fn/symbol');
+}
+if (typeof Promise === 'undefined') {
+  require('core-js/fn/promise');
+}
+if (typeof TransformStream === 'undefined') {
+  require('@mattiasbuelens/web-streams-polyfill');
+}
 
 (typeof window !== 'undefined' ? window : global).resolves = function(val) {
   return new Promise(function(res) { res(val); });
@@ -27,21 +36,29 @@
 describe('Unit Tests', function () {
 
   if (typeof window !== 'undefined') {
-    openpgp.config.s2kIterationCountByte = 0;
+    openpgp.config.s2k_iteration_count_byte = 0;
+    openpgp.config.indutny_elliptic_path = '../dist/elliptic.min.js';
+
+    afterEach(function () {
+      if (window.scrollY >= document.body.scrollHeight - window.innerHeight - 100
+        || openpgp.config.ci) {
+        window.scrollTo(0, document.body.scrollHeight);
+      }
+    });
 
     window.location.search.substr(1).split('&').forEach(param => {
       const [key, value] = param.split('=');
       if (key && key !== 'grep') {
         openpgp.config[key] = decodeURIComponent(value);
         try {
-          openpgp.config[key] = window.eval(openpgp.config[key]);
-        } catch (e) {}
+          openpgp.config[key] = eval(openpgp.config[key]);
+        } catch(e) {}
       }
     });
   }
 
-  require('./crypto')();
-  require('./general')();
-  require('./worker')();
-  require('./security')();
+  require('./crypto');
+  require('./general');
+  require('./worker');
+  require('./security');
 });

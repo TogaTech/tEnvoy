@@ -27,26 +27,31 @@
  * @module key/factory
  */
 
-import { PacketList, UserIDPacket, SignaturePacket } from '../packet';
+import packet from '../packet';
 import Key from './key';
 import * as helper from './helper';
 import enums from '../enums';
 import util from '../util';
 import config from '../config';
-import { unarmor } from '../encoding/armor';
+import armor from '../encoding/armor';
 
 /**
  * Generates a new OpenPGP key. Supports RSA and ECC keys.
- * By default, primary and subkeys will be of same type.
- * @param {ecc|rsa} options.type                  The primary key algorithm type: ECC or RSA
- * @param {String}  options.curve                 Elliptic curve for ECC keys
- * @param {Integer} options.rsaBits               Number of bits for RSA keys
- * @param {Array<String|Object>} options.userIds  User IDs as strings or objects: 'Jo Doe <info@jo.com>' or { name:'Jo Doe', email:'info@jo.com' }
- * @param {String}  options.passphrase            Passphrase used to encrypt the resulting private key
- * @param {Number}  options.keyExpirationTime     (optional) Number of seconds from the key creation time after which the key expires
- * @param {Date}    options.date                  Creation date of the key and the key signatures
- * @param {Array<Object>} options.subkeys         (optional) options for each subkey, default to main key options. e.g. [{sign: true, passphrase: '123'}]
- *                                                  sign parameter defaults to false, and indicates whether the subkey should sign rather than encrypt
+ * Primary and subkey will be of same type.
+ * @param {module:enums.publicKey} [options.keyType=module:enums.publicKey.rsa_encrypt_sign]
+ *                             To indicate what type of key to make.
+ *                             RSA is 1. See {@link https://tools.ietf.org/html/rfc4880#section-9.1}
+ * @param {Integer} options.numBits    number of bits for the key creation.
+ * @param {String|Array<String>}  options.userIds
+ *                             Assumes already in form of "User Name <username@email.com>"
+ *                             If array is used, the first userId is set as primary user Id
+ * @param {String}  options.passphrase The passphrase used to encrypt the resulting private key
+ * @param {Number} [options.keyExpirationTime=0]
+ *                             The number of seconds after the key creation time that the key expires
+ * @param  {String} curve            (optional) elliptic curve for ECC keys
+ * @param  {Date} date         Override the creation date of the key and the key signatures
+ * @param  {Array<Object>} subkeys   (optional) options for each subkey, default to main key options. e.g. [{sign: true, passphrase: '123'}]
+ *                                              sign parameter defaults to false, and indicates whether the subkey should sign rather than encrypt
  * @returns {Promise<module:key.Key>}
  * @async
  * @static
@@ -63,12 +68,16 @@ export async function generate(options) {
 
 /**
  * Reformats and signs an OpenPGP key with a given User ID. Currently only supports RSA keys.
- * @param {module:key.Key} options.privateKey     The private key to reformat
- * @param {Array<String|Object>} options.userIds  User IDs as strings or objects: 'Jo Doe <info@jo.com>' or { name:'Jo Doe', email:'info@jo.com' }
- * @param {String} options.passphrase             Passphrase used to encrypt the resulting private key
- * @param {Number} options.keyExpirationTime      Number of seconds from the key creation time after which the key expires
- * @param {Date}   options.date                   Override the creation date of the key and the key signatures
- * @param {Array<Object>} options.subkeys         (optional) options for each subkey, default to main key options. e.g. [{sign: true, passphrase: '123'}]
+ * @param {module:key.Key} options.privateKey   The private key to reformat
+ * @param {module:enums.publicKey} [options.keyType=module:enums.publicKey.rsa_encrypt_sign]
+ * @param {String|Array<String>}  options.userIds
+ *                             Assumes already in form of "User Name <username@email.com>"
+ *                             If array is used, the first userId is set as primary user Id
+ * @param {String}  options.passphrase The passphrase used to encrypt the resulting private key
+ * @param {Number} [options.keyExpirationTime=0]
+ *                             The number of seconds after the key creation time that the key expires
+ * @param  {Date} date         Override the creation date of the key and the key signatures
+ * @param  {Array<Object>} subkeys   (optional) options for each subkey, default to main key options. e.g. [{sign: true, passphrase: '123'}]
  *
  * @returns {Promise<module:key.Key>}
  * @async
@@ -77,13 +86,13 @@ export async function generate(options) {
 export async function reformat(options) {
   options = sanitize(options);
 
-  if (options.privateKey.primaryKey.isDummy()) {
-    throw new Error('Cannot reformat a gnu-dummy primary key');
-  }
-
-  const isDecrypted = options.privateKey.getKeys().every(({ keyPacket }) => keyPacket.isDecrypted());
-  if (!isDecrypted) {
-    throw new Error('Key is not decrypted');
+  try {
+    const isDecrypted = options.privateKey.getKeys().every(key => key.isDecrypted());
+    if (!isDecrypted) {
+      await options.privateKey.decrypt();
+    }
+  } catch (err) {
+    throw new Error('Key not decrypted');
   }
 
   const packetlist = options.privateKey.toPacketlist();
@@ -138,7 +147,7 @@ async function wrapKeyObject(secretKeyPacket, secretSubkeyPackets, options) {
     }
   }));
 
-  const packetlist = new PacketList();
+  const packetlist = new packet.List();
 
   packetlist.push(secretKeyPacket);
 
@@ -156,32 +165,37 @@ async function wrapKeyObject(secretKeyPacket, secretSubkeyPackets, options) {
       return algos;
     }
 
-    const userIdPacket = UserIDPacket.fromObject(userId);
+    const userIdPacket = new packet.Userid();
+    userIdPacket.format(userId);
+
     const dataToSign = {};
     dataToSign.userId = userIdPacket;
     dataToSign.key = secretKeyPacket;
-    const signaturePacket = new SignaturePacket(options.date);
-    signaturePacket.signatureType = enums.signature.certGeneric;
+    const signaturePacket = new packet.Signature(options.date);
+    signaturePacket.signatureType = enums.signature.cert_generic;
     signaturePacket.publicKeyAlgorithm = secretKeyPacket.algorithm;
     signaturePacket.hashAlgorithm = await helper.getPreferredHashAlgo(null, secretKeyPacket);
-    signaturePacket.keyFlags = [enums.keyFlags.certifyKeys | enums.keyFlags.signData];
+    signaturePacket.keyFlags = [enums.keyFlags.certify_keys | enums.keyFlags.sign_data];
     signaturePacket.preferredSymmetricAlgorithms = createdPreferredAlgos([
       // prefer aes256, aes128, then aes192 (no WebCrypto support: https://www.chromium.org/blink/webcrypto#TOC-AES-support)
       enums.symmetric.aes256,
       enums.symmetric.aes128,
-      enums.symmetric.aes192
-    ], config.encryptionCipher);
-    if (config.aeadProtect) {
+      enums.symmetric.aes192,
+      enums.symmetric.cast5,
+      enums.symmetric.tripledes
+    ], config.encryption_cipher);
+    if (config.aead_protect) {
       signaturePacket.preferredAeadAlgorithms = createdPreferredAlgos([
         enums.aead.eax,
         enums.aead.ocb
-      ], config.aeadMode);
+      ], config.aead_mode);
     }
     signaturePacket.preferredHashAlgorithms = createdPreferredAlgos([
-      // prefer fast asm.js implementations (SHA-256)
+      // prefer fast asm.js implementations (SHA-256). SHA-1 will not be secure much longer...move to bottom of list
       enums.hash.sha256,
-      enums.hash.sha512
-    ], config.preferHashAlgorithm);
+      enums.hash.sha512,
+      enums.hash.sha1
+    ], config.prefer_hash_algorithm);
     signaturePacket.preferredCompressionAlgorithms = createdPreferredAlgos([
       enums.compression.zlib,
       enums.compression.zip,
@@ -190,17 +204,17 @@ async function wrapKeyObject(secretKeyPacket, secretSubkeyPackets, options) {
     if (index === 0) {
       signaturePacket.isPrimaryUserID = true;
     }
-    if (config.integrityProtect) {
+    if (config.integrity_protect) {
       signaturePacket.features = [0];
-      signaturePacket.features[0] |= enums.features.modificationDetection;
+      signaturePacket.features[0] |= enums.features.modification_detection;
     }
-    if (config.aeadProtect) {
+    if (config.aead_protect) {
       signaturePacket.features || (signaturePacket.features = [0]);
       signaturePacket.features[0] |= enums.features.aead;
     }
-    if (config.v5Keys) {
+    if (config.v5_keys) {
       signaturePacket.features || (signaturePacket.features = [0]);
-      signaturePacket.features[0] |= enums.features.v5Keys;
+      signaturePacket.features[0] |= enums.features.v5_keys;
     }
     if (options.keyExpirationTime > 0) {
       signaturePacket.keyExpirationTime = options.keyExpirationTime;
@@ -231,8 +245,8 @@ async function wrapKeyObject(secretKeyPacket, secretSubkeyPackets, options) {
   // This packet should be removed before returning the key.
   const dataToSign = { key: secretKeyPacket };
   packetlist.push(await helper.createSignaturePacket(dataToSign, null, secretKeyPacket, {
-    signatureType: enums.signature.keyRevocation,
-    reasonForRevocationFlag: enums.reasonForRevocation.noReason,
+    signatureType: enums.signature.key_revocation,
+    reasonForRevocationFlag: enums.reasonForRevocation.no_reason,
     reasonForRevocationString: ''
   }, options.date));
 
@@ -252,67 +266,61 @@ async function wrapKeyObject(secretKeyPacket, secretSubkeyPackets, options) {
 }
 
 /**
- * Reads an unarmored OpenPGP key and returns a key object
+ * Reads an unarmored OpenPGP key list and returns one or multiple key objects
  * @param {Uint8Array} data to be parsed
- * @returns {Promise<module:key.Key>} key object
+ * @returns {Promise<{keys: Array<module:key.Key>,
+ *            err: (Array<Error>|null)}>} result object with key and error arrays
  * @async
  * @static
  */
-export async function readKey(data) {
-  const packetlist = new PacketList();
-  await packetlist.read(data, helper.allowedKeyPackets);
-  return new Key(packetlist);
+export async function read(data) {
+  const result = {};
+  result.keys = [];
+  const err = [];
+  try {
+    const packetlist = new packet.List();
+    await packetlist.read(data);
+    const keyIndex = packetlist.indexOfTag(enums.packet.publicKey, enums.packet.secretKey);
+    if (keyIndex.length === 0) {
+      throw new Error('No key packet found');
+    }
+    for (let i = 0; i < keyIndex.length; i++) {
+      const oneKeyList = packetlist.slice(keyIndex[i], keyIndex[i + 1]);
+      try {
+        const newKey = new Key(oneKeyList);
+        result.keys.push(newKey);
+      } catch (e) {
+        err.push(e);
+      }
+    }
+  } catch (e) {
+    err.push(e);
+  }
+  if (err.length) {
+    result.err = err;
+  }
+  return result;
 }
 
-/**
- * Reads an OpenPGP armored key and returns a key object
- * @param {String | ReadableStream<String>} armoredKey text to be parsed
- * @returns {Promise<module:key.Key>} key object
- * @async
- * @static
- */
-export async function readArmoredKey(armoredKey) {
-  const input = await unarmor(armoredKey);
-  if (!(input.type === enums.armor.publicKey || input.type === enums.armor.privateKey)) {
-    throw new Error('Armored text not of type key');
-  }
-  return readKey(input.data);
-}
 
 /**
- * Reads an unarmored OpenPGP key block and returns a list of key objects
- * @param {Uint8Array} data to be parsed
- * @returns {Promise<Array<module:key.Key>>} key object
+ * Reads an OpenPGP armored text and returns one or multiple key objects
+ * @param {String | ReadableStream<String>} armoredText text to be parsed
+ * @returns {Promise<{keys: Array<module:key.Key>,
+ *            err: (Array<Error>|null)}>} result object with key and error arrays
  * @async
  * @static
  */
-export async function readKeys(data) {
-  const keys = [];
-  const packetlist = new PacketList();
-  await packetlist.read(data, helper.allowedKeyPackets);
-  const keyIndex = packetlist.indexOfTag(enums.packet.publicKey, enums.packet.secretKey);
-  if (keyIndex.length === 0) {
-    throw new Error('No key packet found');
+export async function readArmored(armoredText) {
+  try {
+    const input = await armor.decode(armoredText);
+    if (!(input.type === enums.armor.public_key || input.type === enums.armor.private_key)) {
+      throw new Error('Armored text not of type key');
+    }
+    return read(input.data);
+  } catch (e) {
+    const result = { keys: [], err: [] };
+    result.err.push(e);
+    return result;
   }
-  for (let i = 0; i < keyIndex.length; i++) {
-    const oneKeyList = packetlist.slice(keyIndex[i], keyIndex[i + 1]);
-    const newKey = new Key(oneKeyList);
-    keys.push(newKey);
-  }
-  return keys;
-}
-
-/**
- * Reads an OpenPGP armored key block and returns a list of key objects
- * @param {String | ReadableStream<String>} armoredKey text to be parsed
- * @returns {Promise<Array<module:key.Key>>} key objects
- * @async
- * @static
- */
-export async function readArmoredKeys(armoredKey) {
-  const input = await unarmor(armoredKey);
-  if (!(input.type === enums.armor.publicKey || input.type === enums.armor.privateKey)) {
-    throw new Error('Armored text not of type key');
-  }
-  return readKeys(input.data);
 }

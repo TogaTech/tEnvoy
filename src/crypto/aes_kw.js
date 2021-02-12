@@ -23,17 +23,10 @@
  * @module crypto/aes_kw
  */
 
-import * as cipher from './cipher';
+import cipher from './cipher';
 import util from '../util';
 
-/**
- * AES key wrap
- * @function
- * @param {Uint8Array} key
- * @param {Uint8Array} data
- * @returns {Uint8Array}
- */
-export function wrap(key, data) {
+function wrap(key, data) {
   const aes = new cipher["aes" + (key.length * 8)](key);
   const IV = new Uint32Array([0xA6A6A6A6, 0xA6A6A6A6]);
   const P = unpack(data);
@@ -65,15 +58,7 @@ export function wrap(key, data) {
   return pack(A, R);
 }
 
-/**
- * AES key unwrap
- * @function
- * @param {String} key
- * @param {String} data
- * @returns {Uint8Array}
- * @throws {Error}
- */
-export function unwrap(key, data) {
+function unwrap(key, data) {
   const aes = new cipher["aes" + (key.length * 8)](key);
   const IV = new Uint32Array([0xA6A6A6A6, 0xA6A6A6A6]);
   const C = unpack(data);
@@ -146,3 +131,23 @@ function pack() {
   }
   return new Uint8Array(buffer);
 }
+
+export default {
+  /**
+   * AES key wrap
+   * @function
+   * @param {String} key
+   * @param {String} data
+   * @returns {Uint8Array}
+   */
+  wrap,
+  /**
+   * AES key unwrap
+   * @function
+   * @param {String} key
+   * @param {String} data
+   * @returns {Uint8Array}
+   * @throws {Error}
+   */
+  unwrap
+};

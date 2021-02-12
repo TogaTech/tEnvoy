@@ -11,8 +11,8 @@
  * @module crypto/hash
  */
 
-import { Sha1 } from 'asmcrypto.js/dist_es8/hash/sha1/sha1';
-import { Sha256 } from 'asmcrypto.js/dist_es8/hash/sha256/sha256';
+import { Sha1 } from 'asmcrypto.js/dist_es5/hash/sha1/sha1';
+import { Sha256 } from 'asmcrypto.js/dist_es5/hash/sha256/sha256';
 import sha224 from 'hash.js/lib/hash/sha/224';
 import sha384 from 'hash.js/lib/hash/sha/384';
 import sha512 from 'hash.js/lib/hash/sha/512';
@@ -37,7 +37,7 @@ function node_hash(type) {
 
 function hashjs_hash(hash, webCryptoHash) {
   return async function(data) {
-    if (!util.isStream(data) && webCrypto && webCryptoHash && data.length >= config.minBytesForWebCrypto) {
+    if (!util.isStream(data) && webCrypto && webCryptoHash && data.length >= config.min_bytes_for_web_crypto) {
       return new Uint8Array(await webCrypto.digest(webCryptoHash, data));
     }
     const hashInstance = hash();
@@ -54,7 +54,7 @@ function asmcrypto_hash(hash, webCryptoHash) {
       return stream.transform(data, value => {
         hashInstance.process(value);
       }, () => hashInstance.finish().result);
-    } else if (webCrypto && webCryptoHash && data.length >= config.minBytesForWebCrypto) {
+    } else if (webCrypto && webCryptoHash && data.length >= config.min_bytes_for_web_crypto) {
       return new Uint8Array(await webCrypto.digest(webCryptoHash, data));
     } else {
       return hash.bytes(data);

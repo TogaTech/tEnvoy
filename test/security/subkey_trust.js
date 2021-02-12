@@ -1,7 +1,6 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
-const { readArmoredKey, Key, readArmoredCleartextMessage, CleartextMessage, enums, PacketList, SignaturePacket } = openpgp;
-const key = require('../../src/key');
+const { key, cleartext, enums, packet: { List, Signature } } = openpgp;
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -10,9 +9,8 @@ const expect = chai.expect;
 
 async function generateTestData() {
   const victimPrivKey = await key.generate({
-    userIds: [{ name: 'Victim', email: 'victim@example.com' }],
-    type: 'rsa',
-    rsaBits: 1024,
+    userIds: ['Victim <victim@example.com>'],
+    rsaBits: openpgp.util.getWebCryptoAll() ? 2048 : 1024,
     subkeys: [{
       sign: true
     }]
@@ -20,15 +18,14 @@ async function generateTestData() {
   victimPrivKey.revocationSignatures = [];
 
   const attackerPrivKey = await key.generate({
-    userIds: [{ name: 'Attacker', email: 'attacker@example.com' }],
-    type: 'rsa',
-    rsaBits: 1024,
+    userIds: ['Attacker <attacker@example.com>'],
+    rsaBits: openpgp.util.getWebCryptoAll() ? 2048 : 1024,
     subkeys: [],
     sign: false
   });
   attackerPrivKey.revocationSignatures = [];
   const signed = await openpgp.sign({
-    message: await CleartextMessage.fromText('I am batman'),
+    message: await cleartext.fromText('I am batman'),
     privateKeys: victimPrivKey,
     streaming: false,
     armor: true
@@ -51,13 +48,13 @@ async function testSubkeyTrust() {
     key: attackerPrivKey.toPublic().keyPacket,
     bind: pktPubVictim[3] // victim subkey
   };
-  const fakeBindingSignature = new SignaturePacket();
-  fakeBindingSignature.signatureType = enums.signature.subkeyBinding;
+  const fakeBindingSignature = new Signature();
+  fakeBindingSignature.signatureType = enums.signature.subkey_binding;
   fakeBindingSignature.publicKeyAlgorithm = attackerPrivKey.keyPacket.algorithm;
   fakeBindingSignature.hashAlgorithm = enums.hash.sha256;
-  fakeBindingSignature.keyFlags = [enums.keyFlags.signData];
+  fakeBindingSignature.keyFlags = [enums.keyFlags.sign_data];
   await fakeBindingSignature.sign(attackerPrivKey.keyPacket, dataToSign);
-  const newList = new PacketList();
+  const newList = new List();
   newList.concat([
     pktPrivAttacker[0], // attacker private key
     pktPrivAttacker[1], // attacker user
@@ -65,10 +62,10 @@ async function testSubkeyTrust() {
     pktPubVictim[3], // victim subkey
     fakeBindingSignature // faked key binding
   ]);
-  let fakeKey = new Key(newList);
-  fakeKey = await readArmoredKey(await fakeKey.toPublic().armor());
+  let fakeKey = new key.Key(newList);
+  fakeKey = (await key.readArmored(await fakeKey.toPublic().armor())).keys[0];
   const verifyAttackerIsBatman = await openpgp.verify({
-    message: (await readArmoredCleartextMessage(signed)),
+    message: (await cleartext.readArmored(signed.data)),
     publicKeys: fakeKey,
     streaming: false
   });
@@ -76,4 +73,4 @@ async function testSubkeyTrust() {
   expect(verifyAttackerIsBatman.signatures[0].valid).to.be.null;
 }
 
-module.exports = () => it('Does not trust subkeys without Primary Key Binding Signature', testSubkeyTrust);
+it('Does not trust subkeys without Primary Key Binding Signature', testSubkeyTrust);

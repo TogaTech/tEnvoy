@@ -20,68 +20,29 @@
  * @requires web-stream-tools
  * @requires config
  * @requires key
+ * @requires util
  * @module keyring/localstore
  */
 
 import stream from 'web-stream-tools';
 import config from '../config';
-import { readArmoredKey } from '../key';
+import { readArmored } from '../key';
+import util from '../util';
 
 /**
  * The class that deals with storage of the keyring.
  * Currently the only option is to use HTML5 local storage.
+ * @constructor
+ * @param {String} prefix prefix for itemnames in localstore
  */
-class LocalStore {
-  /**
-   * @param {String} prefix prefix for itemnames in localstore
-   */
-  constructor(prefix) {
-    prefix = prefix || 'openpgp-';
-    this.publicKeysItem = prefix + this.publicKeysItem;
-    this.privateKeysItem = prefix + this.privateKeysItem;
-    if (typeof globalThis !== 'undefined' && globalThis.localStorage) {
-      this.storage = globalThis.localStorage;
-    } else {
-      this.storage = new (require('node-localstorage').LocalStorage)(config.nodeStore);
-    }
-  }
-
-  /**
-   * Load the public keys from HTML5 local storage.
-   * @returns {Array<module:key.Key>} array of keys retrieved from localstore
-   * @async
-   */
-  async loadPublic() {
-    return loadKeys(this.storage, this.publicKeysItem);
-  }
-
-  /**
-   * Load the private keys from HTML5 local storage.
-   * @returns {Array<module:key.Key>} array of keys retrieved from localstore
-   * @async
-   */
-  async loadPrivate() {
-    return loadKeys(this.storage, this.privateKeysItem);
-  }
-
-  /**
-   * Saves the current state of the public keys to HTML5 local storage.
-   * The key array gets stringified using JSON
-   * @param {Array<module:key.Key>} keys array of keys to save in localstore
-   * @async
-   */
-  async storePublic(keys) {
-    await storeKeys(this.storage, this.publicKeysItem, keys);
-  }
-
-  /**
-   * Saves the current state of the private keys to HTML5 local storage.
-   * The key array gets stringified using JSON
-   * @param {Array<module:key.Key>} keys array of keys to save in localstore
-   * @async
-   */
-  async storePrivate(keys) {
-    await storeKeys(this.storage, this.privateKeysItem, keys);
+function LocalStore(prefix) {
+  prefix = prefix || 'openpgp-';
+  this.publicKeysItem = prefix + this.publicKeysItem;
+  this.privateKeysItem = prefix + this.privateKeysItem;
+  if (typeof global !== 'undefined' && global.localStorage) {
+    this.storage = global.localStorage;
+  } else {
+    this.storage = new (require('node-localstorage').LocalStorage)(config.node_store);
   }
 }
 
@@ -91,18 +52,60 @@ class LocalStore {
 LocalStore.prototype.publicKeysItem = 'public-keys';
 LocalStore.prototype.privateKeysItem = 'private-keys';
 
+/**
+ * Load the public keys from HTML5 local storage.
+ * @returns {Array<module:key.Key>} array of keys retrieved from localstore
+ * @async
+ */
+LocalStore.prototype.loadPublic = async function () {
+  return loadKeys(this.storage, this.publicKeysItem);
+};
+
+/**
+ * Load the private keys from HTML5 local storage.
+ * @returns {Array<module:key.Key>} array of keys retrieved from localstore
+ * @async
+ */
+LocalStore.prototype.loadPrivate = async function () {
+  return loadKeys(this.storage, this.privateKeysItem);
+};
+
 async function loadKeys(storage, itemname) {
   const armoredKeys = JSON.parse(storage.getItem(itemname));
   const keys = [];
   if (armoredKeys !== null && armoredKeys.length !== 0) {
     let key;
     for (let i = 0; i < armoredKeys.length; i++) {
-      key = await readArmoredKey(armoredKeys[i]);
-      keys.push(key);
+      key = await readArmored(armoredKeys[i]);
+      if (!key.err) {
+        keys.push(key.keys[0]);
+      } else {
+        util.print_debug("Error reading armored key from keyring index: " + i);
+      }
     }
   }
   return keys;
 }
+
+/**
+ * Saves the current state of the public keys to HTML5 local storage.
+ * The key array gets stringified using JSON
+ * @param {Array<module:key.Key>} keys array of keys to save in localstore
+ * @async
+ */
+LocalStore.prototype.storePublic = async function (keys) {
+  await storeKeys(this.storage, this.publicKeysItem, keys);
+};
+
+/**
+ * Saves the current state of the private keys to HTML5 local storage.
+ * The key array gets stringified using JSON
+ * @param {Array<module:key.Key>} keys array of keys to save in localstore
+ * @async
+ */
+LocalStore.prototype.storePrivate = async function (keys) {
+  await storeKeys(this.storage, this.privateKeysItem, keys);
+};
 
 async function storeKeys(storage, itemname, keys) {
   if (keys.length) {

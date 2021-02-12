@@ -3,48 +3,24 @@
   <head>
     <meta charset="utf-8">
     <title>OpenPGPJS Unit Tests</title>
-    <link rel="stylesheet" href="../node_modules/mocha/mocha.css" />
+    <link rel="stylesheet" href="lib/mocha.css" />
 
     <!-- libs -->
-    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../dist/openpgp.js"></script>
+    <script src="lib/mocha.js"></script>
     <script>
-      mocha.setup('bdd');
-      mocha.timeout(240000);
+        mocha.setup('bdd');
+        mocha.timeout(240000);
     </script>
   </head>
   <body>
     <div id="mocha"></div>
 
-    <script type="module">
-    (async () => {
-      const openpgp = await import(
-        window.location.search.includes('lightweight=') ?
-          '../dist/lightweight/openpgp.mjs' :
-          '../dist/openpgp.mjs'
-      );
-      window.openpgp = openpgp;
-      await import('./lib/unittests-bundle.js');
-
+    <script src="lib/unittests-bundle.js"></script>
+    <script>
       if (typeof openpgp !== 'undefined') {
-        const runner = mocha.run();
-        var wasScrolledDown = true;
-        function beforeTestReport() {
-          wasScrolledDown = document.documentElement.scrollHeight - document.documentElement.scrollTop - document.documentElement.clientHeight < 50;
-        }
-        function afterTestReport() {
-          if (wasScrolledDown || openpgp.config.ci) {
-            window.scrollTo(0, document.documentElement.scrollHeight);
-          }
-        }
-        runner._events['suite'].unshift(beforeTestReport);
-        runner._events['pass'].unshift(beforeTestReport);
-        runner._events['fail'].unshift(beforeTestReport);
-        runner._events['pending'].unshift(beforeTestReport);
-        document.addEventListener('scroll', beforeTestReport);
-        runner.on('suite', afterTestReport);
-        runner.on('test end', afterTestReport);
+        mocha.run();
       }
-    })();
     </script>
   </body>
 </html>
