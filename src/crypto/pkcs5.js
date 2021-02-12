@@ -15,41 +15,42 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+import util from '../util';
+
 /**
  * @fileoverview Functions to add and remove PKCS5 padding
- * @see module:packet.PublicKeyEncryptedSessionKey
+ * @see PublicKeyEncryptedSessionKeyPacket
  * @module crypto/pkcs5
  */
 
 /**
- * Add pkcs5 padding to a text.
- * @param  {String}  msg  Text to add padding
- * @returns {String}       Text with padding added
+ * Add pkcs5 padding to a message
+ * @param  {Uint8Array}  message  message to pad
+ * @returns {Uint8Array}  padded message
  */
-function encode(msg) {
-  const c = 8 - (msg.length % 8);
-  const padding = String.fromCharCode(c).repeat(c);
-  return msg + padding;
+export function encode(message) {
+  const c = 8 - (message.length % 8);
+  const padded = new Uint8Array(message.length + c).fill(c);
+  padded.set(message);
+  return padded;
 }
 
 /**
- * Remove pkcs5 padding from a string.
- * @param  {String}  msg  Text to remove padding from
- * @returns {String}       Text with padding removed
+ * Remove pkcs5 padding from a message
+ * @param  {Uint8Array}  message  message to remove padding from
+ * @returns {Uint8Array} message without padding
  */
-function decode(msg) {
-  const len = msg.length;
+export function decode(message) {
+  const len = message.length;
   if (len > 0) {
-    const c = msg.charCodeAt(len - 1);
+    const c = message[len - 1];
     if (c >= 1) {
-      const provided = msg.substr(len - c);
-      const computed = String.fromCharCode(c).repeat(c);
-      if (provided === computed) {
-        return msg.substr(0, len - c);
+      const provided = message.subarray(len - c);
+      const computed = new Uint8Array(c).fill(c);
+      if (util.equalsUint8Array(provided, computed)) {
+        return message.subarray(0, len - c);
       }
     }
   }
   throw new Error('Invalid padding');
 }
-
-export default { encode, decode };

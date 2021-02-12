@@ -1,9 +1,11 @@
 /* globals tryTests: true */
 
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const crypto = require('../../src/crypto');
+const random = require('../../src/crypto/random');
+const util = require('../../src/util');
 
 const spy = require('sinon/lib/sinon/spy');
-const stub = require('sinon/lib/sinon/stub');
 const input = require('./testInputs.js');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -374,6 +376,71 @@ EQr2Mx42THr260IFYp5E/rIA
 =oA0b
 -----END PGP PRIVATE KEY BLOCK-----`;
 
+const mismatchingKeyParams = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: OpenPGP.js v4.7.0
+Comment: https://openpgpjs.org
+
+xcMGBF3ey50BCADaTsujZxXLCYBeaGd9qXqHc+oWtQF2BZdYWPvguljrYgrK
+WwyoFy8cHaQyi3OTccFXVhFNDG+TgYUG9nk/jvsgOKiu4HugJR5/UPXapBwp
+UooVtp9+0ppOJr9GWKeFNXP8tLLFHXSvApnRntbbHeYJoSEa4Ct2suStq/QU
+NuO3ov9geiNo+BKIf8btm+urRN1jU2QAh9vkB8m3ZiNJhgR6Yoh5omwASLUz
+qPQpuJmfTEnfA9EsaosrrJ2wzvA7enCHdsUFkhsKARCfCqy5sb90PkNXu3Vo
+CybN9h0C801wrkYCBo2SW6mscd4I6Dk7FEoAD1bo5MJfGT96H059Ca9TABEB
+AAH+CQMIZP38MpAOKygADY2D7fzhN5OxQe3vpprtJeqQ/BZ6g7VOd7Sdic2m
+9MTTo/A0XTJxkxf9Rwakcgepm7KwyXE1ntWD9m/XqBzvagTiT4pykvTgm446
+hB/9zileZjp2vmQH+a0Q3X9jXSh0iHQmLTUWGu3Jd/iscGLUGgDPquKNa5Gr
+cfjkxf0tG0JjS+mrdR836UOfHvLWbhbrAgrbCuOEC6ziQe+uFgktqWJPTurP
+Op4fvFD9hggN+lVVLlFwa5N0gaX6GdQHfsktKw6/WTomdjTfWZi87SCz1sXD
+o8Ob/679IjPwvl6gqVlr8iBhpYX3K3NyExRh4DQ2xYhGNtygtyiqSuYYGarm
+lieJuRbx+sm6N4nwJgrvPx9h0MzX86X3n6RNZa7SppJQJ4Z7OrObvRbGsbOc
+hY97shxWT7I7a9KUcmCxSf49GUsKJ5a9z/GS3QpCLxG0rZ3fDQ0sKEVSv+KP
+OJyIiyPyvmlkblJCr83uqrVzJva6/vjZeQa0Wfp2ngh6sE4q+KE+tog0a989
+cuTBZwO2Pl9F9iGVKvL+I/PrBq5UFOk/F3mk8GsS2OuInm5gTcOhIDH6Blhz
+WwLZIfNulozA8Ug2A8C0ntIQsL1Ie/1Yr14mdVk7xMuM7bgwQtQ4pAQcVI3e
+CqyosP7L05ZQKV3FpI2jm+VxfzqsxqMuLwamrS0dB+Jm0KllwwS+Yr84W68S
+v4w258HPRDFDdLveVj3wh7nh/PL4KVXjfR5rz1JNxsgKau/O5ipNcw6CDAQX
+5eI3hAl+YfJs8fRPkvVuf3Nzw/Gs82Zvs6iZxgTqSCyJ/QAHmO+riEukblw2
+Y8EIAaq8QV4WYJs/3Ag3v+FY9x3G/Sf+NKXwnAH9mT+3J8k0JFY4tIXmOunB
+6nWJReZvW5SVu4j2S3dDCX8pTwIPKok8zQDCwHUEEAEIAB8FAl3ey50GCwkH
+CAMCBBUICgIDFgIBAhkBAhsDAh4BAAoJEMNNmgUbCqiXu74IAIzIFeCsco52
+FF2JBf1qffxveLB//lwaAqyAJDFHvrAjmHNFCrwNLmnnP4no7U4P6Zq9aQeK
+ZCj9YMxykpO2tArcjSTCUklDjPj2IPe13vg4giiF9hwtlAKhPhrytqjgNwLF
+ET/9hFtVWZtwaxx8PXXq8E48yOavSk7smKi+z89NloJH7ePzMzV2GfXe6mtH
+qSkzjYJKy72YNvTStay5Tc/bt9zS3jbFv7QtUXRdudcLD0yZC//p3PPrAsaV
+uCAPwz3fvKYX9kdWWrj98FvzzMxx3Lvh3zcEPaWLDOHOdJKHU/YxmrO0+Jxo
+n9uUuQegJMKuiQ4G785Yo+zPjpTpXMTHwwYEXd7LnQEIAJ8lLko4nvEE3x+5
+M4sFNyIYdYK7qvETu9Sz7AOxbeOWiUY8Na2lDuwAmuYDEQcnax9Kh0D6gp1i
+Z86WQwt3uCmLKATahlGolwbn47ztA0Ac8IbbswSr7OJNNJ1byS8h0udmc/SY
+WSWVBeGAmj1Bat8X9nOakwskI8Sm44F/vAvZSIIQ7atzUQbSn9LHftfzWbAX
+wX6LZGnLVn/E7e/YzULuvry7xmqiH/DmsfLLGn04HkcWeBweVo0QvPCETNgR
+MUIL4o84Fo8MQPkPQafUO4uSkFHyixN3YnFwDRHYpn24R3dePLELXUblGANv
+mtOubWvAkFhLVg2HkWJN9iwhLs8AEQEAAf4JAwjXnNHwEu9CWQDc+bM3IwYt
+SUIwwdt7hT9C2FX3nrCPnzsKwI1jUrZOGe0LMSSIJNf5TyWAw6LNUrjnD4hg
+UzIGvgZJDcRl8Ms3LMVaUZMFK/6XE5sdpD7cEgtxY1aGTAitOZ49hClaevnk
+RCRqxT2C2A+GqyvIhr1w3i+AD+zYL1ygLiXpKad82Gbk2axJxcH/hljIKlqr
+v114iGKMHVnqP5L+hM9am2Qu3M+BMROiE/XG82d8r1oAEpQZEXJNBuKSDtL+
+8256OQW1fSQTqkCSIPGVxejrb3TyeAklyQXtGD39rN2qYZcKecUGc2zB85zi
+upoSSYdEfQWoNs/8Z26+17oqKMSl85mWtztz63OEWR7fGfmofiiU+tQw/ndz
+cyvxSc/fIih3adJmFrTtX+nI6hbEVeBZCNhHSQE0I0YoQBfuAmAiNzeV1ISV
+XgjuKHENPPY2bTZZ4Fxmua/OLE+3/nlIuw3LnfGDflv3HVzLJIzlOi5+t58Z
+UMLKesj6Wv1+AW9J1qYEK7/sdpI1LNtde5YRK//gUM6AvvTgcYSWv0FnGYkr
+xKFyYCTztOT4NbywTZNtIqVuHkmkV93PkW/lzR5rK7Hk7ec9lBYGcEOwlGAd
+27fvkTAYLx5S3Qkce0Um3m36TMJ5sCJnZZJ/U/tETiZoq+fbi0Rh4WMNdHu/
+tdckiovkQtSRIJJT1tLY6DvssPGIh1oTyb2Lj9vw/BVFQkgLrpuSMtnJbStt
+cJNpQZfmn2V85Z06qoH/WekQ404xX6+gVw+DetJc2fI4JEKYocUs8R406jRp
+iBndPeORg3fw7C4BLavN6bvUF8qNIEfBNm6/gD5nCU1xflm+a/3dLWFH1R1g
+tjO+0UCRVN7ExVq0m3hhQS2ETi8t3BbZCliMQ1J4k71GGwdA6e6Pu6Q86m4b
+7PrCwF8EGAEIAAkFAl3ey50CGwwACgkQw02aBRsKqJdVvwf/UICpq9O09uuQ
+MFKYevMLfEGF896TCe6sKtwpvyU5QX0xlODI554uJhIxUew6HPzafCO9SWfP
+tas+15nI43pEc0VEnd31g3pqiKSd+PYolw4NfYI0jrcRabebGlGcprvoj2fD
+C/wSMmcnvJkjFzUoDkRX3bMV1C7birw9C1QYOpEj8c0KGIsiVI45sGwFlclD
+AxMSJy5Dv9gcVPq6V8fuPw05ODSpbieoIF3d3WuaI39lAZpfuhNaSNAQmzA7
+6os1UTIywR2rDFRWbh2IrviZ9BVkV6NXa9+gT+clr3PsE4XeADacVAa2MZNR
+0NubenKyljKtyHyoU+S+TqUyx7gf5A==
+=Lj9k
+-----END PGP PRIVATE KEY BLOCK-----
+`;
+
 const rsaPrivateKeyPKCS1 = `-----BEGIN PGP PRIVATE KEY BLOCK-----
 
 xcLYBF7yFJcBCACv2ad3tpfA8agLV+7ZO+7vWAS8f4CgCLsW2fvyIG0X3to9
@@ -436,6 +503,40 @@ IMq6OV/eCedB8bF4bqoU+zGdGh+XwJkoYVVF6DtG+gIcceHUjC0eXHw=
 -----END PGP PRIVATE KEY BLOCK-----
 `;
 
+const gnuDummyKeySigningSubkey = `
+-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: OpenPGP.js VERSION
+Comment: https://openpgpjs.org
+
+xZUEWCC+hwEEALu8GwefswqZLoiKJk1Nd1yKmVWBL1ypV35FN0gCjI1NyyJX
+UfQZDdC2h0494OVAM2iqKepqht3tH2DebeFLnc2ivvIFmQJZDnH2/0nFG2gC
+rSySWHUjVfbMSpmTaXpit8EX/rjNauGOdbePbezOSsAhW7R9pBdtDjPnq2Zm
+vDXXABEBAAH+B2UAR05VAc0JR05VIER1bW15wrgEEwECACIFAlggvocCGwMG
+CwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEJ3XHFanUJgCeMYD/2zKefpl
+clQoBdDPJKCYJm8IhuWuoF8SnHAsbhD+U42Gbm+2EATTPj0jyGPkZzl7a0th
+S2rSjQ4JF0Ktgdr9585haknpGwr31t486KxXOY4AEsiBmRyvTbaQegwKaQ+C
+/0JQYo/XKpsaX7PMDBB9SNFSa8NkhxYseLaB7gbM8w+Lx8EYBFggvpwBBADF
+YeeJwp6MAVwVwXX/eBRKBIft6LC4E9czu8N2AbOW97WjWNtXi3OuM32OwKXq
+vSck8Mx8FLOAuvVq41NEboeknhptw7HzoQMB35q8NxA9lvvPd0+Ef+BvaVB6
+NmweHttt45LxYxLMdXdGoIt3wn/HBY81HnMqfV/KnggZ+imJ0wARAQABAAP7
+BA56WdHzb53HIzYgWZl04H3BJdB4JU6/FJo0yHpjeWRQ46Q7w2WJzjHS6eBB
+G+OhGzjAGYK7AUr8wgjqMq6LQHt2f80N/nWLusZ00a4lcMd7rvoHLWwRj80a
+RzviOvvhP7kZY1TrhbS+Sl+BWaNIDOxS2maEkxexztt4GEl2dWUCAMoJvyFm
+qPVqVx2Yug29vuJsDcr9XwnjrYI8PtszJI8Fr+5rKgWE3GJumheaXaug60dr
+mLMXdvT/0lj3sXquqR0CAPoZ1Mn7GaUKjPVJ7CiJ/UjqSurrGhruA5ikhehQ
+vUB+v4uIl7ICcX8zfiP+SMhWY9qdkmOvLSSSMcTkguMfe68B/j/qf2en5OHy
+6NJgMIjMrBHvrf34f6pxw5p10J6nxjooZQxV0P+9MoTHWsy0r6Er8IOSSTGc
+WyWJ8wmSqiq/dZSoJcLAfQQYAQIACQUCWCC+nAIbAgCoCRCd1xxWp1CYAp0g
+BBkBAgAGBQJYIL6cAAoJEOYZSGiVA/C9CT4D/2Vq2dKxHmzn/UD1MWSLXUbN
+ISd8tvHjoVg52RafdgHFmg9AbE0DW8ifwaai7FkifD0IXiN04nER3MuVhAn1
+gtMu03m1AQyX/X39tHz+otpwBn0g57NhFbHFmzKfr/+N+XsDRj4VXn13hhqM
+qQR8i1wgiWBUFJbpP5M1BPdH4Qfkcn8D/j8A3QKYGGETa8bNOdVTRU+sThXr
+imOfWu58V1yWCmLE1kK66qkqmgRVUefqacF/ieMqNmsAY+zmR9D4fg2wzu/d
+nPjJXp1670Vlzg7oT5XVYnfys7x4GLHsbaOSjXToILq+3GwI9UjNjtpobcfm
+mNG2ibD6lftLOtDsVSDY8a6a
+=KjxQ
+-----END PGP PRIVATE KEY BLOCK-----
+`;
 
 function withCompression(tests) {
   const compressionTypes = Object.keys(openpgp.enums.compression).map(k => openpgp.enums.compression[k]);
@@ -452,8 +553,8 @@ function withCompression(tests) {
       let decompressSpy;
 
       beforeEach(function () {
-        compressSpy = spy(openpgp.packet.Compressed.prototype, 'compress');
-        decompressSpy = spy(openpgp.packet.Compressed.prototype, 'decompress');
+        compressSpy = spy(openpgp.CompressedDataPacket.prototype, 'compress');
+        decompressSpy = spy(openpgp.CompressedDataPacket.prototype, 'decompress');
       });
 
       afterEach(function () {
@@ -467,11 +568,6 @@ function withCompression(tests) {
           return options;
         },
         function() {
-          // Disable the call expectations when using the web worker because it's not possible to spy on what functions get called.
-          if (openpgp.getWorker()) {
-            return;
-          }
-
           if (compression === openpgp.enums.compression.uncompressed) {
             expect(compressSpy.called).to.be.false;
             expect(decompressSpy.called).to.be.false;
@@ -488,41 +584,7 @@ function withCompression(tests) {
   });
 }
 
-describe('OpenPGP.js public api tests', function() {
-
-  let rsaGenStub;
-  let rsaGenValue = openpgp.crypto.publicKey.rsa.generate(openpgp.util.getWebCryptoAll() ? 2048 : 512, "10001");
-
-  beforeEach(function() {
-    rsaGenStub = stub(openpgp.crypto.publicKey.rsa, 'generate');
-    rsaGenStub.returns(rsaGenValue);
-  });
-
-  afterEach(function() {
-    rsaGenStub.restore();
-  });
-
-  describe('initWorker, getWorker, destroyWorker - unit tests', function() {
-    afterEach(function() {
-      openpgp.destroyWorker(); // cleanup worker in case of failure
-    });
-
-    it('should work', async function() {
-      const workerStub = {
-        postMessage: function() {},
-        terminate: function() {}
-      };
-      await Promise.all([
-        openpgp.initWorker({
-          workers: [workerStub]
-        }),
-        workerStub.onmessage({ data: { event: 'loaded' } })
-      ]);
-      expect(openpgp.getWorker()).to.exist;
-      openpgp.destroyWorker();
-      expect(openpgp.getWorker()).to.not.exist;
-    });
-  });
+module.exports = () => describe('OpenPGP.js public api tests', function() {
 
   describe('generateKey - validate user ids', function() {
     it('should fail for invalid user name', async function() {
@@ -530,7 +592,7 @@ describe('OpenPGP.js public api tests', function() {
         userIds: [{ name: {}, email: 'text@example.com' }]
       };
       const test = openpgp.generateKey(opt);
-      await expect(test).to.eventually.be.rejectedWith(/Invalid user id format/);
+      await expect(test).to.eventually.be.rejectedWith(/Invalid user ID format/);
     });
 
     it('should fail for invalid user email address', async function() {
@@ -538,7 +600,7 @@ describe('OpenPGP.js public api tests', function() {
         userIds: [{ name: 'Test User', email: 'textexample.com' }]
       };
       const test = openpgp.generateKey(opt);
-      await expect(test).to.eventually.be.rejectedWith(/Invalid user id format/);
+      await expect(test).to.eventually.be.rejectedWith(/Invalid user ID format/);
     });
 
     it('should fail for invalid user email address', async function() {
@@ -546,61 +608,39 @@ describe('OpenPGP.js public api tests', function() {
         userIds: [{ name: 'Test User', email: 'text@examplecom' }]
       };
       const test = openpgp.generateKey(opt);
-      await expect(test).to.eventually.be.rejectedWith(/Invalid user id format/);
+      await expect(test).to.eventually.be.rejectedWith(/Invalid user ID format/);
     });
 
-    it('should fail for invalid string user id', async function() {
-      const opt = {
-        userIds: ['Test User text@example.com>']
-      };
-      const test = openpgp.generateKey(opt);
-      await expect(test).to.eventually.be.rejectedWith(/Invalid user id format/);
-    });
-
-    it('should fail for invalid single string user id', async function() {
-      const opt = {
-        userIds: 'Test User text@example.com>'
-      };
-      const test = openpgp.generateKey(opt);
-      await expect(test).to.eventually.be.rejectedWith(/Invalid user id format/);
-    });
-
-    it('should work for valid single string user id', function() {
+    it('should fail for string user ID', async function() {
       const opt = {
         userIds: 'Test User <text@example.com>'
       };
-      return openpgp.generateKey(opt);
+      const test = openpgp.generateKey(opt);
+      await expect(test).to.eventually.be.rejectedWith(/Invalid user ID format/);
     });
 
-    it('should work for valid string user id', function() {
-      const opt = {
-        userIds: ['Test User <text@example.com>']
-      };
-      return openpgp.generateKey(opt);
-    });
-
-    it('should work for valid single user id hash', function() {
+    it('should work for valid single user ID object', function() {
       const opt = {
         userIds: { name: 'Test User', email: 'text@example.com' }
       };
       return openpgp.generateKey(opt);
     });
 
-    it('should work for valid single user id hash', function() {
+    it('should work for array of user ID objects', function() {
       const opt = {
         userIds: [{ name: 'Test User', email: 'text@example.com' }]
       };
       return openpgp.generateKey(opt);
     });
 
-    it('should work for an empty name', function() {
+    it('should work for undefined name', function() {
       const opt = {
         userIds: { email: 'text@example.com' }
       };
       return openpgp.generateKey(opt);
     });
 
-    it('should work for an empty email address', function() {
+    it('should work for an undefined email address', function() {
       const opt = {
         userIds: { name: 'Test User' }
       };
@@ -609,117 +649,48 @@ describe('OpenPGP.js public api tests', function() {
   });
 
   describe('generateKey - unit tests', function() {
-    let keyGenStub;
-    let keyObjStub;
-    let getWebCryptoAllStub;
-
-    beforeEach(function() {
-      keyObjStub = {
-        armor: function() {
-          return 'priv_key';
-        },
-        toPublic: function() {
-          return {
-            armor: function() {
-              return 'pub_key';
-            }
-          };
-        },
-        getRevocationCertificate: function() {}
-      };
-      keyGenStub = stub(openpgp.key, 'generate');
-      keyGenStub.returns(resolves(keyObjStub));
-      getWebCryptoAllStub = stub(openpgp.util, 'getWebCryptoAll');
-    });
-
-    afterEach(function() {
-      keyGenStub.restore();
-      openpgp.destroyWorker();
-      getWebCryptoAllStub.restore();
-    });
-
     it('should have default params set', function() {
-      const now = openpgp.util.normalizeDate(new Date());
+      const now = util.normalizeDate(new Date());
       const opt = {
         userIds: { name: 'Test User', email: 'text@example.com' },
         passphrase: 'secret',
-        date: now,
-        subkeys: []
+        date: now
       };
-      return openpgp.generateKey(opt).then(function(newKey) {
-        expect(keyGenStub.withArgs({
-          userIds: [{ name: 'Test User', email: 'text@example.com' }],
-          passphrase: 'secret',
-          rsaBits: 2048,
-          keyExpirationTime: 0,
-          curve: "",
-          date: now,
-          subkeys: []
-        }).calledOnce).to.be.true;
+      return openpgp.generateKey(opt).then(async function(newKey) {
         expect(newKey.key).to.exist;
+        expect(newKey.key.users.length).to.equal(1);
+        expect(newKey.key.users[0].userId.name).to.equal('Test User');
+        expect(newKey.key.users[0].userId.email).to.equal('text@example.com');
+        expect(newKey.key.getAlgorithmInfo().rsaBits).to.equal(undefined);
+        expect(newKey.key.getAlgorithmInfo().curve).to.equal('ed25519');
+        expect(+newKey.key.getCreationTime()).to.equal(+now);
+        expect(await newKey.key.getExpirationTime()).to.equal(Infinity);
+        expect(newKey.key.subKeys.length).to.equal(1);
+        expect(newKey.key.subKeys[0].getAlgorithmInfo().rsaBits).to.equal(undefined);
+        expect(newKey.key.subKeys[0].getAlgorithmInfo().curve).to.equal('curve25519');
+        expect(+newKey.key.subKeys[0].getCreationTime()).to.equal(+now);
+        expect(await newKey.key.subKeys[0].getExpirationTime()).to.equal(Infinity);
         expect(newKey.privateKeyArmored).to.exist;
         expect(newKey.publicKeyArmored).to.exist;
       });
     });
-
-    it('should delegate to async proxy', async function() {
-      const workerStub = {
-        postMessage: function() {},
-        terminate: function() {}
-      };
-      await Promise.all([
-        openpgp.initWorker({
-          workers: [workerStub]
-        }),
-        workerStub.onmessage({ data: { event: 'loaded' } })
-      ]);
-      const proxyGenStub = stub(openpgp.getWorker(), 'delegate');
-      getWebCryptoAllStub.returns();
-
-      const opt = {
-        userIds: { name: 'Test User', email: 'text@example.com' },
-        passphrase: 'secret',
-        subkeys: []
-      };
-      openpgp.generateKey(opt);
-      expect(proxyGenStub.calledOnce).to.be.true;
-      expect(keyGenStub.calledOnce).to.be.false;
-    });
   });
 
   describe('generateKey - integration tests', function() {
-    let use_nativeVal;
+    let useNativeVal;
 
     beforeEach(function() {
-      use_nativeVal = openpgp.config.use_native;
+      useNativeVal = openpgp.config.useNative;
     });
 
     afterEach(function() {
-      openpgp.config.use_native = use_nativeVal;
-      openpgp.destroyWorker();
+      openpgp.config.useNative = useNativeVal;
     });
 
-    it('should work in JS (without worker)', function() {
-      openpgp.config.use_native = false;
-      openpgp.destroyWorker();
+    it('should work in JS', function() {
+      openpgp.config.useNative = false;
       const opt = {
         userIds: [{ name: 'Test User', email: 'text@example.com' }],
-        numBits: 512
-      };
-
-      return openpgp.generateKey(opt).then(function(newKey) {
-        expect(newKey.key.getUserIds()[0]).to.equal('Test User <text@example.com>');
-        expect(newKey.publicKeyArmored).to.match(/^-----BEGIN PGP PUBLIC/);
-        expect(newKey.privateKeyArmored).to.match(/^-----BEGIN PGP PRIVATE/);
-      });
-    });
-
-    it('should work in JS (with worker)', async function() {
-      openpgp.config.use_native = false;
-      await openpgp.initWorker({ path:'../dist/openpgp.worker.js' });
-      const opt = {
-        userIds: [{ name: 'Test User', email: 'text@example.com' }],
-        numBits: 512
       };
 
       return openpgp.generateKey(opt).then(function(newKey) {
@@ -730,12 +701,10 @@ describe('OpenPGP.js public api tests', function() {
     });
 
     it('should work in with native crypto', function() {
-      openpgp.config.use_native = true;
+      openpgp.config.useNative = true;
       const opt = {
         userIds: [{ name: 'Test User', email: 'text@example.com' }],
-        numBits: 512
       };
-      if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
 
       return openpgp.generateKey(opt).then(function(newKey) {
         expect(newKey.key.getUserIds()[0]).to.equal('Test User <text@example.com>');
@@ -755,198 +724,256 @@ describe('OpenPGP.js public api tests', function() {
     let privateKey;
     let publicKey;
     let publicKeyNoAEAD;
-    let zero_copyVal;
-    let use_nativeVal;
-    let aead_protectVal;
-    let aead_modeVal;
-    let aead_chunk_size_byteVal;
-    let v5_keysVal;
+    let useNativeVal;
+    let aeadProtectVal;
+    let aeadModeVal;
+    let aeadChunkSizeByteVal;
+    let v5KeysVal;
+    let privateKeyMismatchingParams;
 
     beforeEach(async function() {
-      publicKey = await openpgp.key.readArmored(pub_key);
-      expect(publicKey.keys).to.have.length(1);
-      expect(publicKey.err).to.not.exist;
-      publicKeyNoAEAD = await openpgp.key.readArmored(pub_key);
-      privateKey = await openpgp.key.readArmored(priv_key);
-      expect(privateKey.keys).to.have.length(1);
-      expect(privateKey.err).to.not.exist;
-      privateKey_2000_2008 = await openpgp.key.readArmored(priv_key_2000_2008);
-      expect(privateKey_2000_2008.keys).to.have.length(1);
-      expect(privateKey_2000_2008.err).to.not.exist;
-      publicKey_2000_2008 = { keys: [ privateKey_2000_2008.keys[0].toPublic() ] };
-      privateKey_2038_2045 = await openpgp.key.readArmored(priv_key_2038_2045);
-      expect(privateKey_2038_2045.keys).to.have.length(1);
-      expect(privateKey_2038_2045.err).to.not.exist;
-      publicKey_2038_2045 = { keys: [ privateKey_2038_2045.keys[0].toPublic() ] };
-      privateKey_1337 = await openpgp.key.readArmored(priv_key_expires_1337);
-      expect(privateKey_1337.keys).to.have.length(1);
-      expect(privateKey_1337.err).to.not.exist;
-      publicKey_1337 = { keys: [ privateKey_1337.keys[0].toPublic() ] };
-      zero_copyVal = openpgp.config.zero_copy;
-      use_nativeVal = openpgp.config.use_native;
-      aead_protectVal = openpgp.config.aead_protect;
-      aead_modeVal = openpgp.config.aead_mode;
-      aead_chunk_size_byteVal = openpgp.config.aead_chunk_size_byte;
-      v5_keysVal = openpgp.config.v5_keys;
+      publicKey = await openpgp.readArmoredKey(pub_key);
+      publicKeyNoAEAD = await openpgp.readArmoredKey(pub_key);
+      privateKey = await openpgp.readArmoredKey(priv_key);
+      privateKey_2000_2008 = await openpgp.readArmoredKey(priv_key_2000_2008);
+      publicKey_2000_2008 = privateKey_2000_2008.toPublic();
+      privateKey_2038_2045 = await openpgp.readArmoredKey(priv_key_2038_2045);
+      publicKey_2038_2045 = privateKey_2038_2045.toPublic();
+      privateKey_1337 = await openpgp.readArmoredKey(priv_key_expires_1337);
+      publicKey_1337 = privateKey_1337.toPublic();
+      privateKeyMismatchingParams = await openpgp.readArmoredKey(mismatchingKeyParams);
+
+      useNativeVal = openpgp.config.useNative;
+      aeadProtectVal = openpgp.config.aeadProtect;
+      aeadModeVal = openpgp.config.aeadMode;
+      aeadChunkSizeByteVal = openpgp.config.aeadChunkSizeByte;
+      v5KeysVal = openpgp.config.v5Keys;
     });
 
     afterEach(function() {
-      openpgp.config.zero_copy = zero_copyVal;
-      openpgp.config.use_native = use_nativeVal;
-      openpgp.config.aead_protect = aead_protectVal;
-      openpgp.config.aead_mode = aead_modeVal;
-      openpgp.config.aead_chunk_size_byte = aead_chunk_size_byteVal;
-      openpgp.config.v5_keys = v5_keysVal;
+      openpgp.config.useNative = useNativeVal;
+      openpgp.config.aeadProtect = aeadProtectVal;
+      openpgp.config.aeadMode = aeadModeVal;
+      openpgp.config.aeadChunkSizeByte = aeadChunkSizeByteVal;
+      openpgp.config.v5Keys = v5KeysVal;
     });
 
     it('Configuration', async function() {
-      openpgp.config.show_version = false;
-      openpgp.config.commentstring = 'different';
-      if (openpgp.getWorker()) { // init again to trigger config event
-        await openpgp.initWorker({ path:'../dist/openpgp.worker.js' });
-      }
-      return openpgp.encrypt({ publicKeys:publicKey.keys, message:openpgp.message.fromText(plaintext) }).then(function(encrypted) {
-        expect(encrypted.data).to.exist;
-        expect(encrypted.data).not.to.match(/^Version:/);
-        expect(encrypted.data).to.match(/Comment: different/);
-      });
-    });
+      const showCommentVal = openpgp.config.showComment;
+      const showVersionVal = openpgp.config.showVersion;
+      const commentStringVal = openpgp.config.commentString;
 
-    it('Test multiple workers', async function() {
-      openpgp.config.show_version = false;
-      openpgp.config.commentstring = 'different';
-      if (!openpgp.getWorker()) {
-        return;
-      }
-      const { workers } = openpgp.getWorker();
       try {
-        await privateKey.keys[0].decrypt(passphrase)
-        await openpgp.initWorker({path: '../dist/openpgp.worker.js', workers, n: 2});
+        const encryptedDefault = await openpgp.encrypt({ publicKeys:publicKey, message:openpgp.Message.fromText(plaintext) });
+        expect(encryptedDefault).to.exist;
+        expect(encryptedDefault).not.to.match(/^Version:/);
+        expect(encryptedDefault).not.to.match(/^Comment:/);
 
-        const workerTest = (_, index) => {
-          const plaintext = input.createSomeMessage() + index;
-          return openpgp.encrypt({
-            publicKeys: publicKey.keys,
-            data: plaintext
-          }).then(function (encrypted) {
-            expect(encrypted.data).to.exist;
-            expect(encrypted.data).not.to.match(/^Version:/);
-            expect(encrypted.data).to.match(/Comment: different/);
-            return openpgp.decrypt({
-              privateKeys: privateKey.keys[0],
-              message: openpgp.message.readArmored(encrypted.data)
-            });
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-          });
-        };
-        await Promise.all(Array(10).fill(null).map(workerTest));
+        openpgp.config.showComment = true;
+        openpgp.config.commentString = 'different';
+        const encryptedWithComment = await openpgp.encrypt({ publicKeys:publicKey, message:openpgp.Message.fromText(plaintext) });
+        expect(encryptedWithComment).to.exist;
+        expect(encryptedWithComment).not.to.match(/^Version:/);
+        expect(encryptedWithComment).to.match(/Comment: different/);
       } finally {
-        await openpgp.initWorker({path: '../dist/openpgp.worker.js', workers, n: 1 });
+        openpgp.config.showComment = showCommentVal;
+        openpgp.config.showVersion = showVersionVal;
+        openpgp.config.commentString = commentStringVal;
       }
     });
 
     it('Decrypting key with wrong passphrase rejected', async function () {
-      await expect(privateKey.keys[0].decrypt('wrong passphrase')).to.eventually.be.rejectedWith('Incorrect key passphrase');
+      await expect(privateKey.decrypt('wrong passphrase')).to.eventually.be.rejectedWith('Incorrect key passphrase');
     });
 
-    it('Decrypting key with correct passphrase returns true', async function () {
-      expect(await privateKey.keys[0].decrypt(passphrase)).to.be.true;
+    it('Can decrypt key with correct passphrase', async function () {
+      expect(privateKey.isDecrypted()).to.be.false;
+      await privateKey.decrypt(passphrase);
+      expect(privateKey.isDecrypted()).to.be.true;
     });
 
     describe('decryptKey', function() {
-      it('should work for correct passphrase', function() {
+      it('should work for correct passphrase', async function() {
+        const originalKey = await openpgp.readArmoredKey(privateKey.armor());
         return openpgp.decryptKey({
-          privateKey: privateKey.keys[0],
+          privateKey: privateKey,
           passphrase: passphrase
         }).then(function(unlocked){
-          expect(unlocked.key.getKeyId().toHex()).to.equal(privateKey.keys[0].getKeyId().toHex());
-          expect(unlocked.key.isDecrypted()).to.be.true;
+          expect(unlocked.getKeyId().toHex()).to.equal(privateKey.getKeyId().toHex());
+          expect(unlocked.subKeys[0].getKeyId().toHex()).to.equal(privateKey.subKeys[0].getKeyId().toHex());
+          expect(unlocked.isDecrypted()).to.be.true;
+          expect(unlocked.keyPacket.privateParams).to.not.be.null;
+          // original key should be unchanged
+          expect(privateKey.isDecrypted()).to.be.false;
+          expect(privateKey.keyPacket.privateParams).to.be.null;
+          originalKey.subKeys[0].getKeyId(); // fill in keyid
+          expect(privateKey).to.deep.equal(originalKey);
         });
       });
 
-      it('should fail for incorrect passphrase', function() {
+      it('should fail for incorrect passphrase', async function() {
+        const originalKey = await openpgp.readArmoredKey(privateKey.armor());
         return openpgp.decryptKey({
-          privateKey: privateKey.keys[0],
+          privateKey: privateKey,
           passphrase: 'incorrect'
         }).then(function() {
           throw new Error('Should not decrypt with incorrect passphrase');
         }).catch(function(error){
           expect(error.message).to.match(/Incorrect key passphrase/);
+          // original key should be unchanged
+          expect(privateKey.isDecrypted()).to.be.false;
+          expect(privateKey.keyPacket.privateParams).to.be.null;
+          expect(privateKey).to.deep.equal(originalKey);
         });
+      });
+
+      it('should fail for corrupted key', async function() {
+        const originalKey = await openpgp.readArmoredKey(privateKeyMismatchingParams.armor());
+        return openpgp.decryptKey({
+          privateKey: privateKeyMismatchingParams,
+          passphrase: 'userpass'
+        }).then(function() {
+          throw new Error('Should not decrypt corrupted key');
+        }).catch(function(error) {
+          expect(error.message).to.match(/Key is invalid/);
+          expect(privateKeyMismatchingParams.isDecrypted()).to.be.false;
+          expect(privateKeyMismatchingParams.keyPacket.privateParams).to.be.null;
+          expect(privateKeyMismatchingParams).to.deep.equal(originalKey);
+        });
+      });
+    });
+
+    describe('encryptKey', function() {
+      it('should not change original key', async function() {
+        const { privateKeyArmored } = await openpgp.generateKey({ userIds: [{ name: 'test', email: 'test@test.com' }] });
+        // read both keys from armored data to make sure all fields are exactly the same
+        const key = await openpgp.readArmoredKey(privateKeyArmored);
+        const originalKey = await openpgp.readArmoredKey(privateKeyArmored);
+        return openpgp.encryptKey({
+          privateKey: key,
+          passphrase: passphrase
+        }).then(function(locked){
+          expect(locked.getKeyId().toHex()).to.equal(key.getKeyId().toHex());
+          expect(locked.subKeys[0].getKeyId().toHex()).to.equal(key.subKeys[0].getKeyId().toHex());
+          expect(locked.isDecrypted()).to.be.false;
+          expect(locked.keyPacket.privateParams).to.be.null;
+          // original key should be unchanged
+          expect(key.isDecrypted()).to.be.true;
+          expect(key.keyPacket.privateParams).to.not.be.null;
+          originalKey.subKeys[0].getKeyId(); // fill in keyid
+          expect(key).to.deep.equal(originalKey);
+        });
+      });
+
+      it('encrypted key can be decrypted', async function() {
+        const { key } = await openpgp.generateKey({ userIds: [{ name: 'test', email: 'test@test.com' }] });
+        const locked = await openpgp.encryptKey({
+          privateKey: key,
+          passphrase: passphrase
+        });
+        expect(locked.isDecrypted()).to.be.false;
+        const unlocked = await openpgp.decryptKey({
+          privateKey: locked,
+          passphrase: passphrase
+        });
+        expect(unlocked.isDecrypted()).to.be.true;
+      });
+
+      it('should support multiple passphrases', async function() {
+        const { key } = await openpgp.generateKey({ userIds: [{ name: 'test', email: 'test@test.com' }] });
+        const passphrases = ['123', '456'];
+        const locked = await openpgp.encryptKey({
+          privateKey: key,
+          passphrase: passphrases
+        });
+        expect(locked.isDecrypted()).to.be.false;
+        await expect(openpgp.decryptKey({
+          privateKey: locked,
+          passphrase: passphrases[0]
+        })).to.eventually.be.rejectedWith(/Incorrect key passphrase/);
+        const unlocked = await openpgp.decryptKey({
+          privateKey: locked,
+          passphrase: passphrases
+        });
+        expect(unlocked.isDecrypted()).to.be.true;
+      });
+
+      it('should encrypt gnu-dummy key', async function() {
+        const key = await openpgp.readArmoredKey(gnuDummyKeySigningSubkey);
+        const locked = await openpgp.encryptKey({
+          privateKey: key,
+          passphrase: passphrase
+        });
+        expect(key.isDecrypted()).to.be.true;
+        expect(locked.isDecrypted()).to.be.false;
+        expect(locked.primaryKey.isDummy()).to.be.true;
+        const unlocked = await openpgp.decryptKey({
+          privateKey: locked,
+          passphrase: passphrase
+        });
+        expect(key.isDecrypted()).to.be.true;
+        expect(unlocked.isDecrypted()).to.be.true;
+        expect(unlocked.primaryKey.isDummy()).to.be.true;
       });
     });
 
     it('Calling decrypt with not decrypted key leads to exception', async function() {
       const encOpt = {
-        message: openpgp.message.fromText(plaintext),
-        publicKeys: publicKey.keys
+        message: openpgp.Message.fromText(plaintext),
+        publicKeys: publicKey
       };
       const decOpt = {
-        privateKeys: privateKey.keys[0]
+        privateKeys: privateKey
       };
       const encrypted = await openpgp.encrypt(encOpt);
-      decOpt.message = await openpgp.message.readArmored(encrypted.data);
+      decOpt.message = await openpgp.readArmoredMessage(encrypted);
       await expect(openpgp.decrypt(decOpt)).to.be.rejectedWith('Error decrypting message: Private key is not decrypted.');
     });
 
     tryTests('CFB mode (asm.js)', tests, {
-      if: !(typeof window !== 'undefined' && window.Worker),
+      if: true,
       beforeEach: function() {
-        openpgp.config.aead_protect = false;
-      }
-    });
-
-    tryTests('CFB mode (asm.js, worker)', tests, {
-      if: typeof window !== 'undefined' && window.Worker,
-      before: async function() {
-        await openpgp.initWorker({ path:'../dist/openpgp.worker.js' });
-      },
-      beforeEach: function() {
-        openpgp.config.aead_protect = false;
-      },
-      after: function() {
-        openpgp.destroyWorker();
+        openpgp.config.aeadProtect = false;
       }
     });
 
     tryTests('GCM mode (V5 keys)', tests, {
       if: true,
       beforeEach: function() {
-        openpgp.config.aead_protect = true;
-        openpgp.config.aead_mode = openpgp.enums.aead.experimental_gcm;
-        openpgp.config.v5_keys = true;
+        openpgp.config.aeadProtect = true;
+        openpgp.config.aeadMode = openpgp.enums.aead.experimentalGcm;
+        openpgp.config.v5Keys = true;
 
         // Monkey-patch AEAD feature flag
-        publicKey.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2000_2008.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2038_2045.keys[0].users[0].selfCertifications[0].features = [7];
+        publicKey.users[0].selfCertifications[0].features = [7];
+        publicKey_2000_2008.users[0].selfCertifications[0].features = [7];
+        publicKey_2038_2045.users[0].selfCertifications[0].features = [7];
       }
     });
 
     tryTests('EAX mode (small chunk size)', tests, {
       if: true,
       beforeEach: function() {
-        openpgp.config.aead_protect = true;
-        openpgp.config.aead_chunk_size_byte = 0;
+        openpgp.config.aeadProtect = true;
+        openpgp.config.aeadChunkSizeByte = 0;
 
         // Monkey-patch AEAD feature flag
-        publicKey.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2000_2008.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2038_2045.keys[0].users[0].selfCertifications[0].features = [7];
+        publicKey.users[0].selfCertifications[0].features = [7];
+        publicKey_2000_2008.users[0].selfCertifications[0].features = [7];
+        publicKey_2038_2045.users[0].selfCertifications[0].features = [7];
       }
     });
 
     tryTests('OCB mode', tests, {
       if: !openpgp.config.ci,
       beforeEach: function() {
-        openpgp.config.aead_protect = true;
-        openpgp.config.aead_mode = openpgp.enums.aead.ocb;
+        openpgp.config.aeadProtect = true;
+        openpgp.config.aeadMode = openpgp.enums.aead.ocb;
 
         // Monkey-patch AEAD feature flag
-        publicKey.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2000_2008.keys[0].users[0].selfCertifications[0].features = [7];
-        publicKey_2038_2045.keys[0].users[0].selfCertifications[0].features = [7];
+        publicKey.users[0].selfCertifications[0].features = [7];
+        publicKey_2000_2008.users[0].selfCertifications[0].features = [7];
+        publicKey_2038_2045.users[0].selfCertifications[0].features = [7];
       }
     });
 
@@ -957,7 +984,7 @@ describe('OpenPGP.js public api tests', function() {
         let decryptedPrivateKey;
         beforeEach(async function() {
           if (!decryptedPrivateKey) {
-            expect(await privateKey.keys[0].decrypt(passphrase)).to.be.true;
+            await privateKey.decrypt(passphrase);
             decryptedPrivateKey = privateKey;
           }
           privateKey = decryptedPrivateKey;
@@ -967,11 +994,13 @@ describe('OpenPGP.js public api tests', function() {
           return openpgp.encryptSessionKey({
             data: sk,
             algorithm: 'aes128',
-            publicKeys: publicKey.keys
-          }).then(function(encrypted) {
+            publicKeys: publicKey,
+            armor: false
+          }).then(async function(encrypted) {
+            const message = await openpgp.readMessage(encrypted);
             return openpgp.decryptSessionKeys({
-              message: encrypted.message,
-              privateKeys: privateKey.keys[0]
+              message,
+              privateKeys: privateKey
             });
           }).then(function(decrypted) {
             expect(decrypted[0].data).to.deep.equal(sk);
@@ -982,10 +1011,12 @@ describe('OpenPGP.js public api tests', function() {
           return openpgp.encryptSessionKey({
             data: sk,
             algorithm: 'aes128',
-            passwords: password1
-          }).then(function(encrypted) {
+            passwords: password1,
+            armor: false
+          }).then(async function(encrypted) {
+            const message = await openpgp.readMessage(encrypted);
             return openpgp.decryptSessionKeys({
-              message: encrypted.message,
+              message,
               passwords: password1
             });
           }).then(function(decrypted) {
@@ -997,12 +1028,14 @@ describe('OpenPGP.js public api tests', function() {
           return openpgp.encryptSessionKey({
             data: sk,
             algorithm: 'aes128',
-            publicKeys: publicKey.keys
+            publicKeys: publicKey,
+            armor: false
           }).then(async function(encrypted) {
-            const invalidPrivateKey = (await openpgp.key.readArmored(priv_key)).keys[0];
+            const message = await openpgp.readMessage(encrypted);
+            const invalidPrivateKey = await openpgp.readArmoredKey(priv_key);
             invalidPrivateKey.subKeys[0].bindingSignatures = [];
             return openpgp.decryptSessionKeys({
-              message: encrypted.message,
+              message,
               privateKeys: invalidPrivateKey
             }).then(() => {
               throw new Error('Should not decrypt with invalid key');
@@ -1012,119 +1045,86 @@ describe('OpenPGP.js public api tests', function() {
           });
         });
 
-        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with pgp key pair', function () {
-          let msgAsciiArmored;
-          return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys
-          }).then(async function (encrypted) {
-            msgAsciiArmored = encrypted.data;
-            return openpgp.decryptSessionKeys({
-              message: await openpgp.message.readArmored(msgAsciiArmored),
-              privateKeys: privateKey.keys[0]
-            });
-
-          }).then(async function (decryptedSessionKeys) {
-            const message = await openpgp.message.readArmored(msgAsciiArmored);
-            return openpgp.decrypt({
-              sessionKeys: decryptedSessionKeys[0],
-              message
-            });
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
+        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with pgp key pair', async function () {
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           });
+          const decryptedSessionKeys = await openpgp.decryptSessionKeys({
+            message: await openpgp.readArmoredMessage(encrypted),
+            privateKeys: privateKey
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: decryptedSessionKeys[0]
+          });
+          expect(decrypted.data).to.equal(plaintext);
         });
 
-        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with pgp key pair -- trailing spaces', function () {
+        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with pgp key pair -- trailing spaces', async function () {
           const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-          let msgAsciiArmored;
-          return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys
-          }).then(async function (encrypted) {
-            msgAsciiArmored = encrypted.data;
-            return openpgp.decryptSessionKeys({
-              message: await openpgp.message.readArmored(msgAsciiArmored),
-              privateKeys: privateKey.keys[0]
-            });
-
-          }).then(async function (decryptedSessionKeys) {
-            const message = await openpgp.message.readArmored(msgAsciiArmored);
-            return openpgp.decrypt({
-              sessionKeys: decryptedSessionKeys[0],
-              message
-            });
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           });
+          const decryptedSessionKeys = await openpgp.decryptSessionKeys({
+            message: await openpgp.readArmoredMessage(encrypted),
+            privateKeys: privateKey
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: decryptedSessionKeys[0]
+          });
+          expect(decrypted.data).to.equal(plaintext);
         });
 
-        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with password', function () {
-          let msgAsciiArmored;
-          return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
+        it('roundtrip workflow: encrypt, decryptSessionKeys, decrypt with password', async function () {
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
             passwords: password1
-          }).then(async function (encrypted) {
-            msgAsciiArmored = encrypted.data;
-            return openpgp.decryptSessionKeys({
-              message: await openpgp.message.readArmored(msgAsciiArmored),
-              passwords: password1
-            });
-
-          }).then(async function (decryptedSessionKeys) {
-            return openpgp.decrypt({
-              sessionKeys: decryptedSessionKeys[0],
-              message: await openpgp.message.readArmored(msgAsciiArmored)
-            });
-
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
           });
+          const decryptedSessionKeys = await openpgp.decryptSessionKeys({
+            message: await openpgp.readArmoredMessage(encrypted),
+            passwords: password1
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: decryptedSessionKeys[0]
+          });
+          expect(decrypted.data).to.equal(plaintext);
         });
 
-        it('roundtrip workflow: encrypt with multiple passwords, decryptSessionKeys, decrypt with multiple passwords', function () {
-          let msgAsciiArmored;
-          return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
+        it('roundtrip workflow: encrypt with multiple passwords, decryptSessionKeys, decrypt with multiple passwords', async function () {
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
             passwords: [password1, password2]
-          }).then(async function (encrypted) {
-            msgAsciiArmored = encrypted.data;
-            return openpgp.decryptSessionKeys({
-              message: await openpgp.message.readArmored(msgAsciiArmored),
-              passwords: [password1, password2]
-            });
-
-          }).then(async function (decryptedSessionKeys) {
-            return openpgp.decrypt({
-              sessionKeys: decryptedSessionKeys,
-              message: await openpgp.message.readArmored(msgAsciiArmored)
-            });
-
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
           });
+          const decryptedSessionKeys = await openpgp.decryptSessionKeys({
+            message: await openpgp.readArmoredMessage(encrypted),
+            passwords: [password1, password2]
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: decryptedSessionKeys[0]
+          });
+          expect(decrypted.data).to.equal(plaintext);
         });
 
-        it('roundtrip workflow: encrypt twice with one password, decryptSessionKeys, only one session key', function () {
-          let msgAsciiArmored;
-          return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
+        it('roundtrip workflow: encrypt twice with one password, decryptSessionKeys, only one session key', async function () {
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
             passwords: [password1, password1]
-          }).then(async function (encrypted) {
-            msgAsciiArmored = encrypted.data;
-            return openpgp.decryptSessionKeys({
-              message: await openpgp.message.readArmored(msgAsciiArmored),
-              passwords: password1
-            });
-          }).then(async function (decryptedSessionKeys) {
-            expect(decryptedSessionKeys.length).to.equal(1);
-            return openpgp.decrypt({
-              sessionKeys: decryptedSessionKeys,
-              message: await openpgp.message.readArmored(msgAsciiArmored)
-            });
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
           });
+          const decryptedSessionKeys = await openpgp.decryptSessionKeys({
+            message: await openpgp.readArmoredMessage(encrypted),
+            passwords: password1
+          });
+          expect(decryptedSessionKeys.length).to.equal(1);
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: decryptedSessionKeys[0]
+          });
+          expect(decrypted.data).to.equal(plaintext);
         });
       });
 
@@ -1144,7 +1144,7 @@ describe('OpenPGP.js public api tests', function() {
         let decryptedPrivateKey;
         beforeEach(async function() {
           if (!decryptedPrivateKey) {
-            expect(await privateKey.keys[0].decrypt(passphrase)).to.be.true;
+            await privateKey.decrypt(passphrase);
             decryptedPrivateKey = privateKey;
           }
           privateKey = decryptedPrivateKey;
@@ -1152,15 +1152,15 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt then decrypt', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys
+            privateKeys: privateKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1170,19 +1170,19 @@ describe('OpenPGP.js public api tests', function() {
         });
 
         it('should encrypt then decrypt with multiple private keys', async function () {
-          const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+          const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
           await privKeyDE.decrypt(passphrase);
 
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           };
           const decOpt = {
-            privateKeys: [privKeyDE, privateKey.keys[0]]
+            privateKeys: [privKeyDE, privateKey]
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1193,16 +1193,16 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt then decrypt with wildcard', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
             wildcard: true
           };
           const decOpt = {
-            privateKeys: privateKey.keys
+            privateKeys: privateKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1212,20 +1212,20 @@ describe('OpenPGP.js public api tests', function() {
         });
 
         it('should encrypt then decrypt with wildcard with multiple private keys', async function () {
-          const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+          const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
           await privKeyDE.decrypt(passphrase);
 
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
             wildcard: true
           };
           const decOpt = {
-            privateKeys: [privKeyDE, privateKey.keys[0]]
+            privateKeys: [privKeyDE, privateKey]
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1234,44 +1234,41 @@ describe('OpenPGP.js public api tests', function() {
           });
         });
 
-        it('should encrypt then decrypt using returned session key', function () {
-          const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            returnSessionKey: true
-          };
-
-          return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            const decOpt = {
-              sessionKeys: encrypted.sessionKey,
-              message: await openpgp.message.readArmored(encrypted.data)
-            };
-            return openpgp.decrypt(decOpt);
-          }).then(function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-            expect(decrypted.signatures).to.exist;
-            expect(decrypted.signatures.length).to.equal(0);
+        it('should encrypt then decrypt using returned session key', async function () {
+          const sessionKey = await openpgp.generateSessionKey({
+            publicKeys: publicKey
           });
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            sessionKey
+          });
+          expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            sessionKeys: sessionKey
+          });
+          expect(decrypted.data).to.equal(plaintext);
+          expect(decrypted.signatures).to.exist;
+          expect(decrypted.signatures.length).to.equal(0);
         });
 
         it('should encrypt using custom session key and decrypt using session key', async function () {
           const sessionKey = {
-            data: await openpgp.crypto.generateSessionKey('aes256'),
+            data: await crypto.generateSessionKey('aes256'),
             algorithm: 'aes256'
           };
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             sessionKey: sessionKey,
-            publicKeys: publicKey.keys
+            publicKeys: publicKey
           };
           const decOpt = {
             sessionKeys: sessionKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(false);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
+            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(false);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1280,21 +1277,21 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt using custom session key and decrypt using private key', async function () {
           const sessionKey = {
-            data: await openpgp.crypto.generateSessionKey('aes128'),
+            data: await crypto.generateSessionKey('aes128'),
             algorithm: 'aes128'
           };
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             sessionKey: sessionKey,
-            publicKeys: publicKey.keys
+            publicKeys: publicKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0]
+            privateKeys: privateKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            expect(encrypted.data).to.match(/^-----BEGIN PGP MESSAGE/);
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(false);
+            expect(encrypted).to.match(/^-----BEGIN PGP MESSAGE/);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
+            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(false);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1303,22 +1300,22 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt/sign and decrypt/verify', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: publicKey.keys
+            privateKeys: privateKey,
+            publicKeys: publicKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(openpgp.config.aead_protect);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
+            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(openpgp.config.aeadProtect);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.true;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -1326,22 +1323,22 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt/sign and decrypt/verify (no AEAD support)', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKeyNoAEAD.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKeyNoAEAD,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: publicKeyNoAEAD.keys
+            privateKeys: privateKey,
+            publicKeys: publicKeyNoAEAD
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(false);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
+            expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(false);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.true;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -1350,189 +1347,147 @@ describe('OpenPGP.js public api tests', function() {
         it('should encrypt/sign and decrypt/verify with generated key', function () {
           const genOpt = {
             userIds: [{ name: 'Test User', email: 'text@example.com' }],
-            numBits: 512
           };
-          if (openpgp.util.getWebCryptoAll()) { genOpt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
 
           return openpgp.generateKey(genOpt).then(async function(newKey) {
-            const newPublicKey = await openpgp.key.readArmored(newKey.publicKeyArmored);
-            const newPrivateKey = await openpgp.key.readArmored(newKey.privateKeyArmored);
+            const newPublicKey = await openpgp.readArmoredKey(newKey.publicKeyArmored);
+            const newPrivateKey = await openpgp.readArmoredKey(newKey.privateKeyArmored);
 
             const encOpt = {
-              message: openpgp.message.fromText(plaintext),
-              publicKeys: newPublicKey.keys,
-              privateKeys: newPrivateKey.keys
+              message: openpgp.Message.fromText(plaintext),
+              publicKeys: newPublicKey,
+              privateKeys: newPrivateKey
             };
             const decOpt = {
-              privateKeys: newPrivateKey.keys[0],
-              publicKeys: newPublicKey.keys
+              privateKeys: newPrivateKey,
+              publicKeys: newPublicKey
             };
             return openpgp.encrypt(encOpt).then(async function (encrypted) {
-              decOpt.message = await openpgp.message.readArmored(encrypted.data);
-              expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(openpgp.config.aead_protect);
+              decOpt.message = await openpgp.readArmoredMessage(encrypted);
+              expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(openpgp.config.aeadProtect);
               return openpgp.decrypt(decOpt);
             }).then(async function (decrypted) {
               expect(decrypted.data).to.equal(plaintext);
               expect(decrypted.signatures[0].valid).to.be.true;
-              const signingKey = await newPrivateKey.keys[0].getSigningKey();
+              const signingKey = await newPrivateKey.getSigningKey();
               expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
               expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
             });
           });
         });
 
-        it('should encrypt/sign and decrypt/verify with generated key and detached signatures', function () {
-          const genOpt = {
+        it('should encrypt/sign and decrypt/verify with generated key and detached signatures', async function () {
+          const newKey = await openpgp.generateKey({
             userIds: [{ name: 'Test User', email: 'text@example.com' }],
-            numBits: 512
-          };
-          if (openpgp.util.getWebCryptoAll()) { genOpt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
-
-          return openpgp.generateKey(genOpt).then(async function(newKey) {
-            const newPublicKey = await openpgp.key.readArmored(newKey.publicKeyArmored);
-            const newPrivateKey = await openpgp.key.readArmored(newKey.privateKeyArmored);
-
-            const encOpt = {
-              message: openpgp.message.fromText(plaintext),
-              publicKeys: newPublicKey.keys,
-              privateKeys: newPrivateKey.keys,
-              detached: true
-            };
-            const decOpt = {
-              privateKeys: newPrivateKey.keys[0],
-              publicKeys: newPublicKey.keys
-            };
-            return openpgp.encrypt(encOpt).then(async function (encrypted) {
-              decOpt.message = await openpgp.message.readArmored(encrypted.data);
-              decOpt.signature = await openpgp.signature.readArmored(encrypted.signature);
-              expect(!!decOpt.message.packets.findPacket(openpgp.enums.packet.symEncryptedAEADProtected)).to.equal(openpgp.config.aead_protect);
-              return openpgp.decrypt(decOpt);
-            }).then(async function (decrypted) {
-              expect(decrypted.data).to.equal(plaintext);
-              expect(decrypted.signatures[0].valid).to.be.true;
-              const signingKey = await newPrivateKey.keys[0].getSigningKey();
-              expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
-              expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
-            });
           });
+          const newPublicKey = await openpgp.readArmoredKey(newKey.publicKeyArmored);
+          const newPrivateKey = await openpgp.readArmoredKey(newKey.privateKeyArmored);
+
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: newPublicKey
+          });
+          const signed = await openpgp.sign({
+            message: openpgp.Message.fromText(plaintext),
+            privateKeys: newPrivateKey,
+            detached: true
+          });
+          const message = await openpgp.readArmoredMessage(encrypted);
+          expect(!!message.packets.findPacket(openpgp.enums.packet.AEADEncryptedData)).to.equal(openpgp.config.aeadProtect);
+          const decrypted = await openpgp.decrypt({
+            message,
+            signature: await openpgp.readArmoredSignature(signed),
+            privateKeys: newPrivateKey,
+            publicKeys: newPublicKey
+          });
+          expect(decrypted.data).to.equal(plaintext);
+          expect(decrypted.signatures[0].valid).to.be.true;
+          const signingKey = await newPrivateKey.getSigningKey();
+          expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
+          expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
         });
 
         it('should encrypt/sign and decrypt/verify with null string input', function () {
           const encOpt = {
-            message: openpgp.message.fromText(''),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(''),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: publicKey.keys
+            privateKeys: privateKey,
+            publicKeys: publicKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal('');
             expect(decrypted.signatures[0].valid).to.be.true;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
         });
 
-        it('should encrypt/sign and decrypt/verify with detached signatures', function () {
-          const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys,
-            detached: true
-          };
-          const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: publicKey.keys
-          };
-          return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            decOpt.signature = await openpgp.signature.readArmored(encrypted.signature);
-            return openpgp.decrypt(decOpt);
-          }).then(async function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-            expect(decrypted.signatures[0].valid).to.be.true;
-            const signingKey = await privateKey.keys[0].getSigningKey();
-            expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
-            expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
+        it('should encrypt/sign and decrypt/verify with detached signatures', async function () {
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           });
+          const signed = await openpgp.sign({
+            message: openpgp.Message.fromText(plaintext),
+            privateKeys: privateKey,
+            detached: true
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            signature: await openpgp.readArmoredSignature(signed),
+            privateKeys: privateKey,
+            publicKeys: publicKey
+          });
+          expect(decrypted.data).to.equal(plaintext);
+          expect(decrypted.signatures[0].valid).to.be.true;
+          const signingKey = await privateKey.getSigningKey();
+          expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
+          expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
         });
 
-        it('should encrypt and decrypt/verify with detached signature input and detached flag set for encryption', function () {
-          const signOpt = {
-            message: openpgp.message.fromText(plaintext),
-            privateKeys: privateKey.keys[0],
-            detached: true
-          };
-
-          const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            detached: true
-          };
-
-          const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: publicKey.keys[0]
-          };
-
-          return openpgp.sign(signOpt).then(async function (signed) {
-            encOpt.signature = await openpgp.signature.readArmored(signed.signature);
-            return openpgp.encrypt(encOpt);
-          }).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            decOpt.signature = await openpgp.signature.readArmored(encrypted.signature);
-            return openpgp.decrypt(decOpt);
-          }).then(async function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-            expect(decrypted.signatures[0].valid).to.be.true;
-            const signingKey = await privateKey.keys[0].getSigningKey();
-            expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
-            expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
-          });
-        });
-
-        it('should encrypt and decrypt/verify with detached signature as input and detached flag not set for encryption', async function () {
+        it('should encrypt and decrypt/verify with detached signature as input for encryption', async function () {
           const plaintext = "  \t┍ͤ޵၂༫዇◧˘˻ᙑ᎚⏴ំந⛑nٓኵΉⅶ⋋ŵ⋲΂ͽᣏ₅ᄶɼ┋⌔û᬴Ƚᔡᧅ≃ṱἆ⃷݂૿ӌ᰹෇ٹჵ⛇໶⛌  \t\n한국어/조선말";
 
-          const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+          const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
           await privKeyDE.decrypt(passphrase);
 
-          const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
+          const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
 
           const signOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             privateKeys: privKeyDE,
             detached: true
           };
 
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys[0]
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
 
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: [publicKey.keys[0], pubKeyDE]
+            privateKeys: privateKey,
+            publicKeys: [publicKey, pubKeyDE]
           };
 
           return openpgp.sign(signOpt).then(async function (signed) {
-            encOpt.signature = await openpgp.signature.readArmored(signed.signature);
+            encOpt.signature = await openpgp.readArmoredSignature(signed);
             return openpgp.encrypt(encOpt);
           }).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             let signingKey;
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.true;
-            signingKey = await privateKey.keys[0].getSigningKey();
+            signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
             expect(decrypted.signatures[1].valid).to.be.true;
@@ -1542,67 +1497,33 @@ describe('OpenPGP.js public api tests', function() {
           });
         });
 
-        it('should fail to encrypt and decrypt/verify with detached signature input and detached flag set for encryption with wrong public key', async function () {
+        it('should fail to encrypt and decrypt/verify with detached signature as input for encryption with wrong public key', async function () {
           const signOpt = {
-            message: openpgp.message.fromText(plaintext),
-            privateKeys: privateKey.keys,
+            message: openpgp.Message.fromText(plaintext),
+            privateKeys: privateKey,
             detached: true
           };
 
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            detached: true
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           };
 
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
+            privateKeys: privateKey,
+            publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
           };
 
           return openpgp.sign(signOpt).then(async function (signed) {
-            encOpt.signature = await openpgp.signature.readArmored(signed.signature);
+            encOpt.signature = await openpgp.readArmoredSignature(signed);
             return openpgp.encrypt(encOpt);
           }).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            decOpt.signature = await openpgp.signature.readArmored(encrypted.signature);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
-            expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
-            expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
-          });
-        });
-
-        it('should fail to encrypt and decrypt/verify with detached signature as input and detached flag not set for encryption with wrong public key', async function () {
-          const signOpt = {
-            message: openpgp.message.fromText(plaintext),
-            privateKeys: privateKey.keys,
-            detached: true
-          };
-
-          const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys
-          };
-
-          const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
-          };
-
-          return openpgp.sign(signOpt).then(async function (signed) {
-            encOpt.signature = await openpgp.signature.readArmored(signed.signature);
-            return openpgp.encrypt(encOpt);
-          }).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            return openpgp.decrypt(decOpt);
-          }).then(async function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-            expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -1610,21 +1531,21 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should fail to verify decrypted data with wrong public pgp key', async function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
+            privateKeys: privateKey,
+            publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -1632,21 +1553,21 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should fail to verify decrypted null string with wrong public pgp key', async function () {
           const encOpt = {
-            message: openpgp.message.fromText(''),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(''),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
+            privateKeys: privateKey,
+            publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal('');
             expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -1654,74 +1575,73 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should successfully decrypt signed message without public keys to verify', async function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
+            privateKeys: privateKey
           };
           const decOpt = {
-            privateKeys: privateKey.keys[0]
+            privateKeys: privateKey
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
+            const signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
           });
         });
 
         it('should fail to verify decrypted data with wrong public pgp key with detached signatures', async function () {
-          const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: privateKey.keys,
-            detached: true
-          };
-          const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
-          };
-          return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
-            decOpt.signature = await openpgp.signature.readArmored(encrypted.signature);
-            return openpgp.decrypt(decOpt);
-          }).then(async function (decrypted) {
-            expect(decrypted.data).to.equal(plaintext);
-            expect(decrypted.signatures[0].valid).to.be.null;
-            const signingKey = await privateKey.keys[0].getSigningKey();
-            expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
-            expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
+          const encrypted = await openpgp.encrypt({
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey
           });
+          const signed = await openpgp.sign({
+            message: openpgp.Message.fromText(plaintext),
+            privateKeys: privateKey,
+            detached: true
+          });
+          const decrypted = await openpgp.decrypt({
+            message: await openpgp.readArmoredMessage(encrypted),
+            signature: await openpgp.readArmoredSignature(signed),
+            privateKeys: privateKey,
+            publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
+          });
+          expect(decrypted.data).to.equal(plaintext);
+          expect(decrypted.signatures[0].valid).to.be.null;
+          const signingKey = await privateKey.getSigningKey();
+          expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
+          expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
         });
 
         it('should encrypt and decrypt/verify both signatures when signed with two private keys', async function () {
-          const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+          const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
           await privKeyDE.decrypt(passphrase);
 
-          const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
+          const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
 
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
-            publicKeys: publicKey.keys,
-            privateKeys: [privateKey.keys[0], privKeyDE]
+            message: openpgp.Message.fromText(plaintext),
+            publicKeys: publicKey,
+            privateKeys: [privateKey, privKeyDE]
           };
 
           const decOpt = {
-            privateKeys: privateKey.keys[0],
-            publicKeys: [publicKey.keys[0], pubKeyDE]
+            privateKeys: privateKey,
+            publicKeys: [publicKey, pubKeyDE]
           };
 
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(async function (decrypted) {
             let signingKey;
             expect(decrypted.data).to.equal(plaintext);
             expect(decrypted.signatures[0].valid).to.be.true;
-            signingKey = await privateKey.keys[0].getSigningKey();
+            signingKey = await privateKey.getSigningKey();
             expect(decrypted.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
             expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
             expect(decrypted.signatures[1].valid).to.be.true;
@@ -1733,8 +1653,8 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should fail to decrypt modified message', async function() {
           const { privateKeyArmored } = await openpgp.generateKey({ curve: 'curve25519', userIds: [{ email: 'test@email.com' }] });
-          const { keys: [key] } = await openpgp.key.readArmored(privateKeyArmored);
-          const { data } = await openpgp.encrypt({ message: openpgp.message.fromBinary(new Uint8Array(500)), publicKeys: [key.toPublic()] });
+          const key = await openpgp.readArmoredKey(privateKeyArmored);
+          const data = await openpgp.encrypt({ message: openpgp.Message.fromBinary(new Uint8Array(500)), publicKeys: [key.toPublic()] });
           let badSumEncrypted = data.replace(/\n=[a-zA-Z0-9/+]{4}/, '\n=aaaa');
           if (badSumEncrypted === data) { // checksum was already =aaaa
             badSumEncrypted = data.replace(/\n=[a-zA-Z0-9/+]{4}/, '\n=bbbb');
@@ -1744,17 +1664,12 @@ describe('OpenPGP.js public api tests', function() {
           }
           const badBodyEncrypted = data.replace(/\n=([a-zA-Z0-9/+]{4})/, 'aaa\n=$1');
           for (let allow_streaming = 1; allow_streaming >= 0; allow_streaming--) {
-            openpgp.config.allow_unauthenticated_stream = !!allow_streaming;
-            if (openpgp.getWorker()) {
-              openpgp.getWorker().workers.forEach(worker => {
-                worker.postMessage({ event: 'configure', config: openpgp.config });
-              });
-            }
+            openpgp.config.allowUnauthenticatedStream = !!allow_streaming;
             await Promise.all([badSumEncrypted, badBodyEncrypted].map(async (encrypted, i) => {
               await Promise.all([
                 encrypted,
                 openpgp.stream.toStream(encrypted),
-                new ReadableStream({
+                new openpgp.stream.ReadableStream({
                   start() {
                     this.remaining = encrypted.split('\n');
                   },
@@ -1770,7 +1685,7 @@ describe('OpenPGP.js public api tests', function() {
               ].map(async (encrypted, j) => {
                 let stepReached = 0;
                 try {
-                  const message = await openpgp.message.readArmored(encrypted);
+                  const message = await openpgp.readArmoredMessage(encrypted);
                   stepReached = 1;
                   const { data: decrypted } = await openpgp.decrypt({ message: message, privateKeys: [key] });
                   stepReached = 2;
@@ -1779,7 +1694,7 @@ describe('OpenPGP.js public api tests', function() {
                   expect(e.message).to.match(/Ascii armor integrity check on message failed/);
                   expect(stepReached).to.equal(
                     j === 0 ? 0 :
-                      (openpgp.config.aead_chunk_size_byte === 0 && (j === 2 || openpgp.util.detectNode() || openpgp.util.getHardwareConcurrency() < 8)) || (!openpgp.config.aead_protect && openpgp.config.allow_unauthenticated_stream) ? 2 :
+                      (openpgp.config.aeadChunkSizeByte === 0 && (j === 2 || util.detectNode() || util.getHardwareConcurrency() < 8)) || (!openpgp.config.aeadProtect && openpgp.config.allowUnauthenticatedStream) ? 2 :
                       1
                   );
                   return;
@@ -1789,24 +1704,33 @@ describe('OpenPGP.js public api tests', function() {
             }));
           }
         });
+
+        it('should fail to decrypt unarmored message with garbage data appended', async function() {
+          const { key } = await openpgp.generateKey({ userIds: {} });
+          const message = await openpgp.encrypt({ message: openpgp.Message.fromText('test'), publicKeys: key, privateKeys: key, armor: false });
+          const encrypted = util.concat([message, new Uint8Array([11])]);
+          await expect(
+            openpgp.decrypt({ message: await openpgp.readMessage(encrypted), privateKeys: key, publicKeys: key })
+          ).to.be.rejectedWith('Error during parsing. This message / key probably does not conform to a valid OpenPGP format.');
+        });
       });
 
       describe('ELG / DSA encrypt, decrypt, sign, verify', function() {
 
         it('round trip test', async function () {
-          const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
-          const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+          const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
+          const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
           await privKeyDE.decrypt(passphrase);
           pubKeyDE.users[0].selfCertifications[0].features = [7]; // Monkey-patch AEAD feature flag
           return openpgp.encrypt({
             publicKeys: pubKeyDE,
             privateKeys: privKeyDE,
-            message: openpgp.message.fromText(plaintext)
+            message: openpgp.Message.fromText(plaintext)
           }).then(async function (encrypted) {
             return openpgp.decrypt({
               privateKeys: privKeyDE,
               publicKeys: pubKeyDE,
-              message: await openpgp.message.readArmored(encrypted.data)
+              message: await openpgp.readArmoredMessage(encrypted)
             });
           }).then(async function (decrypted) {
             expect(decrypted.data).to.exist;
@@ -1872,9 +1796,9 @@ describe('OpenPGP.js public api tests', function() {
             '-----END PGP PRIVATE KEY BLOCK-----'].join('\n');
 
         it('Decrypt message', async function() {
-          const privKey = (await openpgp.key.readArmored(priv_key)).keys[0];
+          const privKey = await openpgp.readArmoredKey(priv_key);
           await privKey.decrypt('1234');
-          const message = await openpgp.message.readArmored(pgp_msg);
+          const message = await openpgp.readArmoredMessage(pgp_msg);
 
           return openpgp.decrypt({ privateKeys:privKey, message:message }).then(function(decrypted) {
             expect(decrypted.data).to.equal('hello 3des\n');
@@ -1887,14 +1811,14 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt and decrypt with one password', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             passwords: password1
           };
           const decOpt = {
             passwords: password1
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1904,14 +1828,14 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt and decrypt with two passwords', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             passwords: [password1, password2]
           };
           const decOpt = {
             passwords: password2
           };
           return openpgp.encrypt(encOpt).then(async function (encrypted) {
-            decOpt.message = await openpgp.message.readArmored(encrypted.data);
+            decOpt.message = await openpgp.readArmoredMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1921,15 +1845,15 @@ describe('OpenPGP.js public api tests', function() {
 
         it('should encrypt and decrypt with password and not ascii armor', function () {
           const encOpt = {
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             passwords: password1,
             armor: false
           };
           const decOpt = {
             passwords: password1
           };
-          return openpgp.encrypt(encOpt).then(function (encrypted) {
-            decOpt.message = encrypted.message;
+          return openpgp.encrypt(encOpt).then(async function (encrypted) {
+            decOpt.message = await openpgp.readMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
             expect(decrypted.data).to.equal(plaintext);
@@ -1937,10 +1861,9 @@ describe('OpenPGP.js public api tests', function() {
           });
         });
 
-        it('should encrypt and decrypt with binary data and transferable objects', function () {
-          openpgp.config.zero_copy = true; // activate transferable objects
+        it('should encrypt and decrypt with binary data', function () {
           const encOpt = {
-            message: openpgp.message.fromBinary(new Uint8Array([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])),
+            message: openpgp.Message.fromBinary(new Uint8Array([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01])),
             passwords: password1,
             armor: false
           };
@@ -1948,17 +1871,10 @@ describe('OpenPGP.js public api tests', function() {
             passwords: password1,
             format: 'binary'
           };
-          return openpgp.encrypt(encOpt).then(function (encrypted) {
-            decOpt.message = encrypted.message;
+          return openpgp.encrypt(encOpt).then(async function (encrypted) {
+            decOpt.message = await openpgp.readMessage(encrypted);
             return openpgp.decrypt(decOpt);
           }).then(function (decrypted) {
-            if (openpgp.getWorker()) {
-              if (navigator.userAgent.indexOf('Safari') !== -1 && (navigator.userAgent.indexOf('Version/11.1') !== -1 || (navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1] < 56)) {
-                expect(encOpt.message.packets[0].data.byteLength).to.equal(8); // browser doesn't support transfering buffers
-              } else {
-                expect(encOpt.message.packets[0].data.byteLength).to.equal(0); // transferred buffer should be empty
-              }
-            }
             expect(decrypted.data).to.deep.equal(new Uint8Array([0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01]));
             expect(decrypted.signatures.length).to.equal(0);
           });
@@ -1969,14 +1885,14 @@ describe('OpenPGP.js public api tests', function() {
         withCompression(function (modifyCompressionEncryptOptions, verifyCompressionDecrypted) {
           it('should encrypt and decrypt with one password', function () {
             const encOpt = modifyCompressionEncryptOptions({
-              message: openpgp.message.fromText(plaintext),
+              message: openpgp.Message.fromText(plaintext),
               passwords: password1
             });
             const decOpt = {
               passwords: password1
             };
             return openpgp.encrypt(encOpt).then(async function (encrypted) {
-              decOpt.message = await openpgp.message.readArmored(encrypted.data);
+              decOpt.message = await openpgp.readArmoredMessage(encrypted);
               return openpgp.decrypt(decOpt);
             }).then(function (decrypted) {
               expect(decrypted.data).to.equal(plaintext);
@@ -1988,10 +1904,12 @@ describe('OpenPGP.js public api tests', function() {
           it('Streaming encrypt and decrypt small message roundtrip', async function() {
             let plaintext = [];
             let i = 0;
+            const useNativeStream = (() => { try { new global.ReadableStream(); return true; } catch (e) { return false; } })();
+            const ReadableStream = useNativeStream ? global.ReadableStream : openpgp.stream.ReadableStream;
             const data = new ReadableStream({
               async pull(controller) {
                 if (i++ < 4) {
-                  let randomBytes = await openpgp.crypto.random.getRandomBytes(10);
+                  let randomBytes = await random.getRandomBytes(10);
                   controller.enqueue(randomBytes);
                   plaintext.push(randomBytes.slice());
                 } else {
@@ -2000,19 +1918,19 @@ describe('OpenPGP.js public api tests', function() {
               }
             });
             const encrypted = await openpgp.encrypt(modifyCompressionEncryptOptions({
-              message: openpgp.message.fromBinary(data),
-              passwords: ['test'],
+              message: openpgp.Message.fromBinary(data),
+              passwords: ['test']
             }));
+            expect(openpgp.stream.isStream(encrypted)).to.equal(useNativeStream ? 'web' : 'ponyfill');
 
-            const msgAsciiArmored = encrypted.data;
-            const message = await openpgp.message.readArmored(msgAsciiArmored);
+            const message = await openpgp.readArmoredMessage(encrypted);
             const decrypted = await openpgp.decrypt({
               passwords: ['test'],
               message,
               format: 'binary'
             });
-            expect(openpgp.util.isStream(decrypted.data)).to.equal('web');
-            expect(await openpgp.stream.readToEnd(decrypted.data)).to.deep.equal(openpgp.util.concatUint8Array(plaintext));
+            expect(openpgp.stream.isStream(decrypted.data)).to.equal(useNativeStream ? 'web' : 'ponyfill');
+            expect(await openpgp.stream.readToEnd(decrypted.data)).to.deep.equal(util.concatUint8Array(plaintext));
           });
         });
       });
@@ -2035,55 +1953,55 @@ describe('OpenPGP.js public api tests', function() {
       let decryptedPrivateKey;
       beforeEach(async function() {
         if (!decryptedPrivateKey) {
-          expect(await privateKey.keys[0].decrypt(passphrase)).to.be.true;
+          await privateKey.decrypt(passphrase);
           decryptedPrivateKey = privateKey;
         }
         privateKey = decryptedPrivateKey;
       });
 
-      it('should sign and verify cleartext data', function () {
-        const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and verify cleartext message', function () {
+        const message = openpgp.CleartextMessage.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: privateKey.keys
+          privateKeys: privateKey
         };
         const verifyOpt = {
-          publicKeys: publicKey.keys
+          publicKeys: publicKey
         };
         return openpgp.sign(signOpt).then(async function (signed) {
-          expect(signed.data).to.match(/-----BEGIN PGP SIGNED MESSAGE-----/);
-          verifyOpt.message = await openpgp.cleartext.readArmored(signed.data);
+          expect(signed).to.match(/-----BEGIN PGP SIGNED MESSAGE-----/);
+          verifyOpt.message = await openpgp.readArmoredCleartextMessage(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
           expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
           expect(verified.signatures[0].valid).to.be.true;
-          const signingKey = await privateKey.keys[0].getSigningKey();
+          const signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
         });
       });
 
-      it('should sign and verify cleartext data with multiple private keys', async function () {
-        const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+      it('should sign and verify cleartext message with multiple private keys', async function () {
+        const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
         await privKeyDE.decrypt(passphrase);
 
-        const message = openpgp.cleartext.fromText(plaintext);
+        const message = openpgp.CleartextMessage.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: [privateKey.keys[0], privKeyDE]
+          privateKeys: [privateKey, privKeyDE]
         };
         const verifyOpt = {
-          publicKeys: [publicKey.keys[0], privKeyDE.toPublic()]
+          publicKeys: [publicKey, privKeyDE.toPublic()]
         };
         return openpgp.sign(signOpt).then(async function (signed) {
-          expect(signed.data).to.match(/-----BEGIN PGP SIGNED MESSAGE-----/);
-          verifyOpt.message = await openpgp.cleartext.readArmored(signed.data);
+          expect(signed).to.match(/-----BEGIN PGP SIGNED MESSAGE-----/);
+          verifyOpt.message = await openpgp.readArmoredCleartextMessage(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
           let signingKey;
           expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
           expect(verified.signatures[0].valid).to.be.true;
-          signingKey = await privateKey.keys[0].getSigningKey();
+          signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
           expect(verified.signatures[1].valid).to.be.true;
@@ -2093,144 +2011,144 @@ describe('OpenPGP.js public api tests', function() {
         });
       });
 
-      it('should sign and verify cleartext data with detached signatures', function () {
-        const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and verify data with detached signatures', function () {
+        const message = openpgp.Message.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: privateKey.keys,
+          privateKeys: privateKey,
           detached: true
         };
         const verifyOpt = {
           message,
-          publicKeys: publicKey.keys
+          publicKeys: publicKey
         };
         return openpgp.sign(signOpt).then(async function (signed) {
-          verifyOpt.signature = await openpgp.signature.readArmored(signed.signature);
+          verifyOpt.signature = await openpgp.readArmoredSignature(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
-          expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
+          expect(verified.data).to.equal(plaintext);
           expect(verified.signatures[0].valid).to.be.true;
-          const signingKey = await privateKey.keys[0].getSigningKey();
+          const signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
         });
       });
 
-      it('should sign and fail to verify cleartext data with wrong public pgp key', async function () {
-        const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and fail to verify cleartext message with wrong public pgp key', async function () {
+        const message = openpgp.CleartextMessage.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: privateKey.keys
+          privateKeys: privateKey
         };
         const verifyOpt = {
-          publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
+          publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
         };
         return openpgp.sign(signOpt).then(async function (signed) {
-          verifyOpt.message = await openpgp.cleartext.readArmored(signed.data);
+          verifyOpt.message = await openpgp.readArmoredCleartextMessage(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
           expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
           expect(verified.signatures[0].valid).to.be.null;
-          const signingKey = await privateKey.keys[0].getSigningKey();
+          const signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
         });
       });
 
-      it('should sign and fail to verify cleartext data with wrong public pgp key with detached signature', async function () {
-        const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and fail to verify data with wrong public pgp key with detached signature', async function () {
+        const message = openpgp.Message.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: privateKey.keys,
+          privateKeys: privateKey,
           detached: true
         };
         const verifyOpt = {
           message,
-          publicKeys: (await openpgp.key.readArmored(wrong_pubkey)).keys
+          publicKeys: await openpgp.readArmoredKey(wrong_pubkey)
         };
         return openpgp.sign(signOpt).then(async function (signed) {
-          verifyOpt.signature = await openpgp.signature.readArmored(signed.signature);
+          verifyOpt.signature = await openpgp.readArmoredSignature(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
-          expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
+          expect(verified.data).to.equal(plaintext);
           expect(verified.signatures[0].valid).to.be.null;
-          const signingKey = await privateKey.keys[0].getSigningKey();
+          const signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
         });
       });
 
-      it('should sign and verify cleartext data and not armor', function () {
-        const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and verify data and not armor', function () {
+        const message = openpgp.Message.fromText(plaintext);
         const signOpt = {
           message,
-          privateKeys: privateKey.keys,
+          privateKeys: privateKey,
           armor: false
         };
         const verifyOpt = {
-          publicKeys: publicKey.keys
+          publicKeys: publicKey
         };
-        return openpgp.sign(signOpt).then(function (signed) {
-          verifyOpt.message = signed.message;
+        return openpgp.sign(signOpt).then(async function (signed) {
+          verifyOpt.message = await openpgp.readMessage(signed);
           return openpgp.verify(verifyOpt);
         }).then(async function (verified) {
-          expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
+          expect(verified.data).to.equal(plaintext);
           expect(verified.signatures[0].valid).to.be.true;
-          const signingKey = await privateKey.keys[0].getSigningKey();
+          const signingKey = await privateKey.getSigningKey();
           expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
           expect(verified.signatures[0].signature.packets.length).to.equal(1);
         });
       });
 
-      it('should sign and verify cleartext data and not armor with detached signatures', function () {
-          const start = openpgp.util.normalizeDate();
-          const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and verify data and not armor with detached signatures', function () {
+          const start = util.normalizeDate();
+          const message = openpgp.Message.fromText(plaintext);
           const signOpt = {
               message,
-              privateKeys: privateKey.keys,
+              privateKeys: privateKey,
               detached: true,
               armor: false
           };
           const verifyOpt = {
               message,
-              publicKeys: publicKey.keys
+              publicKeys: publicKey
           };
-          return openpgp.sign(signOpt).then(function (signed) {
-              verifyOpt.signature = signed.signature;
+          return openpgp.sign(signOpt).then(async function (signed) {
+              verifyOpt.signature = await openpgp.readSignature(signed);
               return openpgp.verify(verifyOpt);
           }).then(async function (verified) {
-              expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
-              expect(+verified.signatures[0].signature.packets[0].created).to.be.lte(+openpgp.util.normalizeDate());
+              expect(verified.data).to.equal(plaintext);
+              expect(+verified.signatures[0].signature.packets[0].created).to.be.lte(+util.normalizeDate());
               expect(+verified.signatures[0].signature.packets[0].created).to.be.gte(+start);
               expect(verified.signatures[0].valid).to.be.true;
-              const signingKey = await privateKey.keys[0].getSigningKey();
+              const signingKey = await privateKey.getSigningKey();
               expect(verified.signatures[0].keyid.toHex()).to.equal(signingKey.getKeyId().toHex());
               expect(verified.signatures[0].signature.packets.length).to.equal(1);
           });
       });
 
-      it('should sign and verify cleartext data with a date in the past', function () {
-          const message = openpgp.cleartext.fromText(plaintext);
+      it('should sign and verify data with a date in the past', function () {
+          const message = openpgp.Message.fromText(plaintext);
           const past = new Date(2000);
           const signOpt = {
               message,
-              privateKeys: privateKey_1337.keys,
+              privateKeys: privateKey_1337,
               detached: true,
               date: past,
               armor: false
           };
           const verifyOpt = {
               message,
-              publicKeys: publicKey_1337.keys,
+              publicKeys: publicKey_1337,
               date: past
           };
-          return openpgp.sign(signOpt).then(function (signed) {
-              verifyOpt.signature = signed.signature;
+          return openpgp.sign(signOpt).then(async function (signed) {
+              verifyOpt.signature = await openpgp.readSignature(signed);
               return openpgp.verify(verifyOpt).then(async function (verified) {
                 expect(+verified.signatures[0].signature.packets[0].created).to.equal(+past);
-                expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
+                expect(verified.data).to.equal(plaintext);
                 expect(verified.signatures[0].valid).to.be.true;
-                expect(await signOpt.privateKeys[0].getSigningKey(verified.signatures[0].keyid, past))
+                expect(await privateKey_1337.getSigningKey(verified.signatures[0].keyid, past))
                     .to.be.not.null;
                 expect(verified.signatures[0].signature.packets.length).to.equal(1);
                 // now check with expiration checking disabled
@@ -2238,9 +2156,9 @@ describe('OpenPGP.js public api tests', function() {
                 return openpgp.verify(verifyOpt);
               }).then(async function (verified) {
                 expect(+verified.signatures[0].signature.packets[0].created).to.equal(+past);
-                expect(verified.data).to.equal(plaintext.replace(/[ \t]+$/mg, ''));
+                expect(verified.data).to.equal(plaintext);
                 expect(verified.signatures[0].valid).to.be.true;
-                expect(await signOpt.privateKeys[0].getSigningKey(verified.signatures[0].keyid, null))
+                expect(await privateKey_1337.getSigningKey(verified.signatures[0].keyid, null))
                     .to.be.not.null;
                 expect(verified.signatures[0].signature.packets.length).to.equal(1);
               });
@@ -2251,25 +2169,26 @@ describe('OpenPGP.js public api tests', function() {
           const future = new Date(2040, 5, 5, 5, 5, 5, 0);
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const signOpt = {
-            message: openpgp.message.fromBinary(data),
-            privateKeys: privateKey_2038_2045.keys,
+            message: openpgp.Message.fromBinary(data),
+            privateKeys: privateKey_2038_2045,
             detached: true,
             date: future,
             armor: false
           };
           const verifyOpt = {
-            publicKeys: publicKey_2038_2045.keys,
-            date: future
+            publicKeys: publicKey_2038_2045,
+            date: future,
+            format: 'binary'
           };
-          return openpgp.sign(signOpt).then(function (signed) {
-            verifyOpt.message = openpgp.message.fromBinary(data);
-            verifyOpt.signature = signed.signature;
+          return openpgp.sign(signOpt).then(async function (signed) {
+            verifyOpt.message = openpgp.Message.fromBinary(data);
+            verifyOpt.signature = await openpgp.readSignature(signed);
             return openpgp.verify(verifyOpt);
           }).then(async function (verified) {
             expect(+verified.signatures[0].signature.packets[0].created).to.equal(+future);
             expect([].slice.call(verified.data)).to.deep.equal([].slice.call(data));
             expect(verified.signatures[0].valid).to.be.true;
-            expect(await signOpt.privateKeys[0].getSigningKey(verified.signatures[0].keyid, future))
+            expect(await privateKey_2038_2045.getSigningKey(verified.signatures[0].keyid, future))
                 .to.be.not.null;
             expect(verified.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -2278,23 +2197,26 @@ describe('OpenPGP.js public api tests', function() {
       it('should sign and verify binary data without one-pass signature', function () {
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const signOpt = {
-            message: openpgp.message.fromBinary(data),
-            privateKeys: privateKey.keys,
+            message: openpgp.Message.fromBinary(data),
+            privateKeys: privateKey,
             armor: false
           };
           const verifyOpt = {
-            publicKeys: publicKey.keys
+            publicKeys: publicKey,
+            format: 'binary'
           };
-          return openpgp.sign(signOpt).then(function (signed) {
-            const packets = new openpgp.packet.List();
-            packets.push(signed.message.packets.findPacket(openpgp.enums.packet.signature));
-            packets.push(signed.message.packets.findPacket(openpgp.enums.packet.literal));
-            verifyOpt.message = new openpgp.message.Message(packets);
+          return openpgp.sign(signOpt).then(async function (signed) {
+            const message = await openpgp.readMessage(signed);
+            message.packets.concat(await openpgp.stream.readToEnd(message.packets.stream, _ => _));
+            const packets = new openpgp.PacketList();
+            packets.push(message.packets.findPacket(openpgp.enums.packet.signature));
+            packets.push(message.packets.findPacket(openpgp.enums.packet.literalData));
+            verifyOpt.message = new openpgp.Message(packets);
             return openpgp.verify(verifyOpt);
           }).then(async function (verified) {
             expect([].slice.call(verified.data)).to.deep.equal([].slice.call(data));
             expect(verified.signatures[0].valid).to.be.true;
-            expect(await signOpt.privateKeys[0].getSigningKey(verified.signatures[0].keyid))
+            expect(await privateKey.getSigningKey(verified.signatures[0].keyid))
                 .to.be.not.null;
             expect(verified.signatures[0].signature.packets.length).to.equal(1);
           });
@@ -2303,49 +2225,50 @@ describe('OpenPGP.js public api tests', function() {
       it('should streaming sign and verify binary data without one-pass signature', function () {
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const signOpt = {
-            message: openpgp.message.fromBinary(data),
-            privateKeys: privateKey.keys,
+            message: openpgp.Message.fromBinary(data),
+            privateKeys: privateKey,
             armor: false,
             streaming: 'web'
           };
           const verifyOpt = {
-            publicKeys: publicKey.keys,
-            streaming: 'web'
+            publicKeys: publicKey,
+            streaming: 'web',
+            format: 'binary'
           };
-          return openpgp.sign(signOpt).then(function (signed) {
-            const packets = new openpgp.packet.List();
-            packets.push(signed.message.packets.findPacket(openpgp.enums.packet.signature));
-            packets.push(signed.message.packets.findPacket(openpgp.enums.packet.literal));
-            verifyOpt.message = new openpgp.message.Message(packets);
+          const useNativeStream = (() => { try { new global.ReadableStream(); return true; } catch (e) { return false; } })();
+          return openpgp.sign(signOpt).then(async function (signed) {
+            expect(openpgp.stream.isStream(signed)).to.equal(useNativeStream ? 'web' : 'ponyfill');
+            const message = await openpgp.readMessage(signed);
+            message.packets.concat(await openpgp.stream.readToEnd(message.packets.stream, _ => _));
+            const packets = new openpgp.PacketList();
+            packets.push(message.packets.findPacket(openpgp.enums.packet.signature));
+            packets.push(message.packets.findPacket(openpgp.enums.packet.literalData));
+            verifyOpt.message = new openpgp.Message(packets);
             return openpgp.verify(verifyOpt);
           }).then(async function (verified) {
-            expect(openpgp.stream.isStream(verified.data)).to.equal('web');
+            expect(openpgp.stream.isStream(verified.data)).to.equal(useNativeStream ? 'web' : 'ponyfill');
             expect([].slice.call(await openpgp.stream.readToEnd(verified.data))).to.deep.equal([].slice.call(data));
             expect(await verified.signatures[0].verified).to.be.true;
-            expect(await signOpt.privateKeys[0].getSigningKey(verified.signatures[0].keyid))
+            expect(await privateKey.getSigningKey(verified.signatures[0].keyid))
                 .to.be.not.null;
             expect((await verified.signatures[0].signature).packets.length).to.equal(1);
           });
       });
 
-      it('should encrypt and decrypt cleartext data with a date in the future', function () {
+      it('should encrypt and decrypt data with a date in the future', function () {
           const future = new Date(2040, 5, 5, 5, 5, 5, 0);
           const encryptOpt = {
-              message: openpgp.message.fromText(plaintext, undefined, future),
-              publicKeys: publicKey_2038_2045.keys,
+              message: openpgp.Message.fromText(plaintext, undefined, future),
+              publicKeys: publicKey_2038_2045,
               date: future,
               armor: false
           };
-          const decryptOpt = {
-              privateKeys: privateKey_2038_2045.keys,
-              date: future
-          };
 
-          return openpgp.encrypt(encryptOpt).then(function (encrypted) {
-              decryptOpt.message = encrypted.message;
-              return encrypted.message.decrypt(decryptOpt.privateKeys);
+          return openpgp.encrypt(encryptOpt).then(async function (encrypted) {
+              const message = await openpgp.readMessage(encrypted);
+              return message.decrypt([privateKey_2038_2045]);
           }).then(async function (packets) {
-              const literals = packets.packets.filterByTag(openpgp.enums.packet.literal);
+              const literals = packets.packets.filterByTag(openpgp.enums.packet.literalData);
               expect(literals.length).to.equal(1);
               expect(+literals[0].date).to.equal(+future);
               expect(await openpgp.stream.readToEnd(packets.getText())).to.equal(plaintext);
@@ -2356,48 +2279,45 @@ describe('OpenPGP.js public api tests', function() {
           const past = new Date(2005, 5, 5, 5, 5, 5, 0);
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const encryptOpt = {
-              message: openpgp.message.fromBinary(data, undefined, past),
-              publicKeys: publicKey_2000_2008.keys,
+              message: openpgp.Message.fromBinary(data, undefined, past),
+              publicKeys: publicKey_2000_2008,
               date: past,
               armor: false
           };
-          const decryptOpt = {
-              privateKeys: privateKey_2000_2008.keys,
-              date: past
-          };
 
-          return openpgp.encrypt(encryptOpt).then(function (encrypted) {
-              decryptOpt.message = encrypted.message;
-              return encrypted.message.decrypt(decryptOpt.privateKeys);
+          return openpgp.encrypt(encryptOpt).then(async function (encrypted) {
+              const message = await openpgp.readMessage(encrypted);
+              return message.decrypt([privateKey_2000_2008]);
           }).then(async function (packets) {
-              const literals = packets.packets.filterByTag(openpgp.enums.packet.literal);
+              const literals = packets.packets.filterByTag(openpgp.enums.packet.literalData);
               expect(literals.length).to.equal(1);
               expect(+literals[0].date).to.equal(+past);
               expect(await openpgp.stream.readToEnd(packets.getLiteralData())).to.deep.equal(data);
           });
       });
 
-      it('should sign, encrypt and decrypt, verify cleartext data with a date in the past', function () {
+      it('should sign, encrypt and decrypt, verify data with a date in the past', function () {
           const past = new Date(2005, 5, 5, 5, 5, 5, 0);
           const encryptOpt = {
-              message: openpgp.message.fromText(plaintext, undefined, past),
-              publicKeys: publicKey_2000_2008.keys,
-              privateKeys: privateKey_2000_2008.keys,
+              message: openpgp.Message.fromText(plaintext, undefined, past),
+              publicKeys: publicKey_2000_2008,
+              privateKeys: privateKey_2000_2008,
               date: past,
               armor: false
           };
 
-          return openpgp.encrypt(encryptOpt).then(function (encrypted) {
-              return encrypted.message.decrypt(encryptOpt.privateKeys);
-          }).then(async function (packets) {
-              const literals = packets.packets.filterByTag(openpgp.enums.packet.literal);
+          return openpgp.encrypt(encryptOpt).then(async function (encrypted) {
+              const message = await openpgp.readMessage(encrypted);
+              return message.decrypt([privateKey_2000_2008]);
+          }).then(async function (message) {
+              const literals = message.packets.filterByTag(openpgp.enums.packet.literalData);
               expect(literals.length).to.equal(1);
               expect(+literals[0].date).to.equal(+past);
-              const signatures = await packets.verify(encryptOpt.publicKeys, past);
-              expect(await openpgp.stream.readToEnd(packets.getText())).to.equal(plaintext);
+              const signatures = await message.verify([publicKey_2000_2008], past);
+              expect(await openpgp.stream.readToEnd(message.getText())).to.equal(plaintext);
               expect(+(await signatures[0].signature).packets[0].created).to.equal(+past);
               expect(await signatures[0].verified).to.be.true;
-              expect(await encryptOpt.privateKeys[0].getSigningKey(signatures[0].keyid, past))
+              expect(await privateKey_2000_2008.getSigningKey(signatures[0].keyid, past))
                   .to.be.not.null;
               expect((await signatures[0].signature).packets.length).to.equal(1);
           });
@@ -2407,25 +2327,26 @@ describe('OpenPGP.js public api tests', function() {
           const future = new Date(2040, 5, 5, 5, 5, 5, 0);
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const encryptOpt = {
-              message: openpgp.message.fromBinary(data, undefined, future),
-              publicKeys: publicKey_2038_2045.keys,
-              privateKeys: privateKey_2038_2045.keys,
+              message: openpgp.Message.fromBinary(data, undefined, future),
+              publicKeys: publicKey_2038_2045,
+              privateKeys: privateKey_2038_2045,
               date: future,
               armor: false
           };
 
-          return openpgp.encrypt(encryptOpt).then(function (encrypted) {
-              return encrypted.message.decrypt(encryptOpt.privateKeys);
-          }).then(async function (packets) {
-              const literals = packets.packets.filterByTag(openpgp.enums.packet.literal);
+          return openpgp.encrypt(encryptOpt).then(async function (encrypted) {
+              const message = await openpgp.readMessage(encrypted);
+              return message.decrypt([privateKey_2038_2045]);
+          }).then(async function (message) {
+              const literals = message.packets.filterByTag(openpgp.enums.packet.literalData);
               expect(literals.length).to.equal(1);
               expect(literals[0].format).to.equal('binary');
               expect(+literals[0].date).to.equal(+future);
-              const signatures = await packets.verify(encryptOpt.publicKeys, future);
-              expect(await openpgp.stream.readToEnd(packets.getLiteralData())).to.deep.equal(data);
+              const signatures = await message.verify([publicKey_2038_2045], future);
+              expect(await openpgp.stream.readToEnd(message.getLiteralData())).to.deep.equal(data);
               expect(+(await signatures[0].signature).packets[0].created).to.equal(+future);
               expect(await signatures[0].verified).to.be.true;
-              expect(await encryptOpt.privateKeys[0].getSigningKey(signatures[0].keyid, future))
+              expect(await privateKey_2038_2045.getSigningKey(signatures[0].keyid, future))
                   .to.be.not.null;
               expect((await signatures[0].signature).packets.length).to.equal(1);
           });
@@ -2435,25 +2356,26 @@ describe('OpenPGP.js public api tests', function() {
           const future = new Date(2040, 5, 5, 5, 5, 5, 0);
           const data = new Uint8Array([3, 14, 15, 92, 65, 35, 59]);
           const encryptOpt = {
-              message: openpgp.message.fromBinary(data, undefined, future, 'mime'),
-              publicKeys: publicKey_2038_2045.keys,
-              privateKeys: privateKey_2038_2045.keys,
+              message: openpgp.Message.fromBinary(data, undefined, future, 'mime'),
+              publicKeys: publicKey_2038_2045,
+              privateKeys: privateKey_2038_2045,
               date: future,
               armor: false
           };
 
-          return openpgp.encrypt(encryptOpt).then(function (encrypted) {
-              return encrypted.message.decrypt(encryptOpt.privateKeys);
-          }).then(async function (packets) {
-              const literals = packets.packets.filterByTag(openpgp.enums.packet.literal);
+          return openpgp.encrypt(encryptOpt).then(async function (encrypted) {
+              const message = await openpgp.readMessage(encrypted);
+              return message.decrypt([privateKey_2038_2045]);
+          }).then(async function (message) {
+              const literals = message.packets.filterByTag(openpgp.enums.packet.literalData);
               expect(literals.length).to.equal(1);
               expect(literals[0].format).to.equal('mime');
               expect(+literals[0].date).to.equal(+future);
-              const signatures = await packets.verify(encryptOpt.publicKeys, future);
-              expect(await openpgp.stream.readToEnd(packets.getLiteralData())).to.deep.equal(data);
+              const signatures = await message.verify([publicKey_2038_2045], future);
+              expect(await openpgp.stream.readToEnd(message.getLiteralData())).to.deep.equal(data);
               expect(+(await signatures[0].signature).packets[0].created).to.equal(+future);
               expect(await signatures[0].verified).to.be.true;
-              expect(await encryptOpt.privateKeys[0].getSigningKey(signatures[0].keyid, future))
+              expect(await privateKey_2038_2045.getSigningKey(signatures[0].keyid, future))
                   .to.be.not.null;
               expect((await signatures[0].signature).packets.length).to.equal(1);
           });
@@ -2461,10 +2383,10 @@ describe('OpenPGP.js public api tests', function() {
 
       it('should fail to encrypt with revoked key', function() {
         return openpgp.revokeKey({
-          key: privateKey.keys[0]
+          key: privateKey
         }).then(function(revKey) {
           return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             publicKeys: revKey.publicKey
           }).then(function() {
             throw new Error('Should not encrypt with revoked key');
@@ -2475,13 +2397,13 @@ describe('OpenPGP.js public api tests', function() {
       });
 
       it('should fail to encrypt with revoked subkey', async function() {
-        const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
-        const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+        const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
+        const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
         await privKeyDE.decrypt(passphrase);
         return privKeyDE.subKeys[0].revoke(privKeyDE.primaryKey).then(function(revSubKey) {
           pubKeyDE.subKeys[0] = revSubKey;
           return openpgp.encrypt({
-            message: openpgp.message.fromText(plaintext),
+            message: openpgp.Message.fromText(plaintext),
             publicKeys: pubKeyDE
           }).then(function() {
             throw new Error('Should not encrypt with revoked subkey');
@@ -2492,16 +2414,16 @@ describe('OpenPGP.js public api tests', function() {
       });
 
       it('should decrypt with revoked subkey', async function() {
-        const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
-        const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+        const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
+        const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
         await privKeyDE.decrypt(passphrase);
         const encrypted = await openpgp.encrypt({
-          message: openpgp.message.fromText(plaintext),
+          message: openpgp.Message.fromText(plaintext),
           publicKeys: pubKeyDE
         });
         privKeyDE.subKeys[0] = await privKeyDE.subKeys[0].revoke(privKeyDE.primaryKey);
         const decOpt = {
-          message: await openpgp.message.readArmored(encrypted.data),
+          message: await openpgp.readArmoredMessage(encrypted),
           privateKeys: privKeyDE
         };
         const decrypted = await openpgp.decrypt(decOpt);
@@ -2509,18 +2431,18 @@ describe('OpenPGP.js public api tests', function() {
       });
 
       it('should not decrypt with corrupted subkey', async function() {
-        const pubKeyDE = (await openpgp.key.readArmored(pub_key_de)).keys[0];
-        const privKeyDE = (await openpgp.key.readArmored(priv_key_de)).keys[0];
+        const pubKeyDE = await openpgp.readArmoredKey(pub_key_de);
+        const privKeyDE = await openpgp.readArmoredKey(priv_key_de);
         // corrupt the public key params
-        privKeyDE.subKeys[0].keyPacket.params[0].data[0]++;
+        privKeyDE.subKeys[0].keyPacket.publicParams.p[0]++;
         // validation will not check the decryption subkey and will succeed
         await privKeyDE.decrypt(passphrase);
         const encrypted = await openpgp.encrypt({
-          message: openpgp.message.fromText(plaintext),
+          message: openpgp.Message.fromText(plaintext),
           publicKeys: pubKeyDE
         });
         const decOpt = {
-          message: await openpgp.message.readArmored(encrypted.data),
+          message: await openpgp.readArmoredMessage(encrypted),
           privateKeys: privKeyDE
         };
         // binding signature is invalid
@@ -2528,7 +2450,7 @@ describe('OpenPGP.js public api tests', function() {
       });
 
       it('RSA decryption with PKCS1 padding of wrong length should fail', async function() {
-        const key = (await openpgp.key.readArmored(rsaPrivateKeyPKCS1)).keys[0];
+        const key = await openpgp.readArmoredKey(rsaPrivateKeyPKCS1);
         // the paddings of these messages are prefixed by 0x02 and 0x000002 instead of 0x0002
         // the code should discriminate between these cases by checking the length of the padded plaintext
         const padding02 = `-----BEGIN PGP MESSAGE-----
@@ -2561,13 +2483,13 @@ J9I8AcH94nE77JUtCm7s1kOlo0EIshZsAqJwGveDGdAuabfViVwVxG4I24M6
 -----END PGP MESSAGE-----`;
 
         const decOpt02 = {
-          message: await openpgp.message.readArmored(padding02),
+          message: await openpgp.readArmoredMessage(padding02),
           privateKeys: key
         };
         await expect(openpgp.decrypt(decOpt02)).to.be.rejectedWith(/Decryption error/);
 
         const decOpt000002 = {
-          message: await openpgp.message.readArmored(padding000002),
+          message: await openpgp.readArmoredMessage(padding000002),
           privateKeys: key
         };
         await expect(openpgp.decrypt(decOpt000002)).to.be.rejectedWith(/Decryption error/);
@@ -2575,7 +2497,7 @@ J9I8AcH94nE77JUtCm7s1kOlo0EIshZsAqJwGveDGdAuabfViVwVxG4I24M6
 
       it('should decrypt with two passwords message which GPG fails on', async function() {
         const decOpt = {
-          message: await openpgp.message.readArmored(twoPasswordGPGFail),
+          message: await openpgp.readArmoredMessage(twoPasswordGPGFail),
           passwords: password2
         };
         return openpgp.decrypt(decOpt).then(function(decrypted) {
@@ -2585,59 +2507,33 @@ J9I8AcH94nE77JUtCm7s1kOlo0EIshZsAqJwGveDGdAuabfViVwVxG4I24M6
       });
 
       it('should decrypt with three passwords', async function() {
-        const messageBinary = openpgp.util.b64_to_Uint8Array('wy4ECQMIElIx/jiwJV9gp/MZ/ElZwUfHrzOBfOtM8VmgDy76F7eSGWH26tAlx3WI0kMBZv6Tlc1Y6baaZ6MEcOLTG/C7uzHH7KMfuQFd3fcMaVcDawk9EEy/CybiGBE+acT6id2pemHQy6Nk76d9UUTFubcB');
-        const message = await openpgp.message.read(messageBinary);
+        const messageBinary = util.hexToUint8Array('c32e04090308125231fe38b0255f60a7f319fc4959c147c7af33817ceb4cf159a00f2efa17b7921961f6ead025c77588d2430166fe9395cd58e9b69a67a30470e2d31bf0bbbb31c7eca31fb9015dddf70c6957036b093d104cbf0b26e218113e69c4fa89dda97a61d0cba364efa77d5144c5b9b701');
+        const message = await openpgp.readMessage(messageBinary);
         const passwords = ['Test', 'Pinata', 'a'];
         const decrypted = await openpgp.decrypt({ message, passwords });
         expect(decrypted.data).to.equal('Hello world');
       });
 
       it('should decrypt broken ECC message from old OpenPGP.js', async function() {
-        const { keys: [key] } = await openpgp.key.readArmored(ecdh_dec_key);
-        const message = await openpgp.message.readArmored(ecdh_msg_bad);
+        const key = await openpgp.readArmoredKey(ecdh_dec_key);
+        const message = await openpgp.readArmoredMessage(ecdh_msg_bad);
         await key.decrypt('12345');
         const decrypted = await openpgp.decrypt({ message, privateKeys: [key] });
         expect(decrypted.data).to.equal('\n');
       });
 
       it('should decrypt broken ECC message from old go crypto', async function() {
-        const { keys: [key] } = await openpgp.key.readArmored(ecdh_dec_key_2);
-        const message = await openpgp.message.readArmored(ecdh_msg_bad_2);
+        const key = await openpgp.readArmoredKey(ecdh_dec_key_2);
+        const message = await openpgp.readArmoredMessage(ecdh_msg_bad_2);
         await key.decrypt('12345');
         const decrypted = await openpgp.decrypt({ message, privateKeys: [key] });
         expect(decrypted.data).to.equal('Tesssst<br><br><br>Sent from ProtonMail mobile<br><br><br>');
       });
 
-      it('should decrypt broken Blowfish message from old OpenPGP.js', async function() {
-        openpgp.crypto.cipher.blowfish.blockSize = 16;
-        openpgp.crypto.cipher.blowfish.prototype.blockSize = 16;
-        const use_nativeVal = openpgp.config.use_native;
-        openpgp.config.use_native = false;
-        try {
-          const { data } = await openpgp.decrypt({
-            passwords: 'test',
-            message: await openpgp.message.readArmored(`-----BEGIN PGP MESSAGE-----
-Version: OpenPGP.js v4.8.1
-Comment: https://openpgpjs.org
-
-wx4EBAMI0eHVbTnl2iLg6pIJ4sWw2K7OwfxFP8bmaUvSRAGiSDGJSFNUuB4v
-SU69Z1XyXiuTpD3780FnLnR4dF41nhbrTXaDG+X1b3JsZCHTFMGF7Eb+YVhh
-YCXOZwd3z5lxcj/M
-=oXcN
------END PGP MESSAGE-----`)
-          });
-          expect(data).to.equal('Hello World!');
-        } finally {
-          openpgp.crypto.cipher.blowfish.blockSize = 8;
-          openpgp.crypto.cipher.blowfish.prototype.blockSize = 8;
-          openpgp.config.use_native = use_nativeVal;
-        }
-      });
-
-      it('should decrypt correct Blowfish message from new OpenPGP.js', async function() {
+      it('should decrypt Blowfish message', async function() {
         const { data } = await openpgp.decrypt({
           passwords: 'test',
-          message: await openpgp.message.readArmored(`-----BEGIN PGP MESSAGE-----
+          message: await openpgp.readArmoredMessage(`-----BEGIN PGP MESSAGE-----
 Version: OpenPGP.js v4.9.0
 Comment: https://openpgpjs.org
 
@@ -2651,26 +2547,38 @@ amnR6g==
       });
 
       it('should normalize newlines in encrypted text message', async function() {
-        const message = openpgp.message.fromText('"BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\r\nUID:123\r\nDTSTART:20191211T121212Z\r\nDTEND:20191212T121212Z\r\nEND:VEVENT\nEND:VCALENDAR"');
+        const message = openpgp.Message.fromText('"BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\r\nUID:123\r\nDTSTART:20191211T121212Z\r\nDTEND:20191212T121212Z\r\nEND:VEVENT\nEND:VCALENDAR"');
         const encrypted = await openpgp.encrypt({
           passwords: 'test',
           message
         });
         const decrypted = await openpgp.decrypt({
           passwords: 'test',
-          message: await openpgp.message.readArmored(encrypted.data),
+          message: await openpgp.readArmoredMessage(encrypted),
           format: 'binary'
         });
-        expect(openpgp.util.decode_utf8(decrypted.data)).to.equal('"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:123\r\nDTSTART:20191211T121212Z\r\nDTEND:20191212T121212Z\r\nEND:VEVENT\r\nEND:VCALENDAR"');
+        expect(util.decodeUtf8(decrypted.data)).to.equal('"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:123\r\nDTSTART:20191211T121212Z\r\nDTEND:20191212T121212Z\r\nEND:VEVENT\r\nEND:VCALENDAR"');
       });
+    });
 
+    describe('Sign and verify with each curve', function() {
+      const curves = ['secp256k1' , 'p256', 'p384', 'p521', 'curve25519', 'brainpoolP256r1', 'brainpoolP384r1', 'brainpoolP512r1'];
+      curves.forEach(curve => {
+        it(`sign/verify with ${curve}`, async function() {
+          const plaintext = 'short message';
+          const key = (await openpgp.generateKey({ curve, userIds: { name: 'Alice', email: 'info@alice.com' } })).key;
+          const signed = await openpgp.sign({ privateKeys:[key], message: openpgp.CleartextMessage.fromText(plaintext) });
+          const verified = await openpgp.verify({ publicKeys:[key], message: await openpgp.readArmoredCleartextMessage(signed) });
+          expect(verified.signatures[0].valid).to.be.true;
+        });
+      });
     });
 
     describe('Errors', function() {
 
       it('Error message should contain the original error message', function() {
         return openpgp.encrypt({
-          message: openpgp.message.fromBinary(new Uint8Array([0x01, 0x01, 0x01])),
+          message: openpgp.Message.fromBinary(new Uint8Array([0x01, 0x01, 0x01])),
           passwords: null
         }).then(function() {
           throw new Error('Error expected.');
@@ -2680,7 +2588,6 @@ amnR6g==
       });
 
     });
-
   });
 
 });

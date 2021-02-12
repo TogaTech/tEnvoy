@@ -17,7 +17,6 @@
 
 /**
  * @fileoverview Key encryption and decryption for RFC 6637 ECDH
- * @requires bn.js
  * @requires tweetnacl
  * @requires crypto/public_key/elliptic/curve
  * @requires crypto/aes_kw
@@ -30,15 +29,16 @@
  * @module crypto/public_key/elliptic/ecdh
  */
 
-import BN from 'bn.js';
 import nacl from 'tweetnacl/nacl-fast-light.js';
-import Curve, { jwkToRawPublic, rawPublicToJwk, privateToJwk, validateStandardParams } from './curves';
-import aes_kw from '../../aes_kw';
-import cipher from '../../cipher';
-import random from '../../random';
+import { Curve, jwkToRawPublic, rawPublicToJwk, privateToJwk, validateStandardParams } from './curves';
+import * as aes_kw from '../../aes_kw';
+import * as cipher from '../../cipher';
+import { getRandomBytes } from '../../random';
 import hash from '../../hash';
 import enums from '../../../enums';
 import util from '../../../util';
+import { b64ToUint8Array } from '../../../encoding/base64';
+import * as pkcs5 from '../../pkcs5';
 import { keyFromPublic, keyFromPrivate, getIndutnyCurve } from './indutnyKey';
 
 const webCrypto = util.getWebCrypto();
@@ -52,7 +52,7 @@ const nodeCrypto = util.getNodeCrypto();
  * @returns {Promise<Boolean>} whether params are valid
  * @async
  */
-async function validateParams(oid, Q, d) {
+export async function validateParams(oid, Q, d) {
   return validateStandardParams(enums.publicKey.ecdh, oid, Q, d);
 }
 
@@ -62,34 +62,9 @@ function buildEcdhParam(public_algo, oid, kdfParams, fingerprint) {
     oid.write(),
     new Uint8Array([public_algo]),
     kdfParams.write(),
-    util.str_to_Uint8Array("Anonymous Sender    "),
+    util.strToUint8Array("Anonymous Sender    "),
     fingerprint.subarray(0, 20)
   ]);
-}
-
-/**
- * Parses MPI params and returns them as byte arrays of fixed length
- * @param {Array} params key parameters
- * @returns {Object} parameters in the form
- *  { oid, kdfParams, d: Uint8Array, Q: Uint8Array }
- */
-function parseParams(params) {
-  if (params.length < 3 || params.length > 4) {
-    throw new Error('Unexpected number of parameters');
-  }
-
-  const oid = params[0];
-  const curve = new Curve(oid);
-  const parsedParams = { oid };
-  // The public point never has leading zeros, as it is prefixed by 0x40 or 0x04
-  parsedParams.Q = params[1].toUint8Array();
-  parsedParams.kdfParams = params[2];
-
-  if (params.length === 4) {
-    parsedParams.d = params[3].toUint8Array('be', curve.payloadSize);
-  }
-
-  return parsedParams;
 }
 
 // Key Derivation Function (RFC 6637)
@@ -127,7 +102,7 @@ async function kdf(hash_algo, X, length, param, stripLeading = false, stripTrail
 async function genPublicEphemeralKey(curve, Q) {
   switch (curve.type) {
     case 'curve25519': {
-      const d = await random.getRandomBytes(32);
+      const d = await getRandomBytes(32);
       const { secretKey, sharedKey } = await genPrivateEphemeralKey(curve, Q, null, d);
       let { publicKey } = nacl.box.keyPair.fromSecretKey(secretKey);
       publicKey = util.concatUint8Array([new Uint8Array([0x40]), publicKey]);
@@ -138,7 +113,7 @@ async function genPublicEphemeralKey(curve, Q) {
         try {
           return await webPublicEphemeralKey(curve, Q);
         } catch (err) {
-          util.print_debug_error(err);
+          util.printDebugError(err);
         }
       }
       break;
@@ -153,19 +128,21 @@ async function genPublicEphemeralKey(curve, Q) {
  *
  * @param  {module:type/oid}        oid          Elliptic curve object identifier
  * @param  {module:type/kdf_params} kdfParams    KDF params including cipher and algorithm to use
- * @param  {module:type/mpi}        m            Value derived from session key (RFC 6637)
+ * @param  {Uint8Array}             data         Unpadded session key data
  * @param  {Uint8Array}             Q            Recipient public key
  * @param  {Uint8Array}             fingerprint  Recipient fingerprint
  * @returns {Promise<{publicKey: Uint8Array, wrappedKey: Uint8Array}>}
  * @async
  */
-async function encrypt(oid, kdfParams, m, Q, fingerprint) {
+export async function encrypt(oid, kdfParams, data, Q, fingerprint) {
+  const m = pkcs5.encode(data);
+
   const curve = new Curve(oid);
   const { publicKey, sharedKey } = await genPublicEphemeralKey(curve, Q);
   const param = buildEcdhParam(enums.publicKey.ecdh, oid, kdfParams, fingerprint);
   const cipher_algo = enums.read(enums.symmetric, kdfParams.cipher);
   const Z = await kdf(kdfParams.hash, sharedKey, cipher[cipher_algo].keySize, param);
-  const wrappedKey = aes_kw.wrap(Z, m.toString());
+  const wrappedKey = aes_kw.wrap(Z, m);
   return { publicKey, wrappedKey };
 }
 
@@ -196,7 +173,7 @@ async function genPrivateEphemeralKey(curve, V, Q, d) {
         try {
           return await webPrivateEphemeralKey(curve, V, Q, d);
         } catch (err) {
-          util.print_debug_error(err);
+          util.printDebugError(err);
         }
       }
       break;
@@ -216,10 +193,10 @@ async function genPrivateEphemeralKey(curve, V, Q, d) {
  * @param  {Uint8Array}             Q            Recipient public key
  * @param  {Uint8Array}             d            Recipient private key
  * @param  {Uint8Array}             fingerprint  Recipient fingerprint
- * @returns {Promise<BN>}                        Value derived from session key
+ * @returns {Promise<Uint8Array>}   Value derived from session key
  * @async
  */
-async function decrypt(oid, kdfParams, V, C, Q, d, fingerprint) {
+export async function decrypt(oid, kdfParams, V, C, Q, d, fingerprint) {
   const curve = new Curve(oid);
   const { sharedKey } = await genPrivateEphemeralKey(curve, V, Q, d);
   const param = buildEcdhParam(enums.publicKey.ecdh, oid, kdfParams, fingerprint);
@@ -229,7 +206,7 @@ async function decrypt(oid, kdfParams, V, C, Q, d, fingerprint) {
     try {
       // Work around old go crypto bug and old OpenPGP.js bug, respectively.
       const Z = await kdf(kdfParams.hash, sharedKey, cipher[cipher_algo].keySize, param, i === 1, i === 2);
-      return new BN(aes_kw.unwrap(Z, C));
+      return pkcs5.decode(aes_kw.unwrap(Z, C));
     } catch (e) {
       err = e;
     }
@@ -286,7 +263,7 @@ async function webPrivateEphemeralKey(curve, V, Q, d) {
   );
   [S, secret] = await Promise.all([S, secret]);
   const sharedKey = new Uint8Array(S);
-  const secretKey = util.b64_to_Uint8Array(secret.d, true);
+  const secretKey = b64ToUint8Array(secret.d, true);
   return { secretKey, sharedKey };
 }
 
@@ -410,5 +387,3 @@ async function nodePublicEphemeralKey(curve, Q) {
   const publicKey = new Uint8Array(sender.getPublicKey());
   return { publicKey, sharedKey };
 }
-
-export default { encrypt, decrypt, genPublicEphemeralKey, genPrivateEphemeralKey, buildEcdhParam, kdf, webPublicEphemeralKey, webPrivateEphemeralKey, ellipticPublicEphemeralKey, ellipticPrivateEphemeralKey, nodePublicEphemeralKey, nodePrivateEphemeralKey, validateParams, parseParams };

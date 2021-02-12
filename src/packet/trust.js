@@ -1,3 +1,5 @@
+/* eslint class-methods-use-this: ["error", { "exceptMethods": ["read"] }] */
+
 /**
  * @requires enums
  */
@@ -19,17 +21,18 @@ import enums from '../enums';
  * transferred to other users, and they SHOULD be ignored on any input
  * other than local keyring files.
  * @memberof module:packet
- * @constructor
  */
-function Trust() {
-  this.tag = enums.packet.trust;
+class TrustPacket {
+  constructor() {
+    this.tag = enums.packet.trust;
+  }
+
+  /**
+   * Parsing function for a trust packet (tag 12).
+   * Currently not implemented as we ignore trust packets
+   * @param {String} byptes payload of a tag 12 packet
+   */
+  read() {} // TODO
 }
 
-/**
- * Parsing function for a trust packet (tag 12).
- * Currently not implemented as we ignore trust packets
- * @param {String} byptes payload of a tag 12 packet
- */
-Trust.prototype.read = function () {}; // TODO
-
-export default Trust;
+export default TrustPacket;

@@ -31,8 +31,8 @@ if (Buffer) {
     return new Uint8Array(b.buffer, b.byteOffset, b.byteLength);
   };
 } else {
-  encodeChunk = buf => btoa(util.Uint8Array_to_str(buf));
-  decodeChunk = str => util.str_to_Uint8Array(atob(str));
+  encodeChunk = buf => btoa(util.uint8ArrayToStr(buf));
+  decodeChunk = str => util.strToUint8Array(atob(str));
 }
 
 /**
@@ -41,7 +41,7 @@ if (Buffer) {
  * @returns {String | ReadableStream<String>} radix-64 version of input string
  * @static
  */
-function encode(data) {
+export function encode(data) {
   let buf = new Uint8Array();
   return stream.transform(data, value => {
     buf = util.concatUint8Array([buf, value]);
@@ -52,11 +52,11 @@ function encode(data) {
     const encoded = encodeChunk(buf.subarray(0, bytes));
     for (let i = 0; i < lines; i++) {
       r.push(encoded.substr(i * 60, 60));
-      r.push('\r\n');
+      r.push('\n');
     }
     buf = buf.subarray(bytes);
     return r.join('');
-  }, () => (buf.length ? encodeChunk(buf) + '\r\n' : ''));
+  }, () => (buf.length ? encodeChunk(buf) + '\n' : ''));
 }
 
 /**
@@ -65,7 +65,7 @@ function encode(data) {
  * @returns {Uint8Array | ReadableStream<Uint8Array>} binary array version of input string
  * @static
  */
-function decode(data) {
+export function decode(data) {
   let buf = '';
   return stream.transform(data, value => {
     buf += value;
@@ -93,4 +93,27 @@ function decode(data) {
   }, () => decodeChunk(buf));
 }
 
-export default { encode, decode };
+/**
+ * Convert a Base-64 encoded string an array of 8-bit integer
+ *
+ * Note: accepts both Radix-64 and URL-safe strings
+ * @param {String} base64 Base-64 encoded string to convert
+ * @returns {Uint8Array} An array of 8-bit integers
+ */
+export function b64ToUint8Array(base64) {
+  return decode(base64.replace(/-/g, '+').replace(/_/g, '/'));
+}
+
+/**
+ * Convert an array of 8-bit integer to a Base-64 encoded string
+ * @param {Uint8Array} bytes An array of 8-bit integers to convert
+ * @param {bool}       url   If true, output is URL-safe
+ * @returns {String}          Base-64 encoded string
+ */
+export function uint8ArrayToB64(bytes, url) {
+  let encoded = encode(bytes).replace(/[\r\n]/g, '');
+  if (url) {
+    encoded = encoded.replace(/[+]/g, '-').replace(/[/]/g, '_').replace(/[=]/g, '');
+  }
+  return encoded;
+}

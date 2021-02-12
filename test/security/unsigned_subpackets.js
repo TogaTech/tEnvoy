@@ -1,6 +1,6 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
 
-const { key, message, enums, packet: { List, Signature } } = openpgp;
+const { readArmoredKey, Key, message, enums, PacketList, SignaturePacket } = openpgp;
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -49,7 +49,7 @@ Dc2vwS83Aja9iWrIEg==
 -----END PGP PRIVATE KEY BLOCK-----`;
 
 async function getInvalidKey() {
-  return (await key.readArmored(INVALID_KEY)).keys[0];
+  return await readArmoredKey(INVALID_KEY);
 }
 async function makeKeyValid() {
   /**
@@ -70,26 +70,25 @@ async function makeKeyValid() {
   // deconstruct invalid key
   const [pubkey, puser, pusersig] = invalidkey.toPacketlist().map(i => i);
   // create a fake signature
-  const fake = new Signature();
+  const fake = new SignaturePacket();
   Object.assign(fake, pusersig);
   // extend expiration times
   fake.keyExpirationTime = 0x7FFFFFFF;
   fake.signatureExpirationTime = 0x7FFFFFFF;
   // add key capability
-  fake.keyFlags[0] |= enums.keyFlags.encrypt_communication;
+  fake.keyFlags[0] |= enums.keyFlags.encryptCommunication;
   // create modified subpacket data
   pusersig.read_sub_packets(fake.write_hashed_sub_packets(), false);
   // reconstruct the modified key
-  const newlist = new List();
+  const newlist = new PacketList();
   newlist.concat([pubkey, puser, pusersig]);
-  let modifiedkey = new key.Key(newlist);
+  let modifiedkey = new Key(newlist);
   // re-read the message to eliminate any
   // behaviour due to cached values.
-  modifiedkey = (await key.readArmored(
-    await modifiedkey.armor())).keys[0];
+  modifiedkey = await readArmoredKey(await modifiedkey.armor());
 
   expect(await encryptFails(invalidkey)).to.be.true;
   expect(await encryptFails(modifiedkey)).to.be.true;
 }
 
-it('Does not accept unsigned subpackets', makeKeyValid);
+module.exports = () => it('Does not accept unsigned subpackets', makeKeyValid);

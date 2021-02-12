@@ -25,7 +25,7 @@
  */
 
 import stream from 'web-stream-tools';
-import base64 from './base64.js';
+import * as base64 from './base64.js';
 import enums from '../enums.js';
 import config from '../config';
 import util from '../util';
@@ -55,14 +55,14 @@ function getType(text) {
   // Used for multi-part messages, where the armor is split amongst Y
   // parts, and this is the Xth part out of Y.
   if (/MESSAGE, PART \d+\/\d+/.test(header[1])) {
-    return enums.armor.multipart_section;
+    return enums.armor.multipartSection;
   } else
   // BEGIN PGP MESSAGE, PART X
   // Used for multi-part messages, where this is the Xth part of an
   // unspecified number of parts. Requires the MESSAGE-ID Armor
   // Header to be used.
   if (/MESSAGE, PART \d+/.test(header[1])) {
-    return enums.armor.multipart_last;
+    return enums.armor.multipartLast;
   } else
   // BEGIN PGP SIGNED MESSAGE
   if (/SIGNED MESSAGE/.test(header[1])) {
@@ -76,12 +76,12 @@ function getType(text) {
   // BEGIN PGP PUBLIC KEY BLOCK
   // Used for armoring public keys.
   if (/PUBLIC KEY BLOCK/.test(header[1])) {
-    return enums.armor.public_key;
+    return enums.armor.publicKey;
   } else
   // BEGIN PGP PRIVATE KEY BLOCK
   // Used for armoring private keys.
   if (/PRIVATE KEY BLOCK/.test(header[1])) {
-    return enums.armor.private_key;
+    return enums.armor.privateKey;
   } else
   // BEGIN PGP SIGNATURE
   // Used for detached signatures, OpenPGP/MIME signatures, and
@@ -102,16 +102,16 @@ function getType(text) {
  */
 function addheader(customComment) {
   let result = "";
-  if (config.show_version) {
-    result += "Version: " + config.versionstring + '\r\n';
+  if (config.showVersion) {
+    result += "Version: " + config.versionString + '\n';
   }
-  if (config.show_comment) {
-    result += "Comment: " + config.commentstring + '\r\n';
+  if (config.showComment) {
+    result += "Comment: " + config.commentString + '\n';
   }
   if (customComment) {
-    result += "Comment: " + customComment + '\r\n';
+    result += "Comment: " + customComment + '\n';
   }
-  result += '\r\n';
+  result += '\n';
   return result;
 }
 
@@ -199,7 +199,7 @@ function verifyHeaders(headers) {
       throw new Error('Improperly formatted armor header: ' + headers[i]);
     }
     if (!/^(Version|Comment|MessageID|Hash|Charset): .+$/.test(headers[i])) {
-      util.print_debug_error(new Error('Unknown header: ' + headers[i]));
+      util.printDebugError(new Error('Unknown header: ' + headers[i]));
     }
   }
 }
@@ -233,7 +233,7 @@ function splitChecksum(text) {
  * @async
  * @static
  */
-function dearmor(input) {
+export function unarmor(input) {
   return new Promise(async (resolve, reject) => {
     try {
       const reSplit = /^-----[^-]+-----$/m;
@@ -331,8 +331,8 @@ function dearmor(input) {
         });
         const writer = stream.getWriter(writable);
         try {
-          const checksumVerifiedString = (await checksumVerified).replace('\r\n', '');
-          if (checksum !== checksumVerifiedString && (checksum || config.checksum_required)) {
+          const checksumVerifiedString = (await checksumVerified).replace('\n', '');
+          if (checksum !== checksumVerifiedString && (checksum || config.checksumRequired)) {
             throw new Error("Ascii armor integrity check on message failed: '" + checksum + "' should be '" +
                     checksumVerifiedString + "'");
           }
@@ -359,7 +359,7 @@ function dearmor(input) {
  * @returns {String | ReadableStream<String>} Armored text
  * @static
  */
-function armor(messagetype, body, partindex, parttotal, customComment) {
+export function armor(messagetype, body, partindex, parttotal, customComment) {
   let text;
   let hash;
   if (messagetype === enums.armor.signed) {
@@ -370,64 +370,59 @@ function armor(messagetype, body, partindex, parttotal, customComment) {
   const bodyClone = stream.passiveClone(body);
   const result = [];
   switch (messagetype) {
-    case enums.armor.multipart_section:
-      result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\r\n");
+    case enums.armor.multipartSection:
+      result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\r\n");
+      result.push("-----END PGP MESSAGE, PART " + partindex + "/" + parttotal + "-----\n");
       break;
-    case enums.armor.multipart_last:
-      result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "-----\r\n");
+    case enums.armor.multipartLast:
+      result.push("-----BEGIN PGP MESSAGE, PART " + partindex + "-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP MESSAGE, PART " + partindex + "-----\r\n");
+      result.push("-----END PGP MESSAGE, PART " + partindex + "-----\n");
       break;
     case enums.armor.signed:
-      result.push("\r\n-----BEGIN PGP SIGNED MESSAGE-----\r\n");
-      result.push("Hash: " + hash + "\r\n\r\n");
+      result.push("\n-----BEGIN PGP SIGNED MESSAGE-----\n");
+      result.push("Hash: " + hash + "\n\n");
       result.push(text.replace(/^-/mg, "- -"));
-      result.push("\r\n-----BEGIN PGP SIGNATURE-----\r\n");
+      result.push("\n-----BEGIN PGP SIGNATURE-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP SIGNATURE-----\r\n");
+      result.push("-----END PGP SIGNATURE-----\n");
       break;
     case enums.armor.message:
-      result.push("-----BEGIN PGP MESSAGE-----\r\n");
+      result.push("-----BEGIN PGP MESSAGE-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP MESSAGE-----\r\n");
+      result.push("-----END PGP MESSAGE-----\n");
       break;
-    case enums.armor.public_key:
-      result.push("-----BEGIN PGP PUBLIC KEY BLOCK-----\r\n");
+    case enums.armor.publicKey:
+      result.push("-----BEGIN PGP PUBLIC KEY BLOCK-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP PUBLIC KEY BLOCK-----\r\n");
+      result.push("-----END PGP PUBLIC KEY BLOCK-----\n");
       break;
-    case enums.armor.private_key:
-      result.push("-----BEGIN PGP PRIVATE KEY BLOCK-----\r\n");
+    case enums.armor.privateKey:
+      result.push("-----BEGIN PGP PRIVATE KEY BLOCK-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP PRIVATE KEY BLOCK-----\r\n");
+      result.push("-----END PGP PRIVATE KEY BLOCK-----\n");
       break;
     case enums.armor.signature:
-      result.push("-----BEGIN PGP SIGNATURE-----\r\n");
+      result.push("-----BEGIN PGP SIGNATURE-----\n");
       result.push(addheader(customComment));
       result.push(base64.encode(body));
       result.push("=", getCheckSum(bodyClone));
-      result.push("-----END PGP SIGNATURE-----\r\n");
+      result.push("-----END PGP SIGNATURE-----\n");
       break;
   }
 
   return util.concat(result);
 }
-
-export default {
-  encode: armor,
-  decode: dearmor
-};

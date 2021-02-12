@@ -1,8 +1,9 @@
 /* globals tryTests: true */
 
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const util = require('../../src/util');
+const key = require('../../src/key');
 
-const stub = require('sinon/lib/sinon/stub');
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 
@@ -166,535 +167,535 @@ zoGJ6s48HcP591pN93uAitCcYcinY2ZslmdiCXw+zbeoX4spNrV4T4CYxBjNQdIa
 
 const twoKeys =
      ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-      'Version: GnuPG v2.0.19 (GNU/Linux)',
-      '',
-      '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',
-      'PepQmgsu',
-      '=w6wd',
-      '-----END PGP PUBLIC KEY BLOCK-----'].join("\n");
+       'Version: GnuPG v2.0.19 (GNU/Linux)',
+       '',
+       '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',
+       'PepQmgsu',
+       '=w6wd',
+       '-----END PGP PUBLIC KEY BLOCK-----'].join("\n");
 
 const pub_revoked_subkeys =
     ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-    'Version: GnuPG v2.0.19 (GNU/Linux)',
-    '',
-    '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',
-    'pMiJM+NJAQ==',
-    '=ok+o',
-    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+      'Version: GnuPG v2.0.19 (GNU/Linux)',
+      '',
+      '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',
+      'pMiJM+NJAQ==',
+      '=ok+o',
+      '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const pub_revoked_with_cert =
     ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-    'Comment: GPGTools - https://gpgtools.org',
-    '',
-    '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',
-    'onCOcv4DKguN2w==',
-    '=OqO3',
-    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+      'Comment: GPGTools - https://gpgtools.org',
+      '',
+      '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',
+      'onCOcv4DKguN2w==',
+      '=OqO3',
+      '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const pub_sig_test =
  ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: GnuPG v2.0.19 (GNU/Linux)',
-  '',
-  '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',
-  'yeSTTh8ZnzRiwuUH1t90E7w=',
-  '=e8xo',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+   'Version: GnuPG v2.0.19 (GNU/Linux)',
+   '',
+   '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',
+   'yeSTTh8ZnzRiwuUH1t90E7w=',
+   '=e8xo',
+   '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const priv_key_rsa =
   ['-----BEGIN PGP PRIVATE KEY BLOCK-----',
-  'Version: GnuPG v2.0.19 (GNU/Linux)',
-  '',
-  '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',
-  '=lw5e',
-  '-----END PGP PRIVATE KEY BLOCK-----'].join('\n');
+    'Version: GnuPG v2.0.19 (GNU/Linux)',
+    '',
+    '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',
+    '=lw5e',
+    '-----END PGP PRIVATE KEY BLOCK-----'].join('\n');
 
 const user_attr_key =
   ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: GnuPG v2.0.22 (GNU/Linux)',
-  '',
-  'mI0EUmEvTgEEANyWtQQMOybQ9JltDqmaX0WnNPJeLILIM36sw6zL0nfTQ5zXSS3+',
-  'fIF6P29lJFxpblWk02PSID5zX/DYU9/zjM2xPO8Oa4xo0cVTOTLj++Ri5mtr//f5',
-  'GLsIXxFrBJhD/ghFsL3Op0GXOeLJ9A5bsOn8th7x6JucNKuaRB6bQbSPABEBAAG0',
-  'JFRlc3QgTWNUZXN0aW5ndG9uIDx0ZXN0QGV4YW1wbGUuY29tPoi5BBMBAgAjBQJS',
-  'YS9OAhsvBwsJCAcDAgEGFQgCCQoLBBYCAwECHgECF4AACgkQSmNhOk1uQJQwDAP6',
-  'AgrTyqkRlJVqz2pb46TfbDM2TDF7o9CBnBzIGoxBhlRwpqALz7z2kxBDmwpQa+ki',
-  'Bq3jZN/UosY9y8bhwMAlnrDY9jP1gdCo+H0sD48CdXybblNwaYpwqC8VSpDdTndf',
-  '9j2wE/weihGp/DAdy/2kyBCaiOY1sjhUfJ1GogF49rDRwc7BzAEQAAEBAAAAAAAA',
-  'AAAAAAAA/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQN',
-  'DAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/',
-  '2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy',
-  'MjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAFABQDASIAAhEBAxEB/8QAHwAAAQUB',
-  'AQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQID',
-  'AAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0',
-  'NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKT',
-  'lJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl',
-  '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL',
-  '/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHB',
-  'CSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpj',
-  'ZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3',
-  'uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIR',
-  'AxEAPwD3+iiigAooooA//9mIuQQTAQIAIwUCUzxDqQIbLwcLCQgHAwIBBhUIAgkK',
-  'CwQWAgMBAh4BAheAAAoJEEpjYTpNbkCU9PEEAKMMaXjhGdgDISBXAAEVXL6MB3x1',
-  'd/7zBdnUljh1gM34TSKvbeZf7h/1DNgLbJFfSF3KiLViiqRVOumIkjwNIMZPqYtu',
-  'WoEcElY50mvTETzOKemCt1GYI0GhOY2uZOVRtQLrkX0CB9r5hEQalkrnjNKlbghj',
-  'LfOYu1uARF16cZUWuI0EUmEvTgEEAOkfz7QRWiWk+I6tdMqgEpOLKsFTLHOh3Inz',
-  'OZUnccxMRT++J2lDDMhLChz+d0MUxdBq6rrGoEIP2bYE9AjdR1DNedsuwAjnadYI',
-  'io6TMzk0ApagqHJcr1jhQfi/0sBhCCX+y0ghK8KAbiYnyXPMQFa9F19CbYaFvrj/',
-  'dXk0N16bABEBAAGJAT0EGAECAAkFAlJhL04CGy4AqAkQSmNhOk1uQJSdIAQZAQIA',
-  'BgUCUmEvTgAKCRDghPdEbCAsl7qiBADZpokQgEhe2Cuz7xZIniTcM3itFdxdpRl/',
-  'rrumN0P2cXbcHOMUfpnvwkgZrFEcl0ztvTloTxi7Mzx/c0iVPQXQ4ur9Mjaa5hT1',
-  '/9TYNAG5/7ApMHrb48QtWCL0yxcLVC/+7+jUtm2abFMUU4PfnEqzFlkjY4mPalCm',
-  'o5tbbszw2VwFBADDZgDd8Vzfyo8r49jitnJNF1u+PLJf7XN6oijzCftAJDBez44Z',
-  'ofZ8ahPfkAhJe6opxaqgS47s4FIQVOEJcF9RgwLTU6uooSzA+b9XfNmQu7TWrXZQ',
-  'zBlpyHbxDAr9hmXLiKg0Pa11rOPXu7atTZ3C2Ic97WIyoaBUyhCKt8tz6Q==',
-  '=MVfN',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+    'Version: GnuPG v2.0.22 (GNU/Linux)',
+    '',
+    'mI0EUmEvTgEEANyWtQQMOybQ9JltDqmaX0WnNPJeLILIM36sw6zL0nfTQ5zXSS3+',
+    'fIF6P29lJFxpblWk02PSID5zX/DYU9/zjM2xPO8Oa4xo0cVTOTLj++Ri5mtr//f5',
+    'GLsIXxFrBJhD/ghFsL3Op0GXOeLJ9A5bsOn8th7x6JucNKuaRB6bQbSPABEBAAG0',
+    'JFRlc3QgTWNUZXN0aW5ndG9uIDx0ZXN0QGV4YW1wbGUuY29tPoi5BBMBAgAjBQJS',
+    'YS9OAhsvBwsJCAcDAgEGFQgCCQoLBBYCAwECHgECF4AACgkQSmNhOk1uQJQwDAP6',
+    'AgrTyqkRlJVqz2pb46TfbDM2TDF7o9CBnBzIGoxBhlRwpqALz7z2kxBDmwpQa+ki',
+    'Bq3jZN/UosY9y8bhwMAlnrDY9jP1gdCo+H0sD48CdXybblNwaYpwqC8VSpDdTndf',
+    '9j2wE/weihGp/DAdy/2kyBCaiOY1sjhUfJ1GogF49rDRwc7BzAEQAAEBAAAAAAAA',
+    'AAAAAAAA/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQN',
+    'DAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/',
+    '2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy',
+    'MjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAFABQDASIAAhEBAxEB/8QAHwAAAQUB',
+    'AQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQID',
+    'AAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0',
+    'NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKT',
+    'lJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl',
+    '5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL',
+    '/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHB',
+    'CSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpj',
+    'ZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3',
+    'uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIR',
+    'AxEAPwD3+iiigAooooA//9mIuQQTAQIAIwUCUzxDqQIbLwcLCQgHAwIBBhUIAgkK',
+    'CwQWAgMBAh4BAheAAAoJEEpjYTpNbkCU9PEEAKMMaXjhGdgDISBXAAEVXL6MB3x1',
+    'd/7zBdnUljh1gM34TSKvbeZf7h/1DNgLbJFfSF3KiLViiqRVOumIkjwNIMZPqYtu',
+    'WoEcElY50mvTETzOKemCt1GYI0GhOY2uZOVRtQLrkX0CB9r5hEQalkrnjNKlbghj',
+    'LfOYu1uARF16cZUWuI0EUmEvTgEEAOkfz7QRWiWk+I6tdMqgEpOLKsFTLHOh3Inz',
+    'OZUnccxMRT++J2lDDMhLChz+d0MUxdBq6rrGoEIP2bYE9AjdR1DNedsuwAjnadYI',
+    'io6TMzk0ApagqHJcr1jhQfi/0sBhCCX+y0ghK8KAbiYnyXPMQFa9F19CbYaFvrj/',
+    'dXk0N16bABEBAAGJAT0EGAECAAkFAlJhL04CGy4AqAkQSmNhOk1uQJSdIAQZAQIA',
+    'BgUCUmEvTgAKCRDghPdEbCAsl7qiBADZpokQgEhe2Cuz7xZIniTcM3itFdxdpRl/',
+    'rrumN0P2cXbcHOMUfpnvwkgZrFEcl0ztvTloTxi7Mzx/c0iVPQXQ4ur9Mjaa5hT1',
+    '/9TYNAG5/7ApMHrb48QtWCL0yxcLVC/+7+jUtm2abFMUU4PfnEqzFlkjY4mPalCm',
+    'o5tbbszw2VwFBADDZgDd8Vzfyo8r49jitnJNF1u+PLJf7XN6oijzCftAJDBez44Z',
+    'ofZ8ahPfkAhJe6opxaqgS47s4FIQVOEJcF9RgwLTU6uooSzA+b9XfNmQu7TWrXZQ',
+    'zBlpyHbxDAr9hmXLiKg0Pa11rOPXu7atTZ3C2Ic97WIyoaBUyhCKt8tz6Q==',
+    '=MVfN',
+    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const pgp_desktop_pub =
   ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: Encryption Desktop 10.3.0 (Build 9307)',
-  '',
-  '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',
-  '=dVeR',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+    'Version: Encryption Desktop 10.3.0 (Build 9307)',
+    '',
+    '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',
+    '=dVeR',
+    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const pgp_desktop_priv =
   ['-----BEGIN PGP PRIVATE KEY BLOCK-----',
-  'Version: Encryption Desktop 10.3.0 (Build 9307)',
-  '',
-  'lQPGBFNjoowBCACeKvpQnv8wN3UdDVrZN//Bh/Dtq60hbZ3ObfTbNVBQ0DLD6jWA',
-  'lKgwgSa3GLr0a3qrc30CRq0hRIjrFMrg4aPu5sRiZYP90B1cUGf08F2by8f+as2b',
-  'BOBzRkcxH/ZmBZPU0pkRoOnkMvoT+YVt2MxzaJRBKM1dgcPXTHvZ52j7V0uEJvs8',
-  's/H8DJq6MtgYqoS1zt/+eqUSDCcsVJBsEl7o7qU2d9i074hiBouM2B2mimvBKFIn',
-  'W2kmG6fSryNSLaUMwvOTEC/esVNlgvSBfhu82Gic8Rwc+g0cHUnAESChxz/jE0P6',
-  'INt2IpBZKeuXCY97tQmce3R4GOc/r3FNBBa3ABEBAAH+CQMCnq0oXlNfXhuothLb',
-  '7AD3fAc7cpnuondcU2+OdOmnkrB73Qf7iVztLXRcMdIZloSqTlAna8w2ZhmDAdId',
-  'EkEO0Uj+Gf7jjC7bLPob/fOj1TMZB3EPX8xs4DhD2oBI5hPNcFrZdHY+qUh1MvMm',
-  'zdKgBsnbU6nJK4MrhrJ7InPIopqbNcw3ILrJZkD7U6fhiROx0+7CQ9DSVEscTj/K',
-  'u3FeGchNwY2ZmTEDrXy2ZGcQRSuw04GPUcXsBqgD3vivhJtq88K5a4SFPx28uaDO',
-  'VXvbUhQ6BpfMaAvpjfJZHzelU4LyQQP+cR/lmR+E7CNuxGa4sT6+NgJ4mQjdWNTc',
-  'XBaFUU8DgrOX2pAjYgszbETlATK1LRVM2eV/bXBURpEY8DL+OtwE1eAb/m4dAJXE',
-  'cFx8CyaZfI64m27X6av/9GTATXVLHuQUbQHiqhxpaOJSj3ykUvfnQGQedKkT6m7/',
-  'Od1B1dQuO0NwRQaM9SOfpNoM9pLU4z2cyOJJBtNydigTyqH7S9WK77BMrsWyHNCG',
-  'yXo8qrCLv8oBGLM8m0WfT8twF/VyFo3iVUHIkzy7NbDu9QqiXnGzg7aBeo1L8mwk',
-  'Fa5vI44Y1kI2XyjPtpOWtxHaq0YGCtSXuQtr3fSQW/AxQzqJW6lzTjdVSCXXxY/G',
-  '2DHWbRbbB2bdk1ehJUzSYHRMvgdsvFkZrdLy5Ibz5bTR80RRHn2Z8vYr/bSTOXdF',
-  'Xo2F5CvhTME+1BJRhObgqJax8vRnArhu+JVml2cjigHnpH05WzEWv7ezqwsQlUz9',
-  'EUN0dZ8Bg4UH7khdcl1Xcepb3+kzFFrGAQG02n1HhZ1Lc1pUTzHKrIQ57x4LUuP8',
-  'ZOrysjcAC9TdqySvWEilEGsn/mu6/tnmZNaViDWlzah6mRgaz3Z+m2NkfcJbn/ZH',
-  'VHWfOZEku5mNtB1QR1AgRGVza3RvcCAxMC4zIDxwZ3BAc3ltLmRlPp0DxgRTY6KN',
-  'AQgA6tnPjznr7HHcoEFXNRC+LEkDOLAm5kTU9MY+2joJyHG7XmEAhPRt4Cp5Fq79',
-  'sXPvGZ6tQnD8NVvqc3+91ThTLLKCIRdLOunIGIEJdCr7gN49kgDYisWxt7QQIsv7',
-  'Q0SqbGJa7F/jPj5EDf36XJlACJy1yfP6KI6NunffLa23BUU0t0S/TWqq4185nQcz',
-  'J1JnZItyyBIyIWXrNtz56B/mIDvIU56SxxpsrcYctAT68vW0njyQ7XRNIzsmvn4o',
-  '+H9YHnSz3VdXeJaXd7TdU+WLT2lbgzF5BvDN3AlJI8jiONfu0rW9oBmHsQdjDcOl',
-  'WdExsCx5Lz7+La7EK/mX0rUVeQARAQAB/gkDAm8zCrvNFCfycCMEudU+3gQFw9Vw',
-  'YP5SEAiCwegbNw/RsPXxIy6nzFbKMP9qN8SApFwhuz9qf6SeeSafNtXLDz1dZEQd',
-  'yYF4BQ0GLZpeE0kF6XvdefVpTiYJaSc2Px+Ae+fw+s+jF/STvLMI8xjWBmUugs/o',
-  'Xto58R6ILKC7n4Fl0YrZcB2hRyIkFu2fq9KhcdAj15rXxxL0Fpzn4wwynCGQW+EO',
-  'Ix3QfDmuFweoHrU15Q7ItmpFlX+QfvTzL7uBS8WUwx2Fd/LkbA7K7yivCBDy6LxB',
-  'rPnffE1EibAVdOHKIkIaSw+zBAOnkieaJou/BEH/NUerAk1uvzZZwi3tKoYy8rxU',
-  'EGPcyblYyBHYRKgGwLsjN1VFvnutBDq7f1uRo5ElCSiVfMsST9VNHIft4V0l6Lsb',
-  'VK/2U5+gT6GUeSXW9Rm4fSZwyslSeB2d0Cq6gbkEUAsIaI8JDtnkBPf/boHb0/S7',
-  'yFeode6LIUrGqrc9ti4Zky+QFsGchJtc191pNsuvYXgeocEz2UjEBra+Tf/Z6Ysv',
-  'zMU8+fVeubWvRpSDhlLc8/+z9FD0hqKJzuJUT5sLfBIvPOkpjDP9k48k5wABzW6S',
-  'Mevw/X2M2vGRdHit/Pzn25Ei1H5O4dUMUkneym0qZxQmi8l/4cl8Yr1yYOKk+dsk',
-  '1dOOGYnyNkoPtrIjLSzctkWZPhVjM7thasBeI77eVdAP4qhf4lCTcnqvnO6eNFLw',
-  'ZylzWyYPZrHGIut6Ltasvz2syeAGEDG2RBLNO+z8Mw4RM9jWmNGESiA8RjcBbSfa',
-  'l5iBJgRBfVwB9v3/3Jh6V5BA1t9LY1nGbodpM6xQVQRHpzMYYO241bB+dtbW3a3y',
-  'XvVs3DJafcAgdGv/TF39h1OP518mNzDG9tYYeAMbJrjby/L0OfS0lEC1gE2Nh1va',
-  '5g==',
-  '=63Nq',
-  '-----END PGP PRIVATE KEY BLOCK-----'].join('\n');
+    'Version: Encryption Desktop 10.3.0 (Build 9307)',
+    '',
+    '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',
+    '5g==',
+    '=63Nq',
+    '-----END PGP PRIVATE KEY BLOCK-----'].join('\n');
 
-  const rsa_ecc_pub =
+const rsa_ecc_pub =
   ['pub   rsa4096/C9DEDC77 2015-10-17 [expires: 2018-10-16]',
-  'uid         Google Security Team <security@google.com>',
-  'sub   nistp384/70C16E3C 2015-10-17 [expires: 2018-10-16]',
-  'sub   rsa4096/50CB43FB 2015-10-17 [expires: 2018-10-16]',
-  'sub   nistp384/102D9086 2015-10-17 [expires: 2018-10-16]',
-  'sub   rsa4096/DFC40367 2015-10-17 [expires: 2018-10-16]',
-  '',
-  '-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: GnuPG v2',
-  '',
-  'mQINBFYiIB8BEACxs55+7GG6ONQV3UFYf36UDSVFbuvNB5V1NaEnkY0t+RVMigLR',
-  'Zdl0HHsiaTKfKs4jqjLQAoR6Fcre9jlEhatotRg3AvHV1XYebxRlzdfXxyD0d6i9',
-  'Quc1zbca0T8F1C5c7xfYP5g9iKWn5yFtHC3S7mLeOg7Ltx84bTo8AF7bHGA3uIQf',
-  'uCtE8l6Z57HTeaf2IR/893jLOir8lvmTef83m/+e1j6ZwmKxxZO2s+aGKre6Fqsz',
-  'Oo89CpWKNrdZ3IN8+Y4udZNlr7u0os7ffY0shfbLrqt+eVEu4EHfbpQTJxvalZJK',
-  'tEnGtV8S7Z3dcPcimxvO7HZu7Wz8VnRzY/AZtee4fC+i2yBu1rWKgY3V1tFKdxVr',
-  'KDnmS5MBgBAxv69mM3bf8QPinL4mtIQ65/Dt4ksJuysRmGwQ8LkjSLQCMMepnjBs',
-  '/63wJ3e4wN1LCwnJonA2f8gZQHNeGPUhVVd/dWFDtmQaLwKFcI0GS/DiUPBIJir5',
-  'DWnrEedtlcSLlwwcUglFsG4Sds/tLr+z5yE88ZrDrIlX9fb9cCAsDq7c8/NCzgvw',
-  'kFez14sXgGhMz6ZfFzM49o0XwlvAeuSJRWBvnKonxM7/laqv4gK0zur3a6+D6qCN',
-  'vt9iWO/YG+0Fvhmyxe34/Q71nXWc9t5aLcokmYLGY1Dpzf9oB8hDRdMCAQARAQAB',
-  'tCpHb29nbGUgU2VjdXJpdHkgVGVhbSA8c2VjdXJpdHlAZ29vZ2xlLmNvbT6JAjwE',
-  'EwEIACYFAlYiIB8CGwEFCQWjmoAFCwkIBwIGFQgJCgsCAxYCAQIeAQIXgAAKCRC4',
-  '5BBcyd7cd8MzD/9YdMVZniQH4qBKxLFIoYGfLzCEI0S9IVUA37wrZ4YiRODSJRMf',
-  'El6oVfTO/g8xpeQlDgHj1w2IDoSkeQrY+7rf9H41sGGOBDGXSQT+7Z7XFH2mPPvC',
-  'cqYqR32BDNDkO/LL1BzzRlQvNmnGHxo098sqTgb7hoVsP+qFoem7JUMpcAV1KrUo',
-  'P81haV8a/25ouWFZu5P68WFh861TyIjIYLQCns2fG+zlKFGN9Uynv6E5+Qk7dmni',
-  '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',
-  '=Q/kB',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+    'uid         Google Security Team <security@google.com>',
+    'sub   nistp384/70C16E3C 2015-10-17 [expires: 2018-10-16]',
+    'sub   rsa4096/50CB43FB 2015-10-17 [expires: 2018-10-16]',
+    'sub   nistp384/102D9086 2015-10-17 [expires: 2018-10-16]',
+    'sub   rsa4096/DFC40367 2015-10-17 [expires: 2018-10-16]',
+    '',
+    '-----BEGIN PGP PUBLIC KEY BLOCK-----',
+    'Version: GnuPG v2',
+    '',
+    'mQINBFYiIB8BEACxs55+7GG6ONQV3UFYf36UDSVFbuvNB5V1NaEnkY0t+RVMigLR',
+    'Zdl0HHsiaTKfKs4jqjLQAoR6Fcre9jlEhatotRg3AvHV1XYebxRlzdfXxyD0d6i9',
+    'Quc1zbca0T8F1C5c7xfYP5g9iKWn5yFtHC3S7mLeOg7Ltx84bTo8AF7bHGA3uIQf',
+    'uCtE8l6Z57HTeaf2IR/893jLOir8lvmTef83m/+e1j6ZwmKxxZO2s+aGKre6Fqsz',
+    'Oo89CpWKNrdZ3IN8+Y4udZNlr7u0os7ffY0shfbLrqt+eVEu4EHfbpQTJxvalZJK',
+    'tEnGtV8S7Z3dcPcimxvO7HZu7Wz8VnRzY/AZtee4fC+i2yBu1rWKgY3V1tFKdxVr',
+    'KDnmS5MBgBAxv69mM3bf8QPinL4mtIQ65/Dt4ksJuysRmGwQ8LkjSLQCMMepnjBs',
+    '/63wJ3e4wN1LCwnJonA2f8gZQHNeGPUhVVd/dWFDtmQaLwKFcI0GS/DiUPBIJir5',
+    'DWnrEedtlcSLlwwcUglFsG4Sds/tLr+z5yE88ZrDrIlX9fb9cCAsDq7c8/NCzgvw',
+    'kFez14sXgGhMz6ZfFzM49o0XwlvAeuSJRWBvnKonxM7/laqv4gK0zur3a6+D6qCN',
+    'vt9iWO/YG+0Fvhmyxe34/Q71nXWc9t5aLcokmYLGY1Dpzf9oB8hDRdMCAQARAQAB',
+    'tCpHb29nbGUgU2VjdXJpdHkgVGVhbSA8c2VjdXJpdHlAZ29vZ2xlLmNvbT6JAjwE',
+    'EwEIACYFAlYiIB8CGwEFCQWjmoAFCwkIBwIGFQgJCgsCAxYCAQIeAQIXgAAKCRC4',
+    '5BBcyd7cd8MzD/9YdMVZniQH4qBKxLFIoYGfLzCEI0S9IVUA37wrZ4YiRODSJRMf',
+    'El6oVfTO/g8xpeQlDgHj1w2IDoSkeQrY+7rf9H41sGGOBDGXSQT+7Z7XFH2mPPvC',
+    'cqYqR32BDNDkO/LL1BzzRlQvNmnGHxo098sqTgb7hoVsP+qFoem7JUMpcAV1KrUo',
+    'P81haV8a/25ouWFZu5P68WFh861TyIjIYLQCns2fG+zlKFGN9Uynv6E5+Qk7dmni',
+    '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',
+    '=Q/kB',
+    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const valid_binding_sig_among_many_expired_sigs_pub = [
   '-----BEGIN PGP PUBLIC KEY BLOCK-----',
@@ -791,54 +792,54 @@ const key_without_subkey = [
 
 const multi_uid_key =
   ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: GnuPG v1',
-  '',
-  'mQENBFbqatUBCADmeA9CjMfzLt3TrplzDxroVisCWO7GRErUXiozULZd5S8p/rHS',
-  'kuclUsQzraSuQ+Q7RhpOWdJt9onf5ro0dCC3i+AEWBrS0nyXGAtpgxJmZ618Cwzz',
-  'RKrYstce4Hsyg0NS1KCbzCxpfIbyU/GOx4AzsvP3BcbRMvJ6fvrKy6zrhyVq5to3',
-  'c6MayKm3cTW0+iDvqbQCMXeKH1MgAj1eOBNrbgQZhTBMhAaIFUb5l9lXUXUmZmSj',
-  'r4pjjVZjWudFswXPoVRGpCOU+ahJFZLeIca99bHOl3Hu+fEbVExHdoaVq5W9R/QJ',
-  '/0bHQrd+Th8e1qpIP2/ABb6P/7SGUKw6ZUvbABEBAAG0E1Rlc3QgVXNlciA8YUBi',
-  'LmNvbT6JATgEEwECACIFAlbqatUCGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheA',
-  'AAoJEPhuIdU05lVRgtoH/ioJdP34cHIdSu2Ofsm6FoWc/nk2QEughNn2AyaxZAKO',
-  'pWy9o9/+KlVD3SoV5fzl6tCsFz1MqLFBsHSj2wKoQqkU6S9MnrG12HgnirqcjOa0',
-  '1uPB0aAqF3ptNScPqcD44bZ4p58TAeU5H7UlrwPUn4gypotAnu+zocNaqe0tKWVo',
-  'f+GAZG/FuXJc5OK2J6OmKIABJCuRchXbkyfsXZYE3f+1U9mLse4wHQhGRiSlgqG4',
-  'CCSIjeIkqeIvLCj/qGXJGyJ0XeMwMVhajylhEtDmMRlc32Jt8btlTJzcQ/3NPuQd',
-  'EryD92vGp/fXwP1/rLtD49o/0UbDeXT4KQphs2DuG/60E1Rlc3QgVXNlciA8YkBj',
-  'LmNvbT6JATgEEwECACIFAlbqeUACGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheA',
-  'AAoJEPhuIdU05lVRuPkIAK+ieYXEflVHY1bKeptYZ+UfHJhsBdM29WYmuHhAbWe9',
-  'mb741n8YXbPENoCSYD4jq7cYOvrduz5QLmXKL57D9rXvu/dWhpLaSjGf4LDrSf+9',
-  'bYw0U2BStjPzjnyxZSQDU60KFRIjZPWxF/VqRFp3QIp/r3vjEGuiE6JdzbT4EWwO',
-  'rltkMzPYgx7cx63EhjrM3kybylL+wBX3T2JNCzLPfZBsdiWmQcypLgOPLrW/4fxQ',
-  'zfAsDyEYlRj7xhVKAc+nMcXo8Hw46AecS8N3htZHM6WeekZYdoJ4DlDeE5RL76xZ',
-  'hVEOziY5UnBT/F8dfZoVcyY/5FiSUuL19Cpwoc+dpWm5AQ0EVupq1QEIAMLfhMdk',
-  'OoIl1J3J8F89My2u7qwKrw1WLWawBacZH2jsGZrjZlUJEIQpaIyvqHSPSgLJ+Yco',
-  'YmCMj/ElNVBKBzaUpfdftW+5/S5OaJVq/j7J1OKMQqXQALgwh8GM/AThO5G4B27c',
-  'HZ/+bkbldYJJK0y5ZONEj7gkch7w6cr1+6NCL7jMWIDar3HpchddOproxAMuZa9D',
-  '2RjOvl+OMb6JMO5zTFbh37o5fAw3YWbmeX/tp2bD5W4lSUGD/Xwf2zS2r7vwGVZO',
-  'C+zx1aaSNllcRvSWkg8zRY5FjL9AOl4l52JFfz8G63EuHrR9dXmsYA9IHunk0UNy',
-  '/GGCcIJ6rXKTMCUAEQEAAYkBHwQYAQIACQUCVupq1QIbDAAKCRD4biHVNOZVUUFY',
-  'CADkAAtvIiJLoiYyWBx4qdTuHecuBC8On64Ln2PqImowpMb8r5JzMP6aAIBxgfEt',
-  'LezjJQbIM6Tcr6nTr1FunbAznrji1s4T6YcrRCS2QLq2j1aDUnLBFPrlAbuRnmZj',
-  'o8miZXTSasZw4O8R56jmsbcebivekg0JQMiEsf3TfxmeFQrjSGKGBarn0aklfwDS',
-  'JuhA5hs46N+HGvngXVZNAM9grFNxusp2YhC+DVDtcvR3SCVnVRfQojyaUKDEofHw',
-  'YD+tjFrH9uxzUEF+0p6he6DJ5KrQuy5Zq4Yc4X2rNvtjsIzww0Byymvo6eRO0Gxk',
-  'ljIYQms3pCv1ja6bLlNKpPII',
-  '=qxBI',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+    'Version: GnuPG v1',
+    '',
+    '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',
+    'ljIYQms3pCv1ja6bLlNKpPII',
+    '=qxBI',
+    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const wrong_key =
   ['-----BEGIN PGP PUBLIC KEY BLOCK-----',
-  'Version: OpenPGP.js v0.9.0',
-  '',
-  'xk0EUlhMvAEB/2MZtCUOAYvyLFjDp3OBMGn3Ev8FwjzyPbIF0JUw+L7y2XR5',
-  'RVGvbK88unV3cU/1tOYdNsXI6pSp/Ztjyv7vbBUAEQEAAc0pV2hpdGVvdXQg',
-  'VXNlciA8d2hpdGVvdXQudGVzdEB0LW9ubGluZS5kZT7CXAQQAQgAEAUCUlhM',
-  'vQkQ9vYOm0LN/0wAAAW4Af9C+kYW1AvNWmivdtr0M0iYCUjM9DNOQH1fcvXq',
-  'IiN602mWrkd8jcEzLsW5IUNzVPLhrFIuKyBDTpLnC07Loce1',
-  '=6XMW',
-  '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
+    'Version: OpenPGP.js v0.9.0',
+    '',
+    'xk0EUlhMvAEB/2MZtCUOAYvyLFjDp3OBMGn3Ev8FwjzyPbIF0JUw+L7y2XR5',
+    'RVGvbK88unV3cU/1tOYdNsXI6pSp/Ztjyv7vbBUAEQEAAc0pV2hpdGVvdXQg',
+    'VXNlciA8d2hpdGVvdXQudGVzdEB0LW9ubGluZS5kZT7CXAQQAQgAEAUCUlhM',
+    'vQkQ9vYOm0LN/0wAAAW4Af9C+kYW1AvNWmivdtr0M0iYCUjM9DNOQH1fcvXq',
+    'IiN602mWrkd8jcEzLsW5IUNzVPLhrFIuKyBDTpLnC07Loce1',
+    '=6XMW',
+    '-----END PGP PUBLIC KEY BLOCK-----'].join('\n');
 
 const expiredKey =
 `-----BEGIN PGP PRIVATE KEY BLOCK-----
@@ -1916,6 +1917,88 @@ vqBGKJzmO5q3cECw
 =X9kJ
 -----END PGP PRIVATE KEY BLOCK-----`;
 
+const dsaPrivateKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+lQNTBF69PO8RCACHP4KLQcYOPGsGV9owTZvxnvHvvrY8W0v8xDUL3y6CLc05srF1
+kQp/81iUfP5g57BEiDpJV95kMh+ulBthIOGnuMCkodJjuBICB4K6BtFTV4Fw1Q5S
+S7aLC9beCaMvvGHXsK6MbknYl+IVJY7Zmml1qUSrBIQFGp5kqdhIX4o+OrzZ1zYj
+ALicqzD7Zx2VRjGNQv7UKv4CkBOC8ncdnq/4/OQeOYFzVbCOf+sJhTgz6yxjHJVC
+fLk7w8l2v1zV11VJuc8cQiQ9g8tjbKgLMsbyzy7gl4m9MSCdinG36XZuPibZrSm0
+H8gKAdd1FT84a3/qU2rtLLR0y8tCxBj89Xx/AQCv7CDmwoU+/yGpBVVl1mh0ZUkA
+/VJUhnJfv5MIOIi3AQf8CS9HrEmYJg/A3z0DcvcwIu/9gqpRLTqH1iT5o4BCg2j+
+Cog2ExYkQl1OEPkEQ1lKJSnD8MDwO3BlkJ4cD0VSKxlnwd9dsu9m2+F8T+K1hoA7
+PfH89TjD5HrEaGAYIdivLYSwoTNOO+fY8FoVC0RR9pFNOmjiTU5PZZedOxAql5Os
+Hp2bYhky0G9trjo8Mt6CGhvgA3dAKyONftLQr9HSM0GKacFV+nRd9TGCPNZidKU8
+MDa/SB/08y1bBGX5FK5wwiZ6H5qD8VAUobH3kwKlrg0nL00/EqtYHJqvJ2gkT5/v
+h8+z4R4TuYiy4kKF2FLPd5OjdA31IVDoVgCwF0WHLgf/X9AiTr/DPs/5dIYN1+hf
+UJwqjzr3dlokRwx3CVDcOVsdkWRwb8cvxubbsIorvUrF02IhYjHJMjIHT/zFt2zA
++VPzO4zabUlawWVepPEwrCtXgvn9aXqjhAYbilG3UZamhfstGUmbmvWVDadALwby
+EO8u2pfLhI2lep63V/+KtUOLhfk8jKRSvxvxlYAvMi7sK8kB+lYy17XKN+IMYgf8
+gMFV6XGKpdmMSV3jOvat8cI6vnRO0i+g3jANP3PfrFEivat/rVgxo67r4rxezfFn
+J29qwB9rgbRgMBGsbDvIlQNV/NWFvHy2uQAEKn5eX4CoLsCZoR2VfK3BwBCxhYDp
+/wAA/0GSmI9MlMnLadFNlcX2Bm4i15quZAGF8JxwHbj1dhdUEYq0E1Rlc3QgPHRl
+c3RAdGVzdC5pbz6IlAQTEQgAPBYhBAq6lCI5EfrbHP1qZCxnOy/rlEGVBQJevTzv
+AhsDBQsJCAcCAyICAQYVCgkICwIEFgIDAQIeBwIXgAAKCRAsZzsv65RBlUPoAP9Q
+aTCWpHWZkvZzC8VU64O76fHp31rLWlcZFttuDNLyeAEAhOxkQHk6GR88R+EF5mrn
+clr63t9Q4wreqOlO0NR5/9k=
+=UW2O
+-----END PGP PRIVATE KEY BLOCK-----
+`;
+
+const uidlessKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+xcMFBF8/lc8BCACwwWWyNdfZ9Qjz8zc4sFGNfHXITscT7WCMuXgC2BbFwiSD
+52+Z6fIKaaMFP07MOy8g3PsrW8rrM6j9ew4fh6Kr6taD5JtZfWEWxSnmfl8T
+MqbfcGklJZDyqbSlRBHh53ea4fZe/wCiaL2qhME9Pa7M+w/AiCT1LuXUBiKp
+oCLVn1PFf760vdsz5CD+kpzBIZ45P6zZxnR/P6zLsKjr5nERlIDZ1gWtctx9
+9ZEEVBrgnEE4dBIT1W/M/XbEwsKn1HGOyTBvzeEfM863uW0V9HKmjilbMF2P
+fJ583t1HzuhA7IewcgX/VGC4QKMnukUpRhJQPlcVFSy0zjD9zQYIh437ABEB
+AAH+CQMIblUClAvPYEvgLJlwFM3vC1LLOtMvegEdpUDVA0rpZLASe9RoyEbB
+PGue+yaxxu06N20fsqIxaBh3+uU2ZVfcEre/5XNCj6QxHzqSbclMyHUyVHlv
+/G308yKMyjvwj3mx1hNY5frDb7Pop4ZSftpx1R3tXU1DC1DGy+3Whp41BKAF
+ahSQ5oK2VjUFqdoej6p46vt0pt9JOsX7T2eX7Z7TcPoJPNZ0rBDYJDV4RVYk
+tdgA2P4mfbjHZOquexzRgGY9Pn7X/NciUrbmfA6sxyR21aG0xAXMk91bwPDs
+SEEj7ikpIlt7F87yafzwS4JFPzuhhGpZjK1f6t24fAAmufKCdt+IEV4EgkBI
+QWrfUUAXytHIPFyP3z4gcIitmx10DqArxhHeR0sKjtAjOKrMP0qBiQAG6cH+
+y4CdRiBiuEDTazgePzIDJMgIjmWH/hxl5puoEKkQAR9kiiU0bDtphSAQ5GXw
+c/1WhYacYWJytUM+uUWMFAdryd93YmRew1kYxqdZn5AywzOOAbTWD6Q2GME5
+0o0Adfw4CopT2VxsbRq4X74DPtXnReyFGd0167IV3Y8HToHyM4gJxxMVXF3G
+TNW7CSq2L53kklynLtBnAuJKwunR8my7Sm+CX/errsXpq/u3QGZDeHlAh8ul
+rHeqOTZwEqGHxHb1FcQJ+1QQohrwJp2hHKXxgZyGQH8ykTZyNpPAiqkhcl9O
+DJdxq4Ke6wistyzF/sRGRcaXaLHZ8dKS8TIjjzGuMWMaZtBO+6EqIE5JgEHe
+t+SdnMeEZ9kDtWx2+eTb/j5IFuIPlWjRNndad3qpw17wvLufSUs06Pjd5O7q
+3k38hvPHNpCyWWsLnddnCGJZwH5uXCsfKqrO1JkY+0gJISxQ0ZNvMCki2tpZ
+k3ByPEnFoT4c6f8eJMQhODqC8Do9xrTHwwYEXz+VzwEIAKp98eVpCy1lIu26
+HdR5CYlQ5aVhqOVPlk1gWqwQwBBOykj3t3nJtA2tS/qgSgbNtk1bf7KSPUKI
+E8vBGZ/uHCtC9B19ytZxHI51TQtTJgbOkuRkq7KizB+ZZ1TPwrb4HyDxtw4L
+K6kBA0vhvOZeWh4XD7CPSjN457eCaKjnaD6HuvvTin4EVJ9G6B9Ioi6Oyi98
+PB0JA3dpPY4cx/3eggx18cAPeZwiO7vIy0VHtq/G8Obf2Tzowmz1vsgTm+fV
+piZ8lQlQkNBn5Z9/mayZ4bMA1EGaQGzfzS+r4AYP+/UxXRCMlwZ3lt7YYnKI
+5lIZX73TwXzuMwFqGEevIJzD9YkAEQEAAf4JAwhHFiWWy6b0muDxhFu5N7oX
+lhSfbD+RSvezCU8xpDHbkvoOZRC21bKJ1jmkvbC/KKAlxNz5UYJ/OFtffAok
+f0aTlkrNvPxN9apqDgwvsjzC10//3b9BzHjds2rrpGHKjzyapAVkEl0PGWCR
+VPdfjC/f5t7GMzOsSNmTqHVS+aCX8aA48BKkjDjFOUjpLGSqVPxoMTe0gUpa
+NxgJhIb5RZ+6JjbmWooZ4nw/GroUGYfupRr4TG3TYVVGXCHN+/CEClyhJDCm
+sqc1ZhdarNINGVndzz/i5sBbuNMnph6j6Mh72duseSEiOxYZ0iOrwNosC0NS
+qDHA+jBHyP405U8N6V1EBKf3Z+C3+vqSxiR37JkwWcaXEDoJm4oNSI6yA1aa
+8QJIcUMEapfoCmA0alKzLvng5wLCEC82MvPMezkF1O6vBXCMBJs9lEGg/61K
+wkiIpz2FEdulWe7Hca66KTIHWLcd0X1mF7L7XK25UW7+1CrX0cqMEhXi1wGS
+SbqKIVA5bEbwNo1VgENgF0NnsR7Q8H+94k0lems8vw4xS98ogVqFdGTmGF0t
+ijE4yf4M9jt7LYWGfru2DDVIHf+K7L+DuOqcjBVXVIy0x+NDSYBnLgIYujsF
+5tMv33SfE17F/CHJDAujY5yTxuXDdzMmxYahsg6vx/fbXZVwm2RFpxCzI6pV
+E/YWhOFMknNHVpiqvQ91Y7nOJlHQAe9RmsGcxng0bwsE1J277JozUr5PNXA9
+ZDPVG7/3nHnUnNwnXupHAsiYW4aN/uFUXg5CoArXvj2SHjWQSBMwWDQK9jC5
+YVzi15D9Jt3xYDXpDbSEf8N+d8C31Jx3QedDi/ei5xs/9CJ+DqbBxRUW04jj
+r8mew9pM2+gpDS5DoNLSBJ1vn3OIRLnCudmSJBHs3NMh85qF07bc1+sAozpZ
+vM7CwF8EGAEIAAkFAl8/lc8CGwwACgkQKBMN0dHENohRNAf/Z5G5pySJe4tk
+G1pGQOLjZms08e1KGQlbRtZR8WN2ySCe3Pyla/R3KQRJBQS6V926GKnvsOZC
+3CWVKHDcn1Rx2uV3GH8VWOHfT+EjQI7zCoQAppVEX4uJ4BCxP5Z9CgSxL8zH
+31AHwLEtCqDfeZf8dttihfafyAUFKCCrN5R6cP2AtUlRDE1XRdTJ8zRk4mRX
+81r0vXC1Xfs1zBy3YnDIJVJcEro9v7yOn/5WBtQT/jnBvJZ/gBieolgXUrRb
+V5PJ0lZPFfMdYjjYR+i7j3+/j59kd1Wuz+6I572J+j4lWlPIvGk2V+rzzHqK
+CciXuhqnLwoVF5/uXMYffVtfl/OU+w==
+=EqcV
+-----END PGP PRIVATE KEY BLOCK-----`;
 
 const rsaSignOnly = `-----BEGIN PGP PRIVATE KEY BLOCK-----
 
@@ -1963,99 +2046,129 @@ zUdJ3Sg6Eu+OC2ae5II63iB5fG+lCwZtfuepWnePDv8RDKNHCVP/LoBNpGOZ
 U9I6AUkZWdcsueib9ghKDDy+HbUbf2kCJWUnuyeOCKqQifDb8bsLmdQY4Wb6
 EBeLgD8oZHVsH3NLjPakPw==
 =STqy
------END PGP MESSAGE-----`
+-----END PGP MESSAGE-----`;
+
+const shortP521Key = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+
+xcAiBV/Pa+4TAAAAjQUrgQQAIwQjBADY+IGvRpeUzbT0+YRUe0KCMxAZmDY1
+KjDzULlmOJOS0bfZfqd4HsUF2hRoU/rg1gu1ju/Nt/18db0SJExOqVB9CgA0
+ZYiYyJhGYDOVg/bD54E7a3txWuDPB1DzkGWJH8PkqGNzU0BJpZcUVA6Th09s
+YeO7rx5jSoyWNXjUYKwc24trFAAAAAAARQIItVgIiTWNT+QEVnZqDKKTIOUU
+XEetkjCjPed1RiSchiZpwq+Bvx5hWGsbV5Pjj0S6EuH/ca5w+2ZyITLWZjr1
+LP8eP80UVGVzdCA8dGVzdEB0ZXN0LmNvbT7CwBUFEBMKACEFAl/Pa+4ECwkH
+CAMVCAoEFgIBAAIZAQIbAwIeBwMiAQIAIyIhBbDerrGG7kdy9vbLYvb/j6TC
+53fuQgK9Gtt1xng5MgpSUX0CCJZB+Ppt8yG5hBzwiGz5ZRpPVBFihEftaTOO
+tKUuYRpWlvgA/XV11DgL6KZWRwu4C2venydBW987CVXCbRp4r18FAgkBjTR1
+AXHEstTVwJYj8mWkOZrz+Bfqvu6pWPmVYclgHJK2sSWizakvX/DtX/LFgTJL
+UoASOVvu1hYHDsCO7vWWC/bHwCYFX89r7hIAAACRBSuBBAAjBCMEAULqNQ3L
+CcdVlpIHiq4Xb+elTEdu2oDDA+FCbwroX3wvMatrH6GodxCcrjQKUrfVNiiI
+cvj+r6SE/pRDnxsvW/JSAWUz3XKfVXccb0PYf0ikkTmb8UW33AaNYX6Srk0W
+iamEmEzUpCMiiyXiYe+fp9JD63rKLXBbvLCT2mHuYO/hOikKAwEKCQAAAAAA
+RQIDBONtE8bb3Yr2otNhdR67lg529mm3rSRsyWwMBVUPwX0RTTZ/bejq7XP5
+fuXV8QSEjWdOdPBARGw9jhw51D1XWl8gFsK9BRgTCgAJBQJfz2vuAhsMACMi
+IQWw3q6xhu5Hcvb2y2L2/4+kwud37kICvRrbdcZ4OTIKUiWwAgkBdH+OZHBt
+D2Yx2xKVPqDGJgMa5Ta8GmQZOFnoC2SpB6i9hIOfwiNjNLs+bv+kTxZ09nzf
+3ZUGYi5Ei70hLrDAy7UCCNQNObtPmUYaUTtRzj3S9jUohbIpQxcfyoCMh6aP
+usLw5q4tc+I5gdq57aiulJ8r4Jj9rdzsZFA7PzNJ9WPGVYJ3
+=GSXO
+-----END PGP PRIVATE KEY BLOCK-----`;
 
 function versionSpecificTests() {
   it('Preferences of generated key', function() {
     const testPref = function(key) {
       // key flags
       const keyFlags = openpgp.enums.keyFlags;
-      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.certify_keys).to.equal(keyFlags.certify_keys);
-      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.sign_data).to.equal(keyFlags.sign_data);
-      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encrypt_communication).to.equal(keyFlags.encrypt_communication);
-      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encrypt_storage).to.equal(keyFlags.encrypt_storage);
+      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.certifyKeys).to.equal(keyFlags.certifyKeys);
+      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.signData).to.equal(keyFlags.signData);
+      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encryptCommunication).to.equal(keyFlags.encryptCommunication);
+      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encryptStorage).to.equal(keyFlags.encryptStorage);
       const sym = openpgp.enums.symmetric;
-      expect(key.users[0].selfCertifications[0].preferredSymmetricAlgorithms).to.eql([sym.aes256, sym.aes128, sym.aes192, sym.cast5, sym.tripledes]);
-      if (openpgp.config.aead_protect) {
+      expect(key.users[0].selfCertifications[0].preferredSymmetricAlgorithms).to.eql([sym.aes256, sym.aes128, sym.aes192]);
+      if (openpgp.config.aeadProtect) {
         const aead = openpgp.enums.aead;
         expect(key.users[0].selfCertifications[0].preferredAeadAlgorithms).to.eql([aead.eax, aead.ocb]);
       }
       const hash = openpgp.enums.hash;
-      expect(key.users[0].selfCertifications[0].preferredHashAlgorithms).to.eql([hash.sha256, hash.sha512, hash.sha1]);
+      expect(key.users[0].selfCertifications[0].preferredHashAlgorithms).to.eql([hash.sha256, hash.sha512]);
       const compr = openpgp.enums.compression;
       expect(key.users[0].selfCertifications[0].preferredCompressionAlgorithms).to.eql([compr.zlib, compr.zip, compr.uncompressed]);
-      expect(key.users[0].selfCertifications[0].features).to.eql(openpgp.config.v5_keys ? [7] : [1]);
+
+      let expectedFeatures;
+      if (openpgp.config.v5Keys) {
+        expectedFeatures = [7]; // v5 + aead + mdc
+      } else if (openpgp.config.aeadProtect) {
+        expectedFeatures = [3]; // aead + mdc
+      } else {
+        expectedFeatures = [1]; // mdc
+      }
+      expect(key.users[0].selfCertifications[0].features).to.eql(expectedFeatures);
     };
-    const opt = {numBits: 512, userIds: 'test <a@b.com>', passphrase: 'hello'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: 'hello' };
     return openpgp.generateKey(opt).then(async function(key) {
       testPref(key.key);
-      testPref((await openpgp.key.readArmored(key.publicKeyArmored)).keys[0]);
+      testPref(await openpgp.readArmoredKey(key.publicKeyArmored));
     });
   });
 
   it('Preferences of generated key - with config values', async function() {
-    const encryption_cipherVal = openpgp.config.encryption_cipher;
-    const prefer_hash_algorithmVal = openpgp.config.prefer_hash_algorithm;
+    const encryptionCipherVal = openpgp.config.encryptionCipher;
+    const preferHashAlgorithmVal = openpgp.config.preferHashAlgorithm;
     const compressionVal = openpgp.config.compression;
-    const aead_modeVal = openpgp.config.aead_mode;
-    openpgp.config.encryption_cipher = openpgp.enums.symmetric.aes192;
-    openpgp.config.prefer_hash_algorithm = openpgp.enums.hash.sha224;
+    const aeadModeVal = openpgp.config.aeadMode;
+    openpgp.config.encryptionCipher = openpgp.enums.symmetric.aes192;
+    openpgp.config.preferHashAlgorithm = openpgp.enums.hash.sha224;
     openpgp.config.compression = openpgp.enums.compression.zlib;
-    openpgp.config.aead_mode = openpgp.enums.aead.experimental_gcm;
-    if (openpgp.getWorker()) {
-      openpgp.getWorker().workers.forEach(worker => {
-        worker.postMessage({ event: 'configure', config: openpgp.config });
-      });
-    }
+    openpgp.config.aeadMode = openpgp.enums.aead.experimentalGcm;
 
     const testPref = function(key) {
       // key flags
       const keyFlags = openpgp.enums.keyFlags;
-      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.certify_keys).to.equal(keyFlags.certify_keys);
-      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.sign_data).to.equal(keyFlags.sign_data);
-      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encrypt_communication).to.equal(keyFlags.encrypt_communication);
-      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encrypt_storage).to.equal(keyFlags.encrypt_storage);
+      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.certifyKeys).to.equal(keyFlags.certifyKeys);
+      expect(key.users[0].selfCertifications[0].keyFlags[0] & keyFlags.signData).to.equal(keyFlags.signData);
+      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encryptCommunication).to.equal(keyFlags.encryptCommunication);
+      expect(key.subKeys[0].bindingSignatures[0].keyFlags[0] & keyFlags.encryptStorage).to.equal(keyFlags.encryptStorage);
       const sym = openpgp.enums.symmetric;
-      expect(key.users[0].selfCertifications[0].preferredSymmetricAlgorithms).to.eql([sym.aes192, sym.aes256, sym.aes128, sym.cast5, sym.tripledes]);
-      if (openpgp.config.aead_protect) {
+      expect(key.users[0].selfCertifications[0].preferredSymmetricAlgorithms).to.eql([sym.aes192, sym.aes256, sym.aes128]);
+      if (openpgp.config.aeadProtect) {
         const aead = openpgp.enums.aead;
-        expect(key.users[0].selfCertifications[0].preferredAeadAlgorithms).to.eql([aead.experimental_gcm, aead.eax, aead.ocb]);
+        expect(key.users[0].selfCertifications[0].preferredAeadAlgorithms).to.eql([aead.experimentalGcm, aead.eax, aead.ocb]);
       }
       const hash = openpgp.enums.hash;
-      expect(key.users[0].selfCertifications[0].preferredHashAlgorithms).to.eql([hash.sha224, hash.sha256, hash.sha512, hash.sha1]);
+      expect(key.users[0].selfCertifications[0].preferredHashAlgorithms).to.eql([hash.sha224, hash.sha256, hash.sha512]);
       const compr = openpgp.enums.compression;
       expect(key.users[0].selfCertifications[0].preferredCompressionAlgorithms).to.eql([compr.zlib, compr.zip, compr.uncompressed]);
-      expect(key.users[0].selfCertifications[0].features).to.eql(openpgp.config.v5_keys ? [7] : [1]);
+
+      let expectedFeatures;
+      if (openpgp.config.v5Keys) {
+        expectedFeatures = [7]; // v5 + aead + mdc
+      } else if (openpgp.config.aeadProtect) {
+        expectedFeatures = [3]; // aead + mdc
+      } else {
+        expectedFeatures = [1]; // mdc
+      }
+      expect(key.users[0].selfCertifications[0].features).to.eql(expectedFeatures);
     };
-    const opt = {numBits: 512, userIds: 'test <a@b.com>', passphrase: 'hello'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: 'hello' };
     try {
       const key = await openpgp.generateKey(opt);
       testPref(key.key);
-      testPref((await openpgp.key.readArmored(key.publicKeyArmored)).keys[0]);
+      testPref(await openpgp.readArmoredKey(key.publicKeyArmored));
     } finally {
-      openpgp.config.encryption_cipher = encryption_cipherVal;
-      openpgp.config.prefer_hash_algorithm = prefer_hash_algorithmVal;
+      openpgp.config.encryptionCipher = encryptionCipherVal;
+      openpgp.config.preferHashAlgorithm = preferHashAlgorithmVal;
       openpgp.config.compression = compressionVal;
-      openpgp.config.aead_mode = aead_modeVal;
-      if (openpgp.getWorker()) {
-        openpgp.getWorker().workers.forEach(worker => {
-          worker.postMessage({ event: 'configure', config: openpgp.config });
-        });
-      }
+      openpgp.config.aeadMode = aeadModeVal;
     }
   });
 
   it('Generated key is not unlocked by default', function() {
-    const opt = {numBits: 512, userIds: 'test <a@b.com>', passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: '123' };
     let key;
     return openpgp.generateKey(opt).then(function(newKey) {
       key = newKey.key;
-      return openpgp.message.fromText('hello').encrypt([key]);
+      return openpgp.Message.fromText('hello').encrypt([key]);
     }).then(function(msg) {
-      return msg.message.decrypt([key]);
+      return msg.decrypt([key]);
     }).catch(function(err) {
       expect(err.message).to.equal('Private key is not decrypted.');
     });
@@ -2063,8 +2176,7 @@ function versionSpecificTests() {
 
   it('Generate key - single userid', function() {
     const userId = { name: 'test', email: 'a@b.com', comment: 'test comment' };
-    const opt = {numBits: 512, userIds: userId, passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: userId, passphrase: '123' };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
@@ -2077,8 +2189,7 @@ function versionSpecificTests() {
 
   it('Generate key - single userid (all missing)', function() {
     const userId = { name: '', email: '', comment: '' };
-    const opt = {numBits: 512, userIds: userId, passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: userId, passphrase: '123' };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
@@ -2091,8 +2202,7 @@ function versionSpecificTests() {
 
   it('Generate key - single userid (missing email)', function() {
     const userId = { name: 'test', email: '', comment: 'test comment' };
-    const opt = {numBits: 512, userIds: userId, passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: userId, passphrase: '123' };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
@@ -2105,8 +2215,7 @@ function versionSpecificTests() {
 
   it('Generate key - single userid (missing comment)', function() {
     const userId = { name: 'test', email: 'a@b.com', comment: '' };
-    const opt = {numBits: 512, userIds: userId, passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: userId, passphrase: '123' };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
@@ -2120,12 +2229,10 @@ function versionSpecificTests() {
   it('Generate key - setting date to the past', function() {
     const past = new Date(0);
     const opt = {
-      numBits: 512,
       userIds: { name: 'Test User', email: 'text@example.com' },
       passphrase: 'secret',
       date: past
     };
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
 
     return openpgp.generateKey(opt).then(function(newKey) {
       expect(newKey.key).to.exist;
@@ -2138,12 +2245,10 @@ function versionSpecificTests() {
   it('Generate key - setting date to the future', function() {
     const future = new Date(Math.ceil(Date.now() / 1000) * 1000 + 1000);
     const opt = {
-      numBits: 512,
       userIds: { name: 'Test User', email: 'text@example.com' },
       passphrase: 'secret',
       date: future
     };
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
 
     return openpgp.generateKey(opt).then(function(newKey) {
       expect(newKey.key).to.exist;
@@ -2154,27 +2259,40 @@ function versionSpecificTests() {
   });
 
   it('Generate key - multi userid', function() {
-    const userId1 = 'test <a@b.com>';
-    const userId2 = 'test <b@c.com>';
-    const opt = {numBits: 512, userIds: [userId1, userId2], passphrase: '123'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId1 = { name: 'test', email: 'a@b.com' };
+    const userId2 = { name: 'test', email: 'b@c.com' };
+    const opt = { userIds: [userId1, userId2], passphrase: '123' };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(2);
-      expect(key.users[0].userId.userid).to.equal(userId1);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
-      expect(key.users[1].userId.userid).to.equal(userId2);
+      expect(key.users[1].userId.userid).to.equal('test <b@c.com>');
       expect(key.users[1].selfCertifications[0].isPrimaryUserID).to.be.null;
     });
   });
 
+  it('Generate key - default values', function() {
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: [userId] };
+    return openpgp.generateKey(opt).then(function({ key }) {
+      expect(key.isDecrypted()).to.be.true;
+      expect(key.getAlgorithmInfo().algorithm).to.equal('eddsa');
+      expect(key.users.length).to.equal(1);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
+      expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
+      expect(key.subKeys).to.have.length(1);
+      expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
+    });
+  });
+
   it('Generate key - two subkeys with default values', function() {
-    const userId = 'test <a@b.com>';
-    const opt = {curve: 'curve25519', userIds: [userId], passphrase: '123', subkeys:[{},{}]};
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: [userId], passphrase: '123', subkeys:[{},{}] };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
-      expect(key.users[0].userId.userid).to.equal(userId);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
       expect(key.subKeys).to.have.length(2);
       expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
@@ -2182,13 +2300,33 @@ function versionSpecificTests() {
     });
   });
 
-  it('Generate key - one signing subkey', function() {
-    const userId = 'test <a@b.com>';
-    const opt = {curve: 'curve25519', userIds: [userId], passphrase: '123', subkeys:[{}, {sign: true}]};
-    return openpgp.generateKey(opt).then(async function({ privateKeyArmored }) {
-      const { keys: [key] } = await openpgp.key.readArmored(privateKeyArmored);
+  it('Generate RSA key - two subkeys with default values', async function() {
+    const rsaBits = 512;
+    const minRsaBits = openpgp.config.minRsaBits;
+    openpgp.config.minRsaBits = rsaBits;
+
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { type: 'rsa', rsaBits, userIds: [userId], passphrase: '123', subkeys:[{},{}] };
+    try {
+      const { key } = await openpgp.generateKey(opt);
       expect(key.users.length).to.equal(1);
-      expect(key.users[0].userId.userid).to.equal(userId);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
+      expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
+      expect(key.subKeys).to.have.length(2);
+      expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('rsaEncryptSign');
+      expect(key.subKeys[1].getAlgorithmInfo().algorithm).to.equal('rsaEncryptSign');
+    } finally {
+      openpgp.config.minRsaBits = minRsaBits;
+    }
+  });
+
+  it('Generate key - one signing subkey', function() {
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: [userId], passphrase: '123', subkeys:[{}, { sign: true }] };
+    return openpgp.generateKey(opt).then(async function({ privateKeyArmored }) {
+      const key = await openpgp.readArmoredKey(privateKeyArmored);
+      expect(key.users.length).to.equal(1);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
       expect(key.subKeys).to.have.length(2);
       expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
@@ -2199,15 +2337,15 @@ function versionSpecificTests() {
   });
 
   it('Reformat key - one signing subkey', function() {
-    const userId = 'test <a@b.com>';
-    const opt = {curve: 'curve25519', userIds: [userId], passphrase: '123', subkeys:[{}, {sign: true}]};
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: [userId], passphrase: '123', subkeys:[{}, { sign: true }] };
     return openpgp.generateKey(opt).then(async function({ key }) {
       await key.decrypt('123');
       return openpgp.reformatKey({ privateKey: key, userIds: [userId] });
     }).then(async function({ privateKeyArmored }) {
-      const { keys: [key] } = await openpgp.key.readArmored(privateKeyArmored);
+      const key = await openpgp.readArmoredKey(privateKeyArmored);
       expect(key.users.length).to.equal(1);
-      expect(key.users[0].userId.userid).to.equal(userId);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
       expect(key.subKeys).to.have.length(2);
       expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
@@ -2217,37 +2355,40 @@ function versionSpecificTests() {
     });
   });
 
-  it('Generate key - override main key options for subkey', function() {
-    const userId = 'test <a@b.com>';
-    const opt = {numBits: 512, userIds: [userId], passphrase: '123', subkeys:[{curve: 'curve25519'}]};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
-    return openpgp.generateKey(opt).then(function(key) {
-      key = key.key;
+  it('Generate key - override main RSA key options for subkey', async function() {
+    const rsaBits = 512;
+    const minRsaBits = openpgp.config.minRsaBits;
+    openpgp.config.minRsaBits = rsaBits;
+
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { type: 'rsa', rsaBits, userIds: [userId], passphrase: '123', subkeys:[{ type: 'ecc', curve: 'curve25519' }] };
+    try {
+      const { key } = await openpgp.generateKey(opt);
       expect(key.users.length).to.equal(1);
-      expect(key.users[0].userId.userid).to.equal(userId);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.users[0].selfCertifications[0].isPrimaryUserID).to.be.true;
-      expect(key.getAlgorithmInfo().algorithm).to.equal('rsa_encrypt_sign');
-      expect(key.getAlgorithmInfo().bits).to.equal(opt.numBits);
-      expect(key.getAlgorithmInfo().rsaBits).to.equal(key.getAlgorithmInfo().bits);
+      expect(key.getAlgorithmInfo().algorithm).to.equal('rsaEncryptSign');
+      expect(key.getAlgorithmInfo().bits).to.equal(opt.rsaBits);
       expect(key.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
-    });
+    } finally {
+      openpgp.config.minRsaBits = minRsaBits;
+    }
   });
 
   it('Encrypt key with new passphrase', async function() {
-    const userId = 'test <a@b.com>';
-    const opt = {numBits: 512, userIds: userId, passphrase: 'passphrase'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: userId, passphrase: 'passphrase' };
     const key = (await openpgp.generateKey(opt)).key;
     const armor1 = key.armor();
     const armor2 = key.armor();
     expect(armor1).to.equal(armor2);
-    expect(await key.decrypt('passphrase')).to.be.true;
+    await key.decrypt('passphrase');
     expect(key.isDecrypted()).to.be.true;
     await key.encrypt('new_passphrase');
     expect(key.isDecrypted()).to.be.false;
-    await expect(key.decrypt('passphrase')).to.eventually.be.rejectedWith('Incorrect key passphrase');
+    await expect(key.decrypt('passphrase')).to.be.rejectedWith('Incorrect key passphrase');
     expect(key.isDecrypted()).to.be.false;
-    expect(await key.decrypt('new_passphrase')).to.be.true;
+    await key.decrypt('new_passphrase');
     expect(key.isDecrypted()).to.be.true;
     const armor3 = key.armor();
     expect(armor3).to.not.equal(armor1);
@@ -2255,9 +2396,8 @@ function versionSpecificTests() {
 
   it('Generate key - ensure keyExpirationTime works', function() {
     const expect_delta = 365 * 24 * 60 * 60;
-    const userId = 'test <a@b.com>';
-    const opt = {numBits: 512, userIds: userId, passphrase: '123', keyExpirationTime: expect_delta};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId = { name: 'test', email: 'a@b.com' };
+    const opt = { userIds: userId, passphrase: '123', keyExpirationTime: expect_delta };
     return openpgp.generateKey(opt).then(async function(key) {
       key = key.key;
 
@@ -2276,8 +2416,8 @@ function versionSpecificTests() {
   });
 
   it('Sign and verify key - primary user', async function() {
-    let publicKey = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+    let publicKey = await openpgp.readArmoredKey(pub_sig_test);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
     publicKey = await publicKey.signPrimaryUser([privateKey]);
     const signatures = await publicKey.verifyPrimaryUser([privateKey]);
@@ -2291,9 +2431,9 @@ function versionSpecificTests() {
   });
 
   it('Sign key and verify with wrong key - primary user', async function() {
-    let publicKey = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    const wrongKey = (await openpgp.key.readArmored(wrong_key)).keys[0];
+    let publicKey = await openpgp.readArmoredKey(pub_sig_test);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+    const wrongKey = await openpgp.readArmoredKey(wrong_key);
     await privateKey.decrypt('hello world');
     publicKey = await publicKey.signPrimaryUser([privateKey]);
     const signatures = await publicKey.verifyPrimaryUser([wrongKey]);
@@ -2307,8 +2447,8 @@ function versionSpecificTests() {
   });
 
   it('Sign and verify key - all users', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+    let publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
     publicKey = await publicKey.signAllUsers([privateKey]);
     const signatures = await publicKey.verifyAllUsers([privateKey]);
@@ -2330,9 +2470,9 @@ function versionSpecificTests() {
   });
 
   it('Sign key and verify with wrong key - all users', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    const wrongKey = (await openpgp.key.readArmored(wrong_key)).keys[0];
+    let publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+    const wrongKey = await openpgp.readArmoredKey(wrong_key);
     await privateKey.decrypt('hello world');
     publicKey = await publicKey.signAllUsers([privateKey]);
     const signatures = await publicKey.verifyAllUsers([wrongKey]);
@@ -2354,72 +2494,71 @@ function versionSpecificTests() {
   });
 
   it('Reformat key without passphrase', function() {
-    const userId1 = 'test1 <a@b.com>';
-    const userId2 = 'test2 <b@a.com>';
-    const opt = {numBits: 512, userIds: userId1};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId1 = { name: 'test', email: 'a@b.com' };
+    const userId2 = { name: 'test', email: 'b@c.com' };
+    const opt = { userIds: userId1 };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       expect(key.users.length).to.equal(1);
-      expect(key.users[0].userId.userid).to.equal(userId1);
+      expect(key.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(key.isDecrypted()).to.be.true;
       opt.privateKey = key;
       opt.userIds = userId2;
       return openpgp.reformatKey(opt).then(function(newKey) {
         newKey = newKey.key;
         expect(newKey.users.length).to.equal(1);
-        expect(newKey.users[0].userId.userid).to.equal(userId2);
+        expect(newKey.users[0].userId.userid).to.equal('test <b@c.com>');
         expect(newKey.isDecrypted()).to.be.true;
       });
     });
   });
 
   it('Reformat key with no subkey with passphrase', async function() {
-    const userId = 'test1 <a@b.com>';
-    const keys = (await openpgp.key.readArmored(key_without_subkey)).keys;
-    const opt = {privateKey: keys[0], userIds: [userId], passphrase: "test"};
+    const userId = { name: 'test', email: 'a@b.com' };
+    const key = await openpgp.readArmoredKey(key_without_subkey);
+    const opt = { privateKey: key, userIds: [userId], passphrase: "test" };
     return openpgp.reformatKey(opt).then(function(newKey) {
       newKey = newKey.key;
       expect(newKey.users.length).to.equal(1);
-      expect(newKey.users[0].userId.userid).to.equal(userId);
+      expect(newKey.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(newKey.isDecrypted()).to.be.false;
     });
   });
 
   it('Reformat key with two subkeys with passphrase', function() {
-    const userId1 = 'test <a@b.com>';
-    const userId2 = 'test <b@c.com>';
-    const now = openpgp.util.normalizeDate(new Date());
-    const before = openpgp.util.normalizeDate(new Date(0));
-    const opt1 = {curve: 'curve25519', userIds: [userId1], date: now};
+    const userId1 = { name: 'test', email: 'a@b.com' };
+    const userId2 = { name: 'test', email: 'b@c.com' };
+    const now = util.normalizeDate(new Date());
+    const before = util.normalizeDate(new Date(0));
+    const opt1 = { userIds: [userId1], date: now };
     return openpgp.generateKey(opt1).then(function(newKey) {
       newKey = newKey.key;
-      expect(newKey.users[0].userId.userid).to.equal(userId1);
+      expect(newKey.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(+newKey.getCreationTime()).to.equal(+now);
       expect(+newKey.subKeys[0].getCreationTime()).to.equal(+now);
       expect(+newKey.subKeys[0].bindingSignatures[0].created).to.equal(+now);
-      const opt2 = {privateKey: newKey, userIds: [userId2], date: before};
+      const opt2 = { privateKey: newKey, userIds: [userId2], date: before };
       return openpgp.reformatKey(opt2).then(function(refKey) {
         refKey = refKey.key;
         expect(refKey.users.length).to.equal(1);
-        expect(refKey.users[0].userId.userid).to.equal(userId2);
+        expect(refKey.users[0].userId.userid).to.equal('test <b@c.com>');
         expect(+refKey.subKeys[0].bindingSignatures[0].created).to.equal(+before);
       });
     });
   });
 
   it('Reformat key with no subkey without passphrase', async function() {
-    const userId = 'test1 <a@b.com>';
-    const keys = (await openpgp.key.readArmored(key_without_subkey)).keys;
-    const opt = {privateKey: keys[0], userIds: [userId]};
+    const userId = { name: 'test', email: 'a@b.com' };
+    const key = await openpgp.readArmoredKey(key_without_subkey);
+    const opt = { privateKey: key, userIds: [userId] };
     return openpgp.reformatKey(opt).then(function(newKey) {
       newKey = newKey.key;
       expect(newKey.users.length).to.equal(1);
-      expect(newKey.users[0].userId.userid).to.equal(userId);
+      expect(newKey.users[0].userId.userid).to.equal('test <a@b.com>');
       expect(newKey.isDecrypted()).to.be.true;
-      return openpgp.sign({message: openpgp.cleartext.fromText('hello'), privateKeys: newKey, armor: true}).then(async function(signed) {
+      return openpgp.sign({ message: openpgp.CleartextMessage.fromText('hello'), privateKeys: newKey, armor: true }).then(async function(signed) {
         return openpgp.verify(
-          {message: await openpgp.cleartext.readArmored(signed.data), publicKeys: newKey.toPublic()}
+          { message: await openpgp.readArmoredCleartextMessage(signed), publicKeys: newKey.toPublic() }
         ).then(async function(verified) {
           expect(verified.signatures[0].valid).to.be.true;
           const newSigningKey = await newKey.getSigningKey();
@@ -2431,11 +2570,10 @@ function versionSpecificTests() {
   });
 
   it('Reformat and encrypt key', function() {
-    const userId1 = 'test1 <a@b.com>';
-    const userId2 = 'test2 <b@c.com>';
-    const userId3 = 'test3 <c@d.com>';
-    const opt = {numBits: 512, userIds: userId1};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId1 = { name: 'test1', email: 'a@b.com' };
+    const userId2 = { name: 'test2', email: 'b@c.com' };
+    const userId3 = { name: 'test3', email: 'c@d.com' };
+    const opt = { userIds: userId1 };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       opt.privateKey = key;
@@ -2444,7 +2582,7 @@ function versionSpecificTests() {
       return openpgp.reformatKey(opt).then(async function(newKey) {
         newKey = newKey.key;
         expect(newKey.users.length).to.equal(2);
-        expect(newKey.users[0].userId.userid).to.equal(userId2);
+        expect(newKey.users[0].userId.userid).to.equal('test2 <b@c.com>');
         expect(newKey.isDecrypted()).to.be.false;
         await newKey.decrypt('123');
         expect(newKey.isDecrypted()).to.be.true;
@@ -2453,18 +2591,17 @@ function versionSpecificTests() {
   });
 
   it('Sign and encrypt with reformatted key', function() {
-    const userId1 = 'test1 <a@b.com>';
-    const userId2 = 'test2 <b@a.com>';
-    const opt = {numBits: 512, userIds: userId1};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const userId1 = { name: 'test1', email: 'a@b.com' };
+    const userId2 = { name: 'test2', email: 'b@c.com' };
+    const opt = { userIds: userId1 };
     return openpgp.generateKey(opt).then(function(key) {
       key = key.key;
       opt.privateKey = key;
       opt.userIds = userId2;
       return openpgp.reformatKey(opt).then(function(newKey) {
         newKey = newKey.key;
-        return openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: newKey.toPublic(), privateKeys: newKey, armor: true}).then(async function(encrypted) {
-          return openpgp.decrypt({message: await openpgp.message.readArmored(encrypted.data), privateKeys: newKey, publicKeys: newKey.toPublic()}).then(function(decrypted) {
+        return openpgp.encrypt({ message: openpgp.Message.fromText('hello'), publicKeys: newKey.toPublic(), privateKeys: newKey, armor: true }).then(async function(encrypted) {
+          return openpgp.decrypt({ message: await openpgp.readArmoredMessage(encrypted), privateKeys: newKey, publicKeys: newKey.toPublic() }).then(function(decrypted) {
             expect(decrypted.data).to.equal('hello');
             expect(decrypted.signatures[0].valid).to.be.true;
           });
@@ -2474,24 +2611,22 @@ function versionSpecificTests() {
   });
 
   it('Reject with user-friendly error when reformatting encrypted key', function() {
-    const opt = {numBits: 512, userIds: 'test1 <a@b.com>', passphrase: '1234'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: '1234' };
     return openpgp.generateKey(opt).then(function(original) {
-      return openpgp.reformatKey({privateKey: original.key, userIds: 'test2 <b@a.com>', passphrase: '1234'}).then(function() {
+      return openpgp.reformatKey({ privateKey: original.key, userIds: { name: 'test2', email: 'a@b.com' }, passphrase: '1234' }).then(function() {
         throw new Error('reformatKey should result in error when key not decrypted');
       }).catch(function(error) {
-        expect(error.message).to.equal('Error reformatting keypair: Key not decrypted');
+        expect(error.message).to.equal('Error reformatting keypair: Key is not decrypted');
       });
     });
   });
 
   it('Revoke generated key with revocation certificate', function() {
-    const opt = {numBits: 512, userIds: 'test1 <a@b.com>', passphrase: '1234'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: '1234' };
     return openpgp.generateKey(opt).then(function(original) {
-      return openpgp.revokeKey({key: original.key.toPublic(), revocationCertificate: original.revocationCertificate}).then(async function(revKey) {
+      return openpgp.revokeKey({ key: original.key.toPublic(), revocationCertificate: original.revocationCertificate }).then(async function(revKey) {
         revKey = revKey.publicKey;
-        expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.no_reason);
+        expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.noReason);
         expect(revKey.revocationSignatures[0].reasonForRevocationString).to.equal('');
         await expect(revKey.verifyPrimaryKey()).to.be.rejectedWith('Primary key is revoked');
       });
@@ -2499,13 +2634,12 @@ function versionSpecificTests() {
   });
 
   it('Revoke generated key with private key', function() {
-    const opt = {numBits: 512, userIds: 'test1 <a@b.com>', passphrase: '1234'};
-    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    const opt = { userIds: { name: 'test', email: 'a@b.com' }, passphrase: '1234' };
     return openpgp.generateKey(opt).then(async function(original) {
       await original.key.decrypt('1234');
-      return openpgp.revokeKey({key: original.key, reasonForRevocation: {string: 'Testing key revocation'}}).then(async function(revKey) {
+      return openpgp.revokeKey({ key: original.key, reasonForRevocation: { string: 'Testing key revocation' } }).then(async function(revKey) {
         revKey = revKey.publicKey;
-        expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.no_reason);
+        expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.noReason);
         expect(revKey.revocationSignatures[0].reasonForRevocationString).to.equal('Testing key revocation');
         await expect(revKey.verifyPrimaryKey()).to.be.rejectedWith('Primary key is revoked');
       });
@@ -2518,107 +2652,89 @@ function versionSpecificTests() {
     // uid                      emma.goldman@example.net
     // ssb   cv25519 2019-03-20 [E]
     //       E4557C2B02FFBF4B04F87401EC336AF7133D0F85BE7FD09BAEFD9CAEB8C93965
-    const { keys: [key] } = await openpgp.key.readArmored(v5_sample_key);
+    const key = await openpgp.readArmoredKey(v5_sample_key);
     expect(key.primaryKey.getFingerprint()).to.equal('19347bc9872464025f99df3ec2e0000ed9884892e1f7b3ea4c94009159569b54');
     expect(key.subKeys[0].getFingerprint()).to.equal('e4557c2b02ffbf4b04f87401ec336af7133d0f85be7fd09baefd9caeb8c93965');
     await key.verifyPrimaryKey();
   });
 }
 
-describe('Key', function() {
-  let rsaGenStub;
-  let rsaGenValue = openpgp.crypto.publicKey.rsa.generate(openpgp.util.getWebCryptoAll() ? 2048 : 512, "10001");
-
-  beforeEach(function() {
-    rsaGenStub = stub(openpgp.crypto.publicKey.rsa, 'generate');
-    rsaGenStub.returns(rsaGenValue);
-  });
-
-  afterEach(function() {
-    rsaGenStub.restore();
-  });
+module.exports = () => describe('Key', function() {
+  let v5KeysVal;
+  let aeadProtectVal;
 
   tryTests('V4', versionSpecificTests, {
-    if: !openpgp.config.ci
-  });
-
-  tryTests('V4 - With Worker', versionSpecificTests, {
-    if: typeof window !== 'undefined' && window.Worker,
-    before: async function() {
-      await openpgp.initWorker({ path: '../dist/openpgp.worker.js' });
+    if: !openpgp.config.ci,
+    beforeEach: function() {
+      v5KeysVal = openpgp.config.v5Keys;
+      openpgp.config.v5Keys = false;
     },
-    after: function() {
-      openpgp.destroyWorker();
+    afterEach: function() {
+      openpgp.config.v5Keys = v5KeysVal;
     }
   });
 
-  let v5_keysVal;
-  let aead_protectVal;
   tryTests('V5', versionSpecificTests, {
     if: !openpgp.config.ci,
     beforeEach: function() {
-      v5_keysVal = openpgp.config.v5_keys;
-      aead_protectVal = openpgp.config.aead_protect;
-      openpgp.config.v5_keys = true;
-      openpgp.config.aead_protect = true;
+      v5KeysVal = openpgp.config.v5Keys;
+      aeadProtectVal = openpgp.config.aeadProtect;
+      openpgp.config.v5Keys = true;
+      openpgp.config.aeadProtect = true;
     },
     afterEach: function() {
-      openpgp.config.v5_keys = v5_keysVal;
-      openpgp.config.aead_protect = aead_protectVal;
+      openpgp.config.v5Keys = v5KeysVal;
+      openpgp.config.aeadProtect = aeadProtectVal;
     }
   });
 
   it('Parsing armored text with RSA key and ECC subkey', async function() {
-    openpgp.config.tolerant = true;
-    const pubKeys = await openpgp.key.readArmored(rsa_ecc_pub);
+    const pubKeys = await openpgp.readArmoredKeys(rsa_ecc_pub);
     expect(pubKeys).to.exist;
-    expect(pubKeys.err).to.not.exist;
-    expect(pubKeys.keys).to.have.length(1);
-    expect(pubKeys.keys[0].getKeyId().toHex()).to.equal('b8e4105cc9dedc77');
+    expect(pubKeys).to.have.length(1);
+    expect(pubKeys[0].getKeyId().toHex()).to.equal('b8e4105cc9dedc77');
   });
 
   it('Parsing armored text with two keys', async function() {
-    const pubKeys = await openpgp.key.readArmored(twoKeys);
+    const pubKeys = await openpgp.readArmoredKeys(twoKeys);
     expect(pubKeys).to.exist;
-    expect(pubKeys.err).to.not.exist;
-    expect(pubKeys.keys).to.have.length(2);
-    expect(pubKeys.keys[0].getKeyId().toHex()).to.equal('4a63613a4d6e4094');
-    expect(pubKeys.keys[1].getKeyId().toHex()).to.equal('dbf223e870534df4');
+    expect(pubKeys).to.have.length(2);
+    expect(pubKeys[0].getKeyId().toHex()).to.equal('4a63613a4d6e4094');
+    expect(pubKeys[1].getKeyId().toHex()).to.equal('dbf223e870534df4');
   });
 
   it('Parsing armored key with an authorized revocation key in a User ID self-signature', async function() {
-    const { keys: [pubKey] } = await openpgp.key.readArmored(key_with_authorized_revocation_key);
+    const pubKey = await openpgp.readArmoredKey(key_with_authorized_revocation_key);
     await expect(pubKey.getPrimaryUser()).to.be.rejectedWith('This key is intended to be revoked with an authorized key, which OpenPGP.js does not support.');
   });
 
   it('Parsing armored key with an authorized revocation key in a direct-key signature', async function() {
-    const { keys: [pubKey] } = await openpgp.key.readArmored(key_with_authorized_revocation_key_in_separate_sig);
+    const pubKey = await openpgp.readArmoredKey(key_with_authorized_revocation_key_in_separate_sig);
     const primaryUser = await pubKey.getPrimaryUser();
     expect(primaryUser).to.exist;
   });
 
   it('Parsing V5 public key packet', async function() {
     // Manually modified from https://gitlab.com/openpgp-wg/rfc4880bis/blob/00b2092/back.mkd#sample-eddsa-key
-    let packetBytes = openpgp.util.hex_to_Uint8Array(`
+    const packetBytes = util.hexToUint8Array(`
       98 37 05 53 f3 5f 0b 16  00 00 00 2d  09 2b 06 01 04 01 da 47
       0f 01 01 07 40 3f 09 89  94 bd d9 16 ed 40 53 19
       79 34 e4 a8 7c 80 73 3a  12 80 d6 2f 80 10 99 2e
       43 ee 3b 24 06
     `.replace(/\s+/g, ''));
 
-    let packetlist = new openpgp.packet.List();
-    await packetlist.read(packetBytes);
-    let key = packetlist[0];
+    const packetlist = new openpgp.PacketList();
+    await packetlist.read(packetBytes, { PublicKeyPacket: openpgp.PublicKeyPacket });
+    const key = packetlist[0];
     expect(key).to.exist;
   });
 
   it('Testing key ID and fingerprint for V4 keys', async function() {
-    const pubKeysV4 = await openpgp.key.readArmored(twoKeys);
+    const pubKeysV4 = await openpgp.readArmoredKeys(twoKeys);
     expect(pubKeysV4).to.exist;
-    expect(pubKeysV4.err).to.not.exist;
-    expect(pubKeysV4.keys).to.have.length(2);
+    expect(pubKeysV4).to.have.length(2);
 
-    const pubKeyV4 = pubKeysV4.keys[0];
+    const pubKeyV4 = pubKeysV4[0];
     expect(pubKeyV4).to.exist;
 
     expect(pubKeyV4.getKeyId().toHex()).to.equal('4a63613a4d6e4094');
@@ -2626,25 +2742,19 @@ describe('Key', function() {
   });
 
   it('Create new key ID with fromId()', async function() {
-    const pubKeyV4 = (await openpgp.key.readArmored(twoKeys)).keys[0];
+    const [pubKeyV4] = await openpgp.readArmoredKeys(twoKeys);
     const keyId = pubKeyV4.getKeyId();
     const newKeyId = keyId.constructor.fromId(keyId.toHex());
     expect(newKeyId.toHex()).to.equal(keyId.toHex());
   });
 
   it('Testing key method getSubkeys', async function() {
-    const pubKeys = await openpgp.key.readArmored(pub_sig_test);
-
-    expect(pubKeys).to.exist;
-    expect(pubKeys.err).to.not.exist;
-    expect(pubKeys.keys).to.have.length(1);
-
-    const pubKey = pubKeys.keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_sig_test);
     expect(pubKey).to.exist;
 
-    const packetlist = new openpgp.packet.List();
+    const packetlist = new openpgp.PacketList();
 
-    await packetlist.read((await openpgp.armor.decode(pub_sig_test)).data);
+    await packetlist.read((await openpgp.unarmor(pub_sig_test)).data, openpgp);
 
     const subkeys = pubKey.getSubkeys();
     expect(subkeys).to.exist;
@@ -2654,17 +2764,12 @@ describe('Key', function() {
   });
 
   it('Verify status of revoked primary key', async function() {
-    const pubKey = (await openpgp.key.readArmored(pub_revoked_subkeys)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_revoked_subkeys);
     await expect(pubKey.verifyPrimaryKey()).to.be.rejectedWith('Primary key is revoked');
   });
 
   it('Verify status of revoked subkey', async function() {
-    const pubKeys = await openpgp.key.readArmored(pub_sig_test);
-    expect(pubKeys).to.exist;
-    expect(pubKeys.err).to.not.exist;
-    expect(pubKeys.keys).to.have.length(1);
-
-    const pubKey = pubKeys.keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_sig_test);
     expect(pubKey).to.exist;
     expect(pubKey.subKeys).to.exist;
     expect(pubKey.subKeys).to.have.length(2);
@@ -2675,13 +2780,13 @@ describe('Key', function() {
   });
 
   it('Verify status of key with non-self revocation signature', async function() {
-    const { keys: [pubKey] } = await openpgp.key.readArmored(key_with_revoked_third_party_cert);
+    const pubKey = await openpgp.readArmoredKey(key_with_revoked_third_party_cert);
     const [selfCertification] = await pubKey.verifyPrimaryUser();
     const publicSigningKey = await pubKey.getSigningKey();
     expect(selfCertification.keyid.toHex()).to.equal(publicSigningKey.getKeyId().toHex());
     expect(selfCertification.valid).to.be.true;
 
-    const { keys: [certifyingKey] } = await openpgp.key.readArmored(certifying_key);
+    const certifyingKey = await openpgp.readArmoredKey(certifying_key);
     const certifyingSigningKey = await certifyingKey.getSigningKey();
     const signatures = await pubKey.verifyPrimaryUser([certifyingKey]);
     expect(signatures.length).to.equal(2);
@@ -2695,7 +2800,7 @@ describe('Key', function() {
   });
 
   it('Verify certificate of key with future creation date', async function() {
-    const { keys: [pubKey] } = await openpgp.key.readArmored(key_created_2030);
+    const pubKey = await openpgp.readArmoredKey(key_created_2030);
     const user = pubKey.users[0];
     await user.verifyCertificate(pubKey.primaryKey, user.selfCertifications[0], [pubKey], pubKey.primaryKey.created);
     const verifyAllResult = await user.verifyAllCertifications(pubKey.primaryKey, [pubKey], pubKey.primaryKey.created);
@@ -2704,66 +2809,69 @@ describe('Key', function() {
   });
 
   it('Evaluate key flags to find valid encryption key packet', async function() {
-    const pubKeys = await openpgp.key.readArmored(pub_sig_test);
-    expect(pubKeys).to.exist;
-    expect(pubKeys.err).to.not.exist;
-    expect(pubKeys.keys).to.have.length(1);
-
-    const pubKey = pubKeys.keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_sig_test);
     // remove subkeys
     pubKey.subKeys = [];
     // primary key has only key flags for signing
     await expect(pubKey.getEncryptionKey()).to.be.rejectedWith('Could not find valid encryption key packet in key c076e634d32b498d');
   });
 
+  it('should pad an ECDSA P-521 key with shorter secret key', async function() {
+    const key = await openpgp.readArmoredKey(shortP521Key);
+    // secret key should be padded
+    expect(key.keyPacket.privateParams.d.length === 66);
+    // sanity check
+    await expect(key.validate()).to.be.fulfilled;
+  });
+
   it('should not decrypt using a sign-only RSA key, unless explicitly configured', async function () {
-    const allowSigningKeyDecryption = openpgp.config.allow_insecure_decryption_with_signing_keys;
-    const { keys: [key] } = await openpgp.key.readArmored(rsaSignOnly);
+    const allowSigningKeyDecryption = openpgp.config.allowInsecureDecryptionWithSigningKeys;
+    const key = await openpgp.readArmoredKey(rsaSignOnly);
     try {
-      openpgp.config.allow_insecure_decryption_with_signing_keys = false;
+      openpgp.config.allowInsecureDecryptionWithSigningKeys = false;
       await expect(openpgp.decrypt({
-        message: await openpgp.message.readArmored(encryptedRsaSignOnly),
+        message: await openpgp.readArmoredMessage(encryptedRsaSignOnly),
         privateKeys: key
       })).to.be.rejectedWith(/Session key decryption failed/);
 
-      openpgp.config.allow_insecure_decryption_with_signing_keys = true;
+      openpgp.config.allowInsecureDecryptionWithSigningKeys = true;
       await expect(openpgp.decrypt({
-        message: await openpgp.message.readArmored(encryptedRsaSignOnly),
+        message: await openpgp.readArmoredMessage(encryptedRsaSignOnly),
         privateKeys: key
       })).to.be.fulfilled;
     } finally {
-      openpgp.config.allow_insecure_decryption_with_signing_keys = allowSigningKeyDecryption;
+      openpgp.config.allowInsecureDecryptionWithSigningKeys = allowSigningKeyDecryption;
     }
   });
 
   it('Method getExpirationTime V4 Key', async function() {
-    const pubKey = (await openpgp.key.readArmored(twoKeys)).keys[1];
+    const [, pubKey] = await openpgp.readArmoredKeys(twoKeys);
     expect(pubKey).to.exist;
-    expect(pubKey).to.be.an.instanceof(openpgp.key.Key);
+    expect(pubKey).to.be.an.instanceof(openpgp.Key);
     const expirationTime = await pubKey.getExpirationTime();
     expect(expirationTime.toISOString()).to.be.equal('2018-11-26T10:58:29.000Z');
   });
 
   it('Method getExpirationTime expired V4 Key', async function() {
-    const pubKey = (await openpgp.key.readArmored(expiredKey)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(expiredKey);
     expect(pubKey).to.exist;
-    expect(pubKey).to.be.an.instanceof(openpgp.key.Key);
+    expect(pubKey).to.be.an.instanceof(openpgp.Key);
     const expirationTime = await pubKey.getExpirationTime();
     expect(expirationTime.toISOString()).to.be.equal('1970-01-01T00:22:18.000Z');
   });
 
   it('Method getExpirationTime V4 SubKey', async function() {
-    const pubKey = (await openpgp.key.readArmored(twoKeys)).keys[1];
+    const [, pubKey] = await openpgp.readArmoredKeys(twoKeys);
     expect(pubKey).to.exist;
-    expect(pubKey).to.be.an.instanceof(openpgp.key.Key);
+    expect(pubKey).to.be.an.instanceof(openpgp.Key);
     const expirationTime = await pubKey.subKeys[0].getExpirationTime(pubKey.primaryKey);
     expect(expirationTime.toISOString()).to.be.equal('2018-11-26T10:58:29.000Z');
   });
 
   it('Method getExpirationTime V4 Key with capabilities', async function() {
-    const pubKey = (await openpgp.key.readArmored(priv_key_2000_2008)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(priv_key_2000_2008);
     expect(pubKey).to.exist;
-    expect(pubKey).to.be.an.instanceof(openpgp.key.Key);
+    expect(pubKey).to.be.an.instanceof(openpgp.Key);
     pubKey.users[0].selfCertifications[0].keyFlags = [1];
     const expirationTime = await pubKey.getExpirationTime();
     expect(expirationTime).to.equal(Infinity);
@@ -2772,9 +2880,9 @@ describe('Key', function() {
   });
 
   it('Method getExpirationTime V4 Key with capabilities - capable primary key', async function() {
-    const pubKey = (await openpgp.key.readArmored(priv_key_2000_2008)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(priv_key_2000_2008);
     expect(pubKey).to.exist;
-    expect(pubKey).to.be.an.instanceof(openpgp.key.Key);
+    expect(pubKey).to.be.an.instanceof(openpgp.Key);
     const expirationTime = await pubKey.getExpirationTime();
     expect(expirationTime).to.equal(Infinity);
     const encryptExpirationTime = await pubKey.getExpirationTime('encrypt_sign');
@@ -2782,13 +2890,13 @@ describe('Key', function() {
   });
 
   it("decrypt() - throw if key parameters don't correspond", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(mismatchingKeyParams);
+    const key = await openpgp.readArmoredKey(mismatchingKeyParams);
     await expect(key.decrypt('userpass')).to.be.rejectedWith('Key is invalid');
   });
 
   it("decrypt(keyId) - throw if key parameters don't correspond", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(mismatchingKeyParams);
-    const subKeyId = key.subKeys[0].getKeyId()
+    const key = await openpgp.readArmoredKey(mismatchingKeyParams);
+    const subKeyId = key.subKeys[0].getKeyId();
     await expect(key.decrypt('userpass', subKeyId)).to.be.rejectedWith('Key is invalid');
   });
 
@@ -2798,34 +2906,54 @@ describe('Key', function() {
   });
 
   it("validate() - throw if all-gnu-dummy key", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(gnuDummyKey);
+    const key = await openpgp.readArmoredKey(gnuDummyKey);
     await expect(key.validate()).to.be.rejectedWith('Cannot validate an all-gnu-dummy key');
   });
 
   it("validate() - gnu-dummy primary key with signing subkey", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(gnuDummyKeySigningSubkey);
+    const key = await openpgp.readArmoredKey(gnuDummyKeySigningSubkey);
     await expect(key.validate()).to.not.be.rejected;
   });
 
   it("validate() - gnu-dummy primary key with encryption subkey", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(dsaGnuDummyKeyWithElGamalSubkey);
+    const key = await openpgp.readArmoredKey(dsaGnuDummyKeyWithElGamalSubkey);
     await expect(key.validate()).to.not.be.rejected;
   });
 
   it("validate() - curve ed25519 (eddsa) cannot be used for ecdsa", async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(eddsaKeyAsEcdsa);
+    const key = await openpgp.readArmoredKey(eddsaKeyAsEcdsa);
     await expect(key.validate()).to.be.rejectedWith('Key is invalid');
   });
 
+  it("isDecrypted() - should reflect whether all (sub)keys are encrypted", async function() {
+    const passphrase = '12345678';
+    const { key } = await openpgp.generateKey({ userIds: {}, curve: 'ed25519', passphrase });
+    expect(key.isDecrypted()).to.be.false;
+    await key.decrypt(passphrase, key.subKeys[0].getKeyId());
+    expect(key.isDecrypted()).to.be.true;
+  });
+
+  it("isDecrypted() - gnu-dummy primary key", async function() {
+    const key = await openpgp.readArmoredKey(gnuDummyKeySigningSubkey);
+    expect(key.isDecrypted()).to.be.true;
+    await key.encrypt('12345678');
+    expect(key.isDecrypted()).to.be.false;
+  });
+
+  it("isDecrypted() - all-gnu-dummy key", async function() {
+    const key = await openpgp.readArmoredKey(gnuDummyKey);
+    expect(key.isDecrypted()).to.be.false;
+  });
+
   it('makeDummy() - the converted key can be parsed', async function() {
-    const { key: key } = await openpgp.generateKey({ userIds: 'dummy <dummy@alice.com>' });
+    const { key } = await openpgp.generateKey({ userIds: { name: 'dummy', email: 'dummy@alice.com' } });
     key.primaryKey.makeDummy();
-    const parsedKeys = (await openpgp.key.readArmored(key.armor())).keys;
+    const parsedKeys = await openpgp.readArmoredKey(key.armor());
     expect(parsedKeys).to.not.be.empty;
   });
 
   it('makeDummy() - the converted key can be encrypted and decrypted', async function() {
-    const { key: key } = await openpgp.generateKey({ userIds: 'dummy <dummy@alice.com>' });
+    const { key } = await openpgp.generateKey({ userIds: { name: 'dummy', email: 'dummy@alice.com' } });
     const passphrase = 'passphrase';
     key.primaryKey.makeDummy();
     expect(key.isDecrypted()).to.be.true;
@@ -2836,75 +2964,99 @@ describe('Key', function() {
   });
 
   it('makeDummy() - the converted key is valid but can no longer sign', async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(priv_key_rsa);
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
     await key.decrypt('hello world');
     expect(key.primaryKey.isDummy()).to.be.false;
     key.primaryKey.makeDummy();
     expect(key.primaryKey.isDummy()).to.be.true;
     await key.validate();
-    await expect(openpgp.reformatKey({ privateKey: key, userIds: 'test2 <b@a.com>' })).to.be.rejectedWith(/Missing private key parameters/);
+    await expect(openpgp.reformatKey({ privateKey: key, userIds: { name: 'test', email: 'a@b.com' } })).to.be.rejectedWith(/Cannot reformat a gnu-dummy primary key/);
   });
 
   it('makeDummy() - subkeys of the converted key can still sign', async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(priv_key_rsa);
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
     await key.decrypt('hello world');
     expect(key.primaryKey.isDummy()).to.be.false;
     key.primaryKey.makeDummy();
     expect(key.primaryKey.isDummy()).to.be.true;
-    await expect(openpgp.sign({ message: openpgp.message.fromText('test'), privateKeys: [key] })).to.be.fulfilled;
+    await expect(openpgp.sign({ message: openpgp.Message.fromText('test'), privateKeys: [key] })).to.be.fulfilled;
+  });
+
+  it('makeDummy() - should work for encrypted keys', async function() {
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
+    expect(key.primaryKey.isDummy()).to.be.false;
+    expect(key.primaryKey.makeDummy()).to.not.throw;
+    expect(key.primaryKey.isDummy()).to.be.true;
+    // dummy primary key should always be marked as not decrypted
+    await expect(key.decrypt('hello world')).to.be.fulfilled;
+    expect(key.primaryKey.isDummy()).to.be.true;
+    expect(key.primaryKey.isEncrypted === null);
+    expect(key.primaryKey.isDecrypted()).to.be.false;
+    await expect(key.encrypt('hello world')).to.be.fulfilled;
+    expect(key.primaryKey.isDummy()).to.be.true;
+    expect(key.primaryKey.isEncrypted === null);
+    expect(key.primaryKey.isDecrypted()).to.be.false;
+    // confirm that the converted key can be parsed
+    const parsedKeys = (await openpgp.readArmoredKey(key.armor())).keys;
+    expect(parsedKeys).to.be.undefined;
   });
 
   it('clearPrivateParams() - check that private key can no longer be used', async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(priv_key_rsa);
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
     await key.decrypt('hello world');
     await key.clearPrivateParams();
     await expect(key.validate()).to.be.rejectedWith('Key is not decrypted');
   });
 
   it('clearPrivateParams() - detect that private key parameters were removed', async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(priv_key_rsa);
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
     await key.decrypt('hello world');
-    const params = key.primaryKey.params;
+    const signingKeyPacket = key.subKeys[0].keyPacket;
+    const privateParams = signingKeyPacket.privateParams;
     await key.clearPrivateParams();
     key.primaryKey.isEncrypted = false;
-    key.primaryKey.params = params;
+    key.primaryKey.privateParams = privateParams;
     key.subKeys[0].keyPacket.isEncrypted = false;
-    key.subKeys[0].keyPacket.params = params;
-    await expect(key.validate()).to.be.rejectedWith('Missing key parameters');
+    key.subKeys[0].keyPacket.privateParams = privateParams;
+    await expect(key.validate()).to.be.rejectedWith('Key is invalid');
   });
 
   it('clearPrivateParams() - detect that private key parameters were zeroed out', async function() {
-    const { keys: [key] } = await openpgp.key.readArmored(priv_key_rsa);
+    const key = await openpgp.readArmoredKey(priv_key_rsa);
     await key.decrypt('hello world');
-    const params = key.primaryKey.params.slice();
+    const signingKeyPacket = key.subKeys[0].keyPacket;
+    const privateParams = {};
+    Object.entries(signingKeyPacket.privateParams).forEach(([name, value]) => {
+      privateParams[name] = value;
+    });
     await key.clearPrivateParams();
     key.primaryKey.isEncrypted = false;
-    key.primaryKey.params = params;
+    key.primaryKey.privateParams = privateParams;
     key.subKeys[0].keyPacket.isEncrypted = false;
-    key.subKeys[0].keyPacket.params = params;
+    key.subKeys[0].keyPacket.privateParams = privateParams;
     await expect(key.validate()).to.be.rejectedWith('Key is invalid');
   });
 
   it('update() - throw error if fingerprints not equal', async function() {
-    const keys = (await openpgp.key.readArmored(twoKeys)).keys;
+    const keys = await openpgp.readArmoredKeys(twoKeys);
     await expect(keys[0].update.bind(
       keys[0], keys[1]
     )()).to.be.rejectedWith('Key update method: fingerprints of keys not equal');
   });
 
   it('update() - merge revocation signatures', async function() {
-    const source = (await openpgp.key.readArmored(pub_revoked_subkeys)).keys[0];
-    const dest = (await openpgp.key.readArmored(pub_revoked_subkeys)).keys[0];
+    const source = await openpgp.readArmoredKey(pub_revoked_subkeys);
+    const dest = await openpgp.readArmoredKey(pub_revoked_subkeys);
     expect(source.revocationSignatures).to.exist;
     dest.revocationSignatures = [];
     return dest.update(source).then(() => {
-      expect(dest.revocationSignatures[0]).to.exist.and.be.an.instanceof(openpgp.packet.Signature);
+      expect(dest.revocationSignatures[0]).to.exist.and.be.an.instanceof(openpgp.SignaturePacket);
     });
   });
 
   it('update() - merge user', async function() {
-    const source = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const dest = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
+    const source = await openpgp.readArmoredKey(pub_sig_test);
+    const dest = await openpgp.readArmoredKey(pub_sig_test);
     expect(source.users[1]).to.exist;
     dest.users.pop();
     return dest.update(source).then(() => {
@@ -2914,8 +3066,8 @@ describe('Key', function() {
   });
 
   it('update() - merge user - other and certification revocation signatures', async function() {
-    const source = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const dest = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
+    const source = await openpgp.readArmoredKey(pub_sig_test);
+    const dest = await openpgp.readArmoredKey(pub_sig_test);
     expect(source.users[1].otherCertifications).to.exist;
     expect(source.users[1].revocationSignatures).to.exist;
     dest.users[1].otherCertifications = [];
@@ -2929,8 +3081,8 @@ describe('Key', function() {
   });
 
   it('update() - merge subkey', async function() {
-    const source = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const dest = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
+    const source = await openpgp.readArmoredKey(pub_sig_test);
+    const dest = await openpgp.readArmoredKey(pub_sig_test);
     expect(source.subKeys[1]).to.exist;
     dest.subKeys.pop();
     return dest.update(source).then(() => {
@@ -2942,8 +3094,8 @@ describe('Key', function() {
   });
 
   it('update() - merge subkey - revocation signature', async function() {
-    const source = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
-    const dest = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
+    const source = await openpgp.readArmoredKey(pub_sig_test);
+    const dest = await openpgp.readArmoredKey(pub_sig_test);
     expect(source.subKeys[0].revocationSignatures).to.exist;
     dest.subKeys[0].revocationSignatures = [];
     return dest.update(source).then(() => {
@@ -2953,8 +3105,8 @@ describe('Key', function() {
   });
 
   it('update() - merge private key into public key', async function() {
-    const source = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    const dest = (await openpgp.key.readArmored(twoKeys)).keys[0];
+    const source = await openpgp.readArmoredKey(priv_key_rsa);
+    const [dest] = await openpgp.readArmoredKeys(twoKeys);
     expect(dest.isPublic()).to.be.true;
     return dest.update(source).then(() => {
       expect(dest.isPrivate()).to.be.true;
@@ -2973,27 +3125,31 @@ describe('Key', function() {
   });
 
   it('update() - merge private key into public key - no subkeys', async function() {
-    const source = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    const dest = (await openpgp.key.readArmored(twoKeys)).keys[0];
+    const source = await openpgp.readArmoredKey(priv_key_rsa);
+    const [dest] = await openpgp.readArmoredKeys(twoKeys);
     source.subKeys = [];
     dest.subKeys = [];
     expect(dest.isPublic()).to.be.true;
-    return dest.update(source).then(() => {
-      expect(dest.isPrivate()).to.be.true;
-      return Promise.all([
-        dest.verifyPrimaryKey().then(result => {
-          expect(source.verifyPrimaryKey()).to.eventually.equal(result);
-        }),
-        dest.users[0].verify(dest.primaryKey).then(result => {
-          expect(source.users[0].verify(source.primaryKey)).to.eventually.equal(result);
-        })
-      ]);
-    });
+
+    await dest.update(source);
+    expect(dest.isPrivate()).to.be.true;
+
+    const { selfCertification: destCertification } = await dest.getPrimaryUser();
+    const { selfCertification: sourceCertification } = await source.getPrimaryUser();
+    destCertification.verified = null;
+    sourceCertification.verified = null;
+    await dest.verifyPrimaryKey().then(async () => expect(destCertification.verified).to.be.true);
+    await source.verifyPrimaryKey().then(async () => expect(sourceCertification.verified).to.be.true);
+
+    destCertification.verified = null;
+    sourceCertification.verified = null;
+    await dest.users[0].verify(dest.primaryKey).then(async () => expect(destCertification.verified).to.be.true);
+    await source.users[0].verify(source.primaryKey).then(async () => expect(sourceCertification.verified).to.be.true);
   });
 
   it('update() - merge private key into public key - mismatch throws error', async function() {
-    const source = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    const dest = (await openpgp.key.readArmored(twoKeys)).keys[0];
+    const source = await openpgp.readArmoredKey(priv_key_rsa);
+    const [dest] = await openpgp.readArmoredKeys(twoKeys);
     source.subKeys = [];
     expect(dest.subKeys).to.exist;
     expect(dest.isPublic()).to.be.true;
@@ -3002,8 +3158,8 @@ describe('Key', function() {
   });
 
   it('update() - merge subkey binding signatures', async function() {
-    const source = (await openpgp.key.readArmored(pgp_desktop_pub)).keys[0];
-    const dest = (await openpgp.key.readArmored(pgp_desktop_priv)).keys[0];
+    const source = await openpgp.readArmoredKey(pgp_desktop_pub);
+    const dest = await openpgp.readArmoredKey(pgp_desktop_priv);
     expect(source.subKeys[0].bindingSignatures[0]).to.exist;
     await source.subKeys[0].verify(source.primaryKey);
     expect(dest.subKeys[0].bindingSignatures[0]).to.not.exist;
@@ -3013,8 +3169,8 @@ describe('Key', function() {
   });
 
   it('update() - merge multiple subkey binding signatures', async function() {
-    const source = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
-    const dest = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
+    const source = await openpgp.readArmoredKey(multipleBindingSignatures);
+    const dest = await openpgp.readArmoredKey(multipleBindingSignatures);
     // remove last subkey binding signature of destination subkey
     dest.subKeys[0].bindingSignatures.length = 1;
     expect((await source.subKeys[0].getExpirationTime(source.primaryKey)).toISOString()).to.equal('2015-10-18T07:41:30.000Z');
@@ -3027,16 +3183,16 @@ describe('Key', function() {
   });
 
   it('revoke() - primary key', async function() {
-    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
+    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
     await privKey.decrypt('hello world');
 
     await privKey.revoke({
-      flag: openpgp.enums.reasonForRevocation.key_retired,
+      flag: openpgp.enums.reasonForRevocation.keyRetired,
       string: 'Testing key revocation'
     }).then(async revKey => {
       expect(revKey.revocationSignatures).to.exist.and.have.length(1);
-      expect(revKey.revocationSignatures[0].signatureType).to.equal(openpgp.enums.signature.key_revocation);
-      expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.key_retired);
+      expect(revKey.revocationSignatures[0].signatureType).to.equal(openpgp.enums.signature.keyRevocation);
+      expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.keyRetired);
       expect(revKey.revocationSignatures[0].reasonForRevocationString).to.equal('Testing key revocation');
 
       await privKey.verifyPrimaryKey();
@@ -3045,17 +3201,17 @@ describe('Key', function() {
   });
 
   it('revoke() - subkey', async function() {
-    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
-    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
     await privKey.decrypt('hello world');
 
     const subKey = pubKey.subKeys[0];
     await subKey.revoke(privKey.primaryKey, {
-      flag: openpgp.enums.reasonForRevocation.key_superseded
+      flag: openpgp.enums.reasonForRevocation.keySuperseded
     }).then(async revKey => {
       expect(revKey.revocationSignatures).to.exist.and.have.length(1);
-      expect(revKey.revocationSignatures[0].signatureType).to.equal(openpgp.enums.signature.subkey_revocation);
-      expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.key_superseded);
+      expect(revKey.revocationSignatures[0].signatureType).to.equal(openpgp.enums.signature.subkeyRevocation);
+      expect(revKey.revocationSignatures[0].reasonForRevocationFlag).to.equal(openpgp.enums.reasonForRevocation.keySuperseded);
       expect(revKey.revocationSignatures[0].reasonForRevocationString).to.equal('');
 
       await subKey.verify(pubKey.primaryKey);
@@ -3064,27 +3220,27 @@ describe('Key', function() {
   });
 
   it('applyRevocationCertificate() should produce the same revoked key as GnuPG', async function() {
-    const pubKey = (await openpgp.key.readArmored(pub_key_arm4)).keys[0];
+    const pubKey = await openpgp.readArmoredKey(pub_key_arm4);
 
     return pubKey.applyRevocationCertificate(revocation_certificate_arm4).then(async revKey => {
-      expect(revKey.armor()).to.equal((await openpgp.key.readArmored(revoked_key_arm4)).keys[0].armor());
+      expect(revKey.armor()).to.equal((await openpgp.readArmoredKey(revoked_key_arm4)).armor());
     });
   });
 
   it('getRevocationCertificate() should produce the same revocation certificate as GnuPG', async function() {
-    const revKey = (await openpgp.key.readArmored(revoked_key_arm4)).keys[0];
+    const revKey = await openpgp.readArmoredKey(revoked_key_arm4);
     const revocationCertificate = await revKey.getRevocationCertificate();
 
-    const input = await openpgp.armor.decode(revocation_certificate_arm4);
-    const packetlist = new openpgp.packet.List();
-    await packetlist.read(input.data);
-    const armored = openpgp.armor.encode(openpgp.enums.armor.public_key, packetlist.write());
+    const input = await openpgp.unarmor(revocation_certificate_arm4);
+    const packetlist = new openpgp.PacketList();
+    await packetlist.read(input.data, { SignaturePacket: openpgp.SignaturePacket });
+    const armored = openpgp.armor(openpgp.enums.armor.publicKey, packetlist.write());
 
-    expect(revocationCertificate.replace(/^Comment: .*$\r\n/mg, '')).to.equal(armored.replace(/^Comment: .*$\r\n/mg, ''));
+    expect(revocationCertificate.replace(/^Comment: .*$\n/mg, '')).to.equal(armored.replace(/^Comment: .*$\n/mg, ''));
   });
 
   it('getRevocationCertificate() should have an appropriate comment', async function() {
-    const revKey = (await openpgp.key.readArmored(revoked_key_arm4)).keys[0];
+    const revKey = await openpgp.readArmoredKey(revoked_key_arm4);
     const revocationCertificate = await revKey.getRevocationCertificate();
 
     expect(revocationCertificate).to.match(/Comment: This is a revocation certificate/);
@@ -3092,44 +3248,44 @@ describe('Key', function() {
   });
 
   it("getPreferredAlgo('symmetric') - one key - AES256", async function() {
-    const key1 = (await openpgp.key.readArmored(twoKeys)).keys[0];
-    const prefAlgo = await openpgp.key.getPreferredAlgo('symmetric', [key1]);
+    const [key1] = await openpgp.readArmoredKeys(twoKeys);
+    const prefAlgo = await key.getPreferredAlgo('symmetric', [key1]);
     expect(prefAlgo).to.equal(openpgp.enums.symmetric.aes256);
   });
 
   it("getPreferredAlgo('symmetric') - two key - AES192", async function() {
-    const keys = (await openpgp.key.readArmored(twoKeys)).keys;
+    const keys = await openpgp.readArmoredKeys(twoKeys);
     const key1 = keys[0];
     const key2 = keys[1];
     const primaryUser = await key2.getPrimaryUser();
     primaryUser.selfCertification.preferredSymmetricAlgorithms = [6,8,3];
-    const prefAlgo = await openpgp.key.getPreferredAlgo('symmetric', [key1, key2]);
+    const prefAlgo = await key.getPreferredAlgo('symmetric', [key1, key2]);
     expect(prefAlgo).to.equal(openpgp.enums.symmetric.aes192);
   });
 
   it("getPreferredAlgo('symmetric') - two key - one without pref", async function() {
-    const keys = (await openpgp.key.readArmored(twoKeys)).keys;
+    const keys = await openpgp.readArmoredKeys(twoKeys);
     const key1 = keys[0];
     const key2 = keys[1];
     const primaryUser = await key2.getPrimaryUser();
     primaryUser.selfCertification.preferredSymmetricAlgorithms = null;
-    const prefAlgo = await openpgp.key.getPreferredAlgo('symmetric', [key1, key2]);
+    const prefAlgo = await key.getPreferredAlgo('symmetric', [key1, key2]);
     expect(prefAlgo).to.equal(openpgp.enums.symmetric.aes128);
   });
 
   it("getPreferredAlgo('aead') - one key - OCB", async function() {
-    const key1 = (await openpgp.key.readArmored(twoKeys)).keys[0];
+    const [key1] = await openpgp.readArmoredKeys(twoKeys);
     const primaryUser = await key1.getPrimaryUser();
     primaryUser.selfCertification.features = [7]; // Monkey-patch AEAD feature flag
     primaryUser.selfCertification.preferredAeadAlgorithms = [2,1];
-    const prefAlgo = await openpgp.key.getPreferredAlgo('aead', [key1]);
+    const prefAlgo = await key.getPreferredAlgo('aead', [key1]);
     expect(prefAlgo).to.equal(openpgp.enums.aead.ocb);
-    const supported = await openpgp.key.isAeadSupported([key1]);
+    const supported = await key.isAeadSupported([key1]);
     expect(supported).to.be.true;
   });
 
   it("getPreferredAlgo('aead') - two key - one without pref", async function() {
-    const keys = (await openpgp.key.readArmored(twoKeys)).keys;
+    const keys = await openpgp.readArmoredKeys(twoKeys);
     const key1 = keys[0];
     const key2 = keys[1];
     const primaryUser = await key1.getPrimaryUser();
@@ -3137,40 +3293,40 @@ describe('Key', function() {
     primaryUser.selfCertification.preferredAeadAlgorithms = [2,1];
     const primaryUser2 = await key2.getPrimaryUser();
     primaryUser2.selfCertification.features = [7]; // Monkey-patch AEAD feature flag
-    const prefAlgo = await openpgp.key.getPreferredAlgo('aead', [key1, key2]);
+    const prefAlgo = await key.getPreferredAlgo('aead', [key1, key2]);
     expect(prefAlgo).to.equal(openpgp.enums.aead.eax);
-    const supported = await openpgp.key.isAeadSupported([key1, key2]);
+    const supported = await key.isAeadSupported([key1, key2]);
     expect(supported).to.be.true;
   });
 
   it("getPreferredAlgo('aead') - two key - one with no support", async function() {
-    const keys = (await openpgp.key.readArmored(twoKeys)).keys;
+    const keys = await openpgp.readArmoredKeys(twoKeys);
     const key1 = keys[0];
     const key2 = keys[1];
     const primaryUser = await key1.getPrimaryUser();
     primaryUser.selfCertification.features = [7]; // Monkey-patch AEAD feature flag
     primaryUser.selfCertification.preferredAeadAlgorithms = [2,1];
-    const prefAlgo = await openpgp.key.getPreferredAlgo('aead', [key1, key2]);
+    const prefAlgo = await key.getPreferredAlgo('aead', [key1, key2]);
     expect(prefAlgo).to.equal(openpgp.enums.aead.eax);
-    const supported = await openpgp.key.isAeadSupported([key1, key2]);
+    const supported = await key.isAeadSupported([key1, key2]);
     expect(supported).to.be.false;
   });
 
   it('User attribute packet read & write', async function() {
-    const key = (await openpgp.key.readArmored(user_attr_key)).keys[0];
-    const key2 = (await openpgp.key.readArmored(key.armor())).keys[0];
+    const key = await openpgp.readArmoredKey(user_attr_key);
+    const key2 = await openpgp.readArmoredKey(key.armor());
     expect(key.users[1].userAttribute).eql(key2.users[1].userAttribute);
   });
 
   it('getPrimaryUser()', async function() {
-    const key = (await openpgp.key.readArmored(pub_sig_test)).keys[0];
+    const key = await openpgp.readArmoredKey(pub_sig_test);
     const primUser = await key.getPrimaryUser();
     expect(primUser).to.exist;
     expect(primUser.user.userId.userid).to.equal('Signature Test <signature@test.com>');
     expect(primUser.user.userId.name).to.equal('Signature Test');
     expect(primUser.user.userId.email).to.equal('signature@test.com');
     expect(primUser.user.userId.comment).to.equal('');
-    expect(primUser.selfCertification).to.be.an.instanceof(openpgp.packet.Signature);
+    expect(primUser.selfCertification).to.be.an.instanceof(openpgp.SignaturePacket);
   });
 
   it('getPrimaryUser() should throw if no UserIDs are bound', async function() {
@@ -3186,98 +3342,109 @@ Vz/bMCJoAShgybW1r6kRWejybzIjFSLnx/YA/iLZeo5UNdlXRJco+15RbFiNSAbw
 VYGdb3eNlV8CfoEC
 =FYbP
 -----END PGP PRIVATE KEY BLOCK-----`;
-    const key = (await openpgp.key.readArmored(keyWithoutUserID)).keys[0];
+    const key = await openpgp.readArmoredKey(keyWithoutUserID);
     await expect(key.getPrimaryUser()).to.be.rejectedWith('Could not find valid self-signature in key 3ce893915c44212f');
   });
 
-  it('Encrypt - latest created user', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+  it('Generate session key - latest created user', async function() {
+    const publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
     // Set second user to prefer aes128. We should select this user by default, since it was created later.
     publicKey.users[1].selfCertifications[0].preferredSymmetricAlgorithms = [openpgp.enums.symmetric.aes128];
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, armor: false});
-    expect(encrypted.message.packets[0].sessionKeyAlgorithm).to.equal('aes128');
+    const sessionKey = await openpgp.generateSessionKey({ publicKeys: publicKey });
+    expect(sessionKey.algorithm).to.equal('aes128');
   });
 
-  it('Encrypt - primary user', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+  it('Generate session key - primary user', async function() {
+    const publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
     // Set first user to primary. We should select this user by default.
     publicKey.users[0].selfCertifications[0].isPrimaryUserID = true;
     // Set first user to prefer aes128.
     publicKey.users[0].selfCertifications[0].preferredSymmetricAlgorithms = [openpgp.enums.symmetric.aes128];
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, armor: false});
-    expect(encrypted.message.packets[0].sessionKeyAlgorithm).to.equal('aes128');
+    const sessionKey = await openpgp.generateSessionKey({ publicKeys: publicKey });
+    expect(sessionKey.algorithm).to.equal('aes128');
   });
 
-  it('Encrypt - specific user', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+  it('Generate session key - specific user', async function() {
+    const publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
     // Set first user to primary. We won't select this user, this is to test that.
     publicKey.users[0].selfCertifications[0].isPrimaryUserID = true;
     // Set second user to prefer aes128. We will select this user.
     publicKey.users[1].selfCertifications[0].preferredSymmetricAlgorithms = [openpgp.enums.symmetric.aes128];
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, toUserIds: {name: 'Test User', email: 'b@c.com'}, armor: false});
-    expect(encrypted.message.packets[0].sessionKeyAlgorithm).to.equal('aes128');
-    await expect(openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, toUserIds: {name: 'Test User', email: 'c@c.com'}, armor: false})).to.be.rejectedWith('Could not find user that matches that user ID');
+    const sessionKey = await openpgp.generateSessionKey({ publicKeys: publicKey, toUserIds: { name: 'Test User', email: 'b@c.com' } });
+    expect(sessionKey.algorithm).to.equal('aes128');
+    await openpgp.encrypt({ message: openpgp.Message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, toUserIds: { name: 'Test User', email: 'b@c.com' }, armor: false });
+    await expect(openpgp.encrypt({ message: openpgp.Message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, toUserIds: { name: 'Test User', email: 'c@c.com' }, armor: false })).to.be.rejectedWith('Could not find user that matches that user ID');
+  });
+
+  it('Fails to encrypt to User ID-less key', async function() {
+    const publicKey = await openpgp.readArmoredKey(uidlessKey);
+    expect(publicKey.users.length).to.equal(0);
+    const privateKey = await openpgp.readArmoredKey(uidlessKey);
+    await privateKey.decrypt('correct horse battery staple');
+    await expect(openpgp.encrypt({ message: openpgp.Message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, armor: false })).to.be.rejectedWith('Could not find primary user');
   });
 
   it('Sign - specific user', async function() {
-    let publicKey = (await openpgp.key.readArmored(multi_uid_key)).keys[0];
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+    const publicKey = await openpgp.readArmoredKey(multi_uid_key);
+    const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
     await privateKey.decrypt('hello world');
-    const privateKeyClone = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
+    const privateKeyClone = await openpgp.readArmoredKey(priv_key_rsa);
     // Duplicate user
     privateKey.users.push(privateKeyClone.users[0]);
     // Set first user to primary. We won't select this user, this is to test that.
     privateKey.users[0].selfCertifications[0].isPrimaryUserID = true;
     // Change userid of the first user so that we don't select it. This also makes this user invalid.
-    privateKey.users[0].userId.parse('Test User <b@c.com>');
+    privateKey.users[0].userId = openpgp.UserIDPacket.fromObject({ name: 'Test User', email: 'b@c.com' });
     // Set second user to prefer aes128. We will select this user.
     privateKey.users[1].selfCertifications[0].preferredHashAlgorithms = [openpgp.enums.hash.sha512];
-    const signed = await openpgp.sign({message: openpgp.cleartext.fromText('hello'), privateKeys: privateKey, fromUserIds: {name: 'Test McTestington', email: 'test@example.com'}, armor: false});
-    expect(signed.message.signature.packets[0].hashAlgorithm).to.equal(openpgp.enums.hash.sha512);
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, fromUserIds: {name: 'Test McTestington', email: 'test@example.com'}, detached: true, armor: false});
-    expect(encrypted.signature.packets[0].hashAlgorithm).to.equal(openpgp.enums.hash.sha512);
-    await expect(openpgp.encrypt({message: openpgp.message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, fromUserIds: {name: 'Not Test McTestington', email: 'test@example.com'}, detached: true, armor: false})).to.be.rejectedWith('Could not find user that matches that user ID');
+    const signed = await openpgp.sign({ message: openpgp.Message.fromText('hello'), privateKeys: privateKey, fromUserIds: { name: 'Test McTestington', email: 'test@example.com' }, armor: false });
+    const signature = await openpgp.readMessage(signed);
+    expect(signature.packets[0].hashAlgorithm).to.equal(openpgp.enums.hash.sha512);
+    const encrypted = await openpgp.encrypt({ message: openpgp.Message.fromText('hello'), passwords: 'test', privateKeys: privateKey, fromUserIds: { name: 'Test McTestington', email: 'test@example.com' }, armor: false });
+    const { signatures } = await openpgp.decrypt({ message: await openpgp.readMessage(encrypted), passwords: 'test' });
+    expect(signatures[0].signature.packets[0].hashAlgorithm).to.equal(openpgp.enums.hash.sha512);
+    await expect(openpgp.encrypt({ message: openpgp.Message.fromText('hello'), publicKeys: publicKey, privateKeys: privateKey, fromUserIds: { name: 'Not Test McTestington', email: 'test@example.com' }, armor: false })).to.be.rejectedWith('Could not find user that matches that user ID');
   });
 
   it('Find a valid subkey binding signature among many invalid ones', async function() {
-    const key = (await openpgp.key.readArmored(valid_binding_sig_among_many_expired_sigs_pub)).keys[0];
+    const key = await openpgp.readArmoredKey(valid_binding_sig_among_many_expired_sigs_pub);
     expect(await key.getEncryptionKey()).to.not.be.null;
   });
 
   it('Selects the most recent subkey binding signature', async function() {
-    const key = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
+    const key = await openpgp.readArmoredKey(multipleBindingSignatures);
     expect((await key.subKeys[0].getExpirationTime(key.primaryKey)).toISOString()).to.equal('2015-10-18T07:41:30.000Z');
   });
 
   it('Selects the most recent non-expired subkey binding signature', async function() {
-    const key = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
+    const key = await openpgp.readArmoredKey(multipleBindingSignatures);
     key.subKeys[0].bindingSignatures[1].signatureNeverExpires = false;
     key.subKeys[0].bindingSignatures[1].signatureExpirationTime = 0;
     expect((await key.subKeys[0].getExpirationTime(key.primaryKey)).toISOString()).to.equal('2018-09-07T06:03:37.000Z');
   });
 
   it('Selects the most recent valid subkey binding signature', async function() {
-    const key = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
+    const key = await openpgp.readArmoredKey(multipleBindingSignatures);
     key.subKeys[0].bindingSignatures[1].signatureData[0]++;
     expect((await key.subKeys[0].getExpirationTime(key.primaryKey)).toISOString()).to.equal('2018-09-07T06:03:37.000Z');
   });
 
   it('Handles a key with no valid subkey binding signatures gracefully', async function() {
-    const key = (await openpgp.key.readArmored(multipleBindingSignatures)).keys[0];
+    const key = await openpgp.readArmoredKey(multipleBindingSignatures);
     key.subKeys[0].bindingSignatures[0].signatureData[0]++;
     key.subKeys[0].bindingSignatures[1].signatureData[0]++;
     expect(await key.subKeys[0].getExpirationTime(key.primaryKey)).to.be.null;
   });
 
   it('Reject encryption with revoked primary user', async function() {
-    const key = (await openpgp.key.readArmored(pub_revoked_subkeys)).keys[0];
-    return openpgp.encrypt({publicKeys: [key], message: openpgp.message.fromText('random data')}).then(() => {
+    const key = await openpgp.readArmoredKey(pub_revoked_subkeys);
+    return openpgp.encrypt({ publicKeys: [key], message: openpgp.Message.fromText('random data') }).then(() => {
       throw new Error('encryptSessionKey should not encrypt with revoked public key');
     }).catch(function(error) {
       expect(error.message).to.equal('Error encrypting message: Primary user is revoked');
@@ -3285,10 +3452,10 @@ VYGdb3eNlV8CfoEC
   });
 
   it('Reject encryption with revoked subkey', async function() {
-    const key = (await openpgp.key.readArmored(pub_revoked_subkeys)).keys[0];
+    const key = await openpgp.readArmoredKey(pub_revoked_subkeys);
     key.revocationSignatures = [];
     key.users[0].revocationSignatures = [];
-    return openpgp.encrypt({publicKeys: [key], message: openpgp.message.fromText('random data'), date: new Date(1386842743000)}).then(() => {
+    return openpgp.encrypt({ publicKeys: [key], message: openpgp.Message.fromText('random data'), date: new Date(1386842743000) }).then(() => {
       throw new Error('encryptSessionKey should not encrypt with revoked public key');
     }).catch(function(error) {
       expect(error.message).to.equal('Error encrypting message: Could not find valid encryption key packet in key ' + key.getKeyId().toHex() + ': Subkey is revoked');
@@ -3296,8 +3463,8 @@ VYGdb3eNlV8CfoEC
   });
 
   it('Reject encryption with key revoked with appended revocation cert', async function() {
-    const key = (await openpgp.key.readArmored(pub_revoked_with_cert)).keys[0];
-    return openpgp.encrypt({publicKeys: [key], message: openpgp.message.fromText('random data')}).then(() => {
+    const key = await openpgp.readArmoredKey(pub_revoked_with_cert);
+    return openpgp.encrypt({ publicKeys: [key], message: openpgp.Message.fromText('random data') }).then(() => {
       throw new Error('encryptSessionKey should not encrypt with revoked public key');
     }).catch(function(error) {
       expect(error.message).to.equal('Error encrypting message: Primary key is revoked');
@@ -3305,8 +3472,8 @@ VYGdb3eNlV8CfoEC
   });
 
   it('Merge key with another key with non-ID user attributes', async function() {
-    const key = (await openpgp.key.readArmored(mergeKey1)).keys[0];
-    const updateKey = (await openpgp.key.readArmored(mergeKey2)).keys[0];
+    const key = await openpgp.readArmoredKey(mergeKey1);
+    const updateKey = await openpgp.readArmoredKey(mergeKey2);
     expect(key).to.exist;
     expect(updateKey).to.exist;
     expect(key.users).to.have.length(1);
@@ -3320,190 +3487,275 @@ VYGdb3eNlV8CfoEC
 
   it("Should throw when trying to encrypt a key that's already encrypted", async function() {
     await expect((async function() {
-      let { privateKeyArmored } = await openpgp.generateKey({ userIds: [{ email: 'hello@user.com' }], passphrase: 'pass', numBits: openpgp.util.getWebCryptoAll() ? 2048 : 512 });
-      let { keys: [k] } = await openpgp.key.readArmored(privateKeyArmored);
+      const { privateKeyArmored } = await openpgp.generateKey({ userIds: [{ email: 'hello@user.com' }], passphrase: 'pass' });
+      const k = await openpgp.readArmoredKey(privateKeyArmored);
       await k.decrypt('pass');
       await k.encrypt('pass');
       await k.encrypt('pass');
     })()).to.be.rejectedWith('Key packet is already encrypted');
   });
-});
 
-describe('addSubkey functionality testing', function(){
-  let rsaBits;
-  let rsaOpt = {};
-  if (openpgp.util.getWebCryptoAll()) {
-    rsaBits = 2048;
-    rsaOpt = { rsaBits: rsaBits };
-  }
-  it('create and add a new rsa subkey to stored rsa key', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const total = privateKey.subKeys.length;
-    let newPrivateKey = await privateKey.addSubkey(rsaOpt);
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    expect(subKey).to.exist;
-    expect(newPrivateKey.subKeys.length).to.be.equal(total+1);
-    const subkeyN = subKey.keyPacket.params[0];
-    const pkN = privateKey.primaryKey.params[0];
-    expect(subkeyN.byteLength()).to.be.equal(rsaBits ? (rsaBits / 8) : pkN.byteLength());
-    expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsa_encrypt_sign');
-    expect(subKey.getAlgorithmInfo().rsaBits).to.be.equal(rsaBits || privateKey.getAlgorithmInfo().rsaBits);
-    await subKey.verify(newPrivateKey.primaryKey);
+  describe('addSubkey functionality testing', function() {
+    const rsaBits = 1024;
+    const rsaOpt = { type: 'rsa' };
+    let minRsaBits;
+    beforeEach(function() {
+      minRsaBits = openpgp.config.minRsaBits;
+      openpgp.config.minRsaBits = rsaBits;
+    });
+    afterEach(function() {
+      openpgp.config.minRsaBits = minRsaBits;
+    });
+
+    it('create and add a new rsa subkey to stored rsa key', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey(rsaOpt);
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      const subkeyN = subKey.keyPacket.publicParams.n;
+      const pkN = privateKey.primaryKey.publicParams.n;
+      expect(subkeyN.length).to.be.equal(pkN.length);
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsaEncryptSign');
+      expect(subKey.getAlgorithmInfo().bits).to.be.equal(privateKey.getAlgorithmInfo().bits);
+      await subKey.verify(newPrivateKey.primaryKey);
+    });
+
+    it('Add a new default subkey to an rsaSign key', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { type: 'rsa', rsaBits, userIds: [userId], subkeys: [] };
+      const { key } = await openpgp.generateKey(opt);
+      expect(key.subKeys).to.have.length(0);
+      key.keyPacket.algorithm = "rsaSign";
+      const newKey = await key.addSubkey();
+      expect(newKey.subKeys[0].getAlgorithmInfo().algorithm).to.equal('rsaEncryptSign');
+    });
+
+    it('Add a new default subkey to an ecc key', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { type: 'ecc', userIds: [userId], subkeys: [] };
+      const { key } = await openpgp.generateKey(opt);
+      expect(key.subKeys).to.have.length(0);
+      const newKey = await key.addSubkey();
+      expect(newKey.subKeys[0].getAlgorithmInfo().algorithm).to.equal('ecdh');
+      expect(newKey.subKeys[0].getAlgorithmInfo().curve).to.equal('curve25519');
+    });
+
+    it('Add a new default subkey to a dsa key', async function() {
+      const key = await openpgp.readArmoredKey(dsaPrivateKey);
+      const total = key.subKeys.length;
+      const newKey = await key.addSubkey();
+      expect(newKey.subKeys[total].getAlgorithmInfo().algorithm).to.equal('rsaEncryptSign');
+      expect(newKey.subKeys[total].getAlgorithmInfo().bits).to.equal(Math.max(key.getAlgorithmInfo().bits, openpgp.config.minRsaBits));
+    });
+
+    it('should throw when trying to encrypt a subkey separately from key', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const opt = { rsaBits: rsaBits, passphrase: 'subkey passphrase' };
+      await expect(privateKey.addSubkey(opt)).to.be.rejectedWith('Subkey could not be encrypted here, please encrypt whole key');
+    });
+
+    it('encrypt and decrypt key with added subkey', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey(rsaOpt);
+      newPrivateKey = await openpgp.readArmoredKey(newPrivateKey.armor());
+      await newPrivateKey.encrypt('12345678');
+      const armoredKey = newPrivateKey.armor();
+      const importedPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      await importedPrivateKey.decrypt('12345678');
+      const subKey = importedPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(importedPrivateKey.subKeys.length).to.be.equal(total + 1);
+      await subKey.verify(importedPrivateKey.primaryKey);
+    });
+
+    it('create and add a new ec subkey to a ec key', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { curve: 'curve25519', userIds: [userId], subkeys:[] };
+      const privateKey = (await openpgp.generateKey(opt)).key;
+      const total = privateKey.subKeys.length;
+      const opt2 = { curve: 'curve25519', userIds: [userId], sign: true };
+      let newPrivateKey = await privateKey.addSubkey(opt2);
+      const subKey1 = newPrivateKey.subKeys[total];
+      await newPrivateKey.encrypt('12345678');
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      await newPrivateKey.decrypt('12345678');
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey.isDecrypted()).to.be.true;
+      expect(subKey1.getKeyId().toHex()).to.be.equal(subKey.getKeyId().toHex());
+      expect(subKey).to.exist;
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      const subkeyOid = subKey.keyPacket.publicParams.oid;
+      const pkOid = privateKey.primaryKey.publicParams.oid;
+      expect(subkeyOid.getName()).to.be.equal(pkOid.getName());
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('eddsa');
+      await subKey.verify(privateKey.primaryKey);
+    });
+
+    it('create and add a new ecdsa subkey to a eddsa key', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { curve: 'ed25519', userIds: [userId], subkeys:[] };
+      const privateKey = (await openpgp.generateKey(opt)).key;
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey({ curve: 'p256', sign: true });
+      newPrivateKey = await openpgp.readArmoredKey(newPrivateKey.armor());
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      expect(newPrivateKey.getAlgorithmInfo().curve).to.be.equal('ed25519');
+      expect(subKey.getAlgorithmInfo().curve).to.be.equal('p256');
+      expect(newPrivateKey.getAlgorithmInfo().algorithm).to.be.equal('eddsa');
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('ecdsa');
+
+      await subKey.verify(privateKey.primaryKey);
+    });
+
+    it('create and add a new ecc subkey to a rsa key', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const total = privateKey.subKeys.length;
+      const opt2 = { type: 'ecc', curve: 'curve25519' };
+      let newPrivateKey = await privateKey.addSubkey(opt2);
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('ecdh');
+      expect(subKey.getAlgorithmInfo().curve).to.be.equal(openpgp.enums.curve.curve25519);
+      await subKey.verify(privateKey.primaryKey);
+    });
+
+    it('create and add a new rsa subkey to a ecc key', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { curve: 'ed25519', userIds: [userId], subkeys:[] };
+      const privateKey = (await openpgp.generateKey(opt)).key;
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey({ type: 'rsa' });
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      expect(subKey.getAlgorithmInfo().bits).to.be.equal(4096);
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsaEncryptSign');
+      await subKey.verify(privateKey.primaryKey);
+    });
+
+    it('create and add a new rsa subkey to a dsa key', async function() {
+      const privateKey = await openpgp.readArmoredKey(dsaPrivateKey);
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey({ type: 'rsa', rsaBits: 2048 });
+      newPrivateKey = await openpgp.readArmoredKey(newPrivateKey.armor());
+      expect(newPrivateKey.subKeys.length).to.be.equal(total + 1);
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey).to.exist;
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsaEncryptSign');
+      expect(subKey.getAlgorithmInfo().bits).to.be.equal(2048);
+      await subKey.verify(privateKey.primaryKey);
+    });
+
+    it('sign/verify data with the new subkey correctly using curve25519', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const opt = { curve: 'curve25519', userIds: [userId], subkeys:[] };
+      const privateKey = (await openpgp.generateKey(opt)).key;
+      const total = privateKey.subKeys.length;
+      const opt2 = { sign: true };
+      let newPrivateKey = await privateKey.addSubkey(opt2);
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      const subkeyOid = subKey.keyPacket.publicParams.oid;
+      const pkOid = newPrivateKey.primaryKey.publicParams.oid;
+      expect(subkeyOid.getName()).to.be.equal(pkOid.getName());
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('eddsa');
+      await subKey.verify(newPrivateKey.primaryKey);
+      expect(await newPrivateKey.getSigningKey()).to.be.equal(subKey);
+      const signed = await openpgp.sign({ message: openpgp.Message.fromText('the data to signed'), privateKeys: newPrivateKey, armor:false });
+      const message = await openpgp.readMessage(signed);
+      const { signatures } = await openpgp.verify({ message, publicKeys: [newPrivateKey.toPublic()] });
+      expect(signatures).to.exist;
+      expect(signatures.length).to.be.equal(1);
+      expect(signatures[0].keyid.toHex()).to.be.equal(subKey.getKeyId().toHex());
+      expect(await signatures[0].verified).to.be.true;
+    });
+
+    it('encrypt/decrypt data with the new subkey correctly using curve25519', async function() {
+      const userId = { name: 'test', email: 'a@b.com' };
+      const vData = 'the data to encrypted!';
+      const opt = { curve: 'curve25519', userIds: [userId], subkeys:[] };
+      const privateKey = (await openpgp.generateKey(opt)).key;
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey();
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      const publicKey = newPrivateKey.toPublic();
+      await subKey.verify(newPrivateKey.primaryKey);
+      expect(await newPrivateKey.getEncryptionKey()).to.be.equal(subKey);
+      const encrypted = await openpgp.encrypt({ message: openpgp.Message.fromText(vData), publicKeys: publicKey, armor:false });
+      expect(encrypted).to.be.exist;
+      const message = await openpgp.readMessage(encrypted);
+      const pkSessionKeys = message.packets.filterByTag(openpgp.enums.packet.publicKeyEncryptedSessionKey);
+      expect(pkSessionKeys).to.exist;
+      expect(pkSessionKeys.length).to.be.equal(1);
+      expect(pkSessionKeys[0].publicKeyId.toHex()).to.be.equals(subKey.keyPacket.getKeyId().toHex());
+      const decrypted = await openpgp.decrypt({ message, privateKeys: newPrivateKey });
+      expect(decrypted).to.exist;
+      expect(decrypted.data).to.be.equal(vData);
+    });
+
+    it('sign/verify data with the new subkey correctly using rsa', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const total = privateKey.subKeys.length;
+      const opt2 = { sign: true, rsaBits: rsaBits };
+      let newPrivateKey = await privateKey.addSubkey(opt2);
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsaEncryptSign');
+      await subKey.verify(newPrivateKey.primaryKey);
+      expect(await newPrivateKey.getSigningKey()).to.be.equal(subKey);
+      const signed = await openpgp.sign({ message: openpgp.Message.fromText('the data to signed'), privateKeys: newPrivateKey, armor:false });
+      const message = await openpgp.readMessage(signed);
+      const { signatures } = await openpgp.verify({ message, publicKeys: [newPrivateKey.toPublic()] });
+      expect(signatures).to.exist;
+      expect(signatures.length).to.be.equal(1);
+      expect(signatures[0].keyid.toHex()).to.be.equal(subKey.getKeyId().toHex());
+      expect(await signatures[0].verified).to.be.true;
+    });
+
+    it('encrypt/decrypt data with the new subkey correctly using rsa', async function() {
+      const privateKey = await openpgp.readArmoredKey(priv_key_rsa);
+      await privateKey.decrypt('hello world');
+      const total = privateKey.subKeys.length;
+      let newPrivateKey = await privateKey.addSubkey(rsaOpt);
+      const armoredKey = newPrivateKey.armor();
+      newPrivateKey = await openpgp.readArmoredKey(armoredKey);
+      const subKey = newPrivateKey.subKeys[total];
+      const publicKey = newPrivateKey.toPublic();
+      const vData = 'the data to encrypted!';
+      expect(await newPrivateKey.getEncryptionKey()).to.be.equal(subKey);
+      const encrypted = await openpgp.encrypt({ message: openpgp.Message.fromText(vData), publicKeys: publicKey, armor:false });
+      expect(encrypted).to.be.exist;
+      const message = await openpgp.readMessage(encrypted);
+      const pkSessionKeys = message.packets.filterByTag(openpgp.enums.packet.publicKeyEncryptedSessionKey);
+      expect(pkSessionKeys).to.exist;
+      expect(pkSessionKeys.length).to.be.equal(1);
+      expect(pkSessionKeys[0].publicKeyId.toHex()).to.be.equals(subKey.keyPacket.getKeyId().toHex());
+      const decrypted = await openpgp.decrypt({ message, privateKeys: newPrivateKey });
+      expect(decrypted).to.exist;
+      expect(decrypted.data).to.be.equal(vData);
+    });
   });
 
-  it('should throw when trying to encrypt a subkey separately from key', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const opt = { rsaBits: rsaBits, passphrase: 'subkey passphrase'};
-    await expect(privateKey.addSubkey(opt)).to.be.rejectedWith('Subkey could not be encrypted here, please encrypt whole key');
-  });
-
-  it('encrypt and decrypt key with added subkey', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const total = privateKey.subKeys.length;
-    let newPrivateKey = await privateKey.addSubkey(rsaOpt);
-    newPrivateKey = (await openpgp.key.readArmored(newPrivateKey.armor())).keys[0];
-    await newPrivateKey.encrypt('12345678');
-    const armoredKey = newPrivateKey.armor();
-    let importedPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    await importedPrivateKey.decrypt('12345678');
-    const subKey = importedPrivateKey.subKeys[total];
-    expect(subKey).to.exist;
-    expect(importedPrivateKey.subKeys.length).to.be.equal(total+1);
-    await subKey.verify(importedPrivateKey.primaryKey);
-  });
-
-  it('create and add a new ec subkey to a ec key', async function() {
-    const userId = 'test <a@b.com>';
-    const opt = {curve: 'curve25519', userIds: [userId], subkeys:[]};
-    const privateKey = (await openpgp.generateKey(opt)).key;
-    const total = privateKey.subKeys.length;
-    const opt2 = {curve: 'curve25519', userIds: [userId], sign: true};
-    let newPrivateKey = await privateKey.addSubkey(opt2);
-    const subKey1 = newPrivateKey.subKeys[total];
-    await newPrivateKey.encrypt('12345678');
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    await newPrivateKey.decrypt('12345678');
-    const subKey = newPrivateKey.subKeys[total];
-    expect(subKey.isDecrypted()).to.be.true;
-    expect(subKey1.getKeyId().toHex()).to.be.equal(subKey.getKeyId().toHex());
-    expect(subKey).to.exist;
-    expect(newPrivateKey.subKeys.length).to.be.equal(total+1);
-    const subkeyOid = subKey.keyPacket.params[0];
-    const pkOid = privateKey.primaryKey.params[0];
-    expect(subkeyOid.getName()).to.be.equal(pkOid.getName());
-    expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('eddsa');
-    await subKey.verify(privateKey.primaryKey);
-  });
-
-  it('create and add a new ec subkey to a rsa key', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const total = privateKey.subKeys.length;
-    const opt2 = {curve: 'curve25519'};
-    let newPrivateKey = await privateKey.addSubkey(opt2);
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    expect(subKey).to.exist;
-    expect(newPrivateKey.subKeys.length).to.be.equal(total+1);
-    expect(subKey.keyPacket.params[0].getName()).to.be.equal(openpgp.enums.curve.curve25519);
-    expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('ecdh');
-    await subKey.verify(privateKey.primaryKey);
-  });
-
-  it('sign/verify data with the new subkey correctly using curve25519', async function() {
-    const userId = 'test <a@b.com>';
-    const opt = {curve: 'curve25519', userIds: [userId], subkeys:[]};
-    const privateKey = (await openpgp.generateKey(opt)).key;
-    const total = privateKey.subKeys.length;
-    const opt2 = {sign: true};
-    let newPrivateKey = await privateKey.addSubkey(opt2);
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    const subkeyOid = subKey.keyPacket.params[0];
-    const pkOid = newPrivateKey.primaryKey.params[0];
-    expect(subkeyOid.getName()).to.be.equal(pkOid.getName());
-    expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('eddsa');
-    await subKey.verify(newPrivateKey.primaryKey);
-    expect(await newPrivateKey.getSigningKey()).to.be.equal(subKey);
-    const signed = await openpgp.sign({message: openpgp.cleartext.fromText('the data to signed'), privateKeys: newPrivateKey, armor:false});
-    const verified = await signed.message.verify([newPrivateKey.toPublic()]);
-    expect(verified).to.exist;
-    expect(verified.length).to.be.equal(1);
-    expect(await verified[0].keyid).to.be.equal(subKey.getKeyId());
-    expect(await verified[0].verified).to.be.true;
-  });
-
-  it('encrypt/decrypt data with the new subkey correctly using curve25519', async function() {
-    const userId = 'test <a@b.com>';
-    const vData = 'the data to encrypted!';
-    const opt = {curve: 'curve25519', userIds: [userId], subkeys:[]};
-    const privateKey = (await openpgp.generateKey(opt)).key;
-    const total = privateKey.subKeys.length;
-    let newPrivateKey = await privateKey.addSubkey();
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    const publicKey = newPrivateKey.toPublic();
-    await subKey.verify(newPrivateKey.primaryKey);
-    expect(await newPrivateKey.getEncryptionKey()).to.be.equal(subKey);
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText(vData), publicKeys: publicKey, armor:false});
-    expect(encrypted.message).to.be.exist;
-    const pkSessionKeys = encrypted.message.packets.filterByTag(openpgp.enums.packet.publicKeyEncryptedSessionKey);
-    expect(pkSessionKeys).to.exist;
-    expect(pkSessionKeys.length).to.be.equal(1);
-    expect(pkSessionKeys[0].publicKeyId.toHex()).to.be.equals(subKey.keyPacket.getKeyId().toHex());
-    const decrypted = await openpgp.decrypt({message: encrypted.message, privateKeys: newPrivateKey})
-    expect(decrypted).to.exist;
-    expect(decrypted.data).to.be.equal(vData);
-  });
-
-  it('sign/verify data with the new subkey correctly using rsa', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const total = privateKey.subKeys.length;
-    const opt2 = { sign: true, rsaBits: rsaBits };
-    let newPrivateKey = await privateKey.addSubkey(opt2);
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    expect(subKey.getAlgorithmInfo().algorithm).to.be.equal('rsa_encrypt_sign');
-    await subKey.verify(newPrivateKey.primaryKey);
-    expect(await newPrivateKey.getSigningKey()).to.be.equal(subKey);
-    const signed = await openpgp.sign({message: openpgp.cleartext.fromText('the data to signed'), privateKeys: newPrivateKey, armor:false});
-    const verified = await signed.message.verify([newPrivateKey.toPublic()]);
-    expect(verified).to.exist;
-    expect(verified.length).to.be.equal(1);
-    expect(await verified[0].keyid).to.be.equal(subKey.getKeyId());
-    expect(await verified[0].verified).to.be.true;
-  });
-
-  it('encrypt/decrypt data with the new subkey correctly using rsa', async function() {
-    const privateKey = (await openpgp.key.readArmored(priv_key_rsa)).keys[0];
-    await privateKey.decrypt('hello world');
-    const total = privateKey.subKeys.length;
-    let newPrivateKey = await privateKey.addSubkey(rsaOpt);
-    const armoredKey = newPrivateKey.armor();
-    newPrivateKey = (await openpgp.key.readArmored(armoredKey)).keys[0];
-    const subKey = newPrivateKey.subKeys[total];
-    const publicKey = newPrivateKey.toPublic();
-    const vData = 'the data to encrypted!';
-    expect(await newPrivateKey.getEncryptionKey()).to.be.equal(subKey);
-    const encrypted = await openpgp.encrypt({message: openpgp.message.fromText(vData), publicKeys: publicKey, armor:false});
-    expect(encrypted.message).to.be.exist;
-    const pkSessionKeys = encrypted.message.packets.filterByTag(openpgp.enums.packet.publicKeyEncryptedSessionKey);
-    expect(pkSessionKeys).to.exist;
-    expect(pkSessionKeys.length).to.be.equal(1);
-    expect(pkSessionKeys[0].publicKeyId.toHex()).to.be.equals(subKey.keyPacket.getKeyId().toHex());
-    const decrypted = await openpgp.decrypt({message: encrypted.message, privateKeys: newPrivateKey})
-    expect(decrypted).to.exist;
-    expect(decrypted.data).to.be.equal(vData);
-  });
 });

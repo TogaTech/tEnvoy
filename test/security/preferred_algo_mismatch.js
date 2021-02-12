@@ -1,6 +1,6 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
 
-const { key, cleartext, enums, packet: { List, Signature } } = openpgp;
+const { key, cleartext, enums, PacketList, SignaturePacket } = openpgp;
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -42,8 +42,8 @@ EnxUPL95HuMKoVkf4w==
 =oopr
 -----END PGP PRIVATE KEY BLOCK-----`;
 
-it('Does not accept message encrypted with algo not mentioned in preferred algorithms', async function() {
-  const message = await openpgp.message.readArmored(messageArmor);
-  const privKey = (await openpgp.key.readArmored(privateKeyArmor)).keys[0];
+module.exports = () => it('Does not accept message encrypted with algo not mentioned in preferred algorithms', async function() {
+  const message = await openpgp.readArmoredMessage(messageArmor);
+  const privKey = await openpgp.readArmoredKey(privateKeyArmor);
   await expect(openpgp.decrypt({ message, privateKeys: [privKey] })).to.be.rejectedWith('A non-preferred symmetric algorithm was used.');
 });

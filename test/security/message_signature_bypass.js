@@ -1,6 +1,7 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const util = require('../../src/util');
 
-const { key, cleartext, util, packet: { Signature } } = openpgp;
+const { readArmoredKey, readArmoredCleartextMessage, SignaturePacket } = openpgp;
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
@@ -67,29 +68,22 @@ fhGyl7nA7UCwgsqf7ZPBhRg=
 =nbjQ
 -----END PGP SIGNATURE-----`;
 async function getOtherPubKey() {
-  return (await key.readArmored(OTHERPUBKEY)).keys[0];
+  return await readArmoredKey(OTHERPUBKEY);
 }
 
 /**
 * The "standalone" signature signed by the victim.
 */
-const STANDALONE_PKT = util.b64_to_Uint8Array(`
-BAIBCAAQBQJbq3MKCRBVIIstGKzjzgAAWdoIALgj7OuhuuAWr6WEvGfvkx3e
-Fn/mg76lh2Hawxq6ryI6+kzUH+YJsG94CfLgGuh5LghZFBnlkdZS11gK87fN
-+ifmPdSDj8fsKqSFdX1sHGwzvzBcuPt+qhtHrACCWwiiBgajIOmIczKUlX4D
-ASBkthx0o9Qb/r3dT91zmrniIK5I0yqe34/1rsHhOAf8ds2EubupFJJqFOb1
-qssMWE+jBrTREoD/EH5q7un2jEGccITcVQSZCqfjHT4EL6dF/bmuggf7wV/E
-QLXfFIJS6cZczK86XW1pGaXBKRLvQXYa/eRWHKcGlrujdFKzJYRoT6LVDk8T
-jhAfE9q2ElqlaAvZZYw=`);
+const STANDALONE_PKT = util.hexToUint8Array(`04020108001005025bab730a091055208b2d18ace3ce000059da0800b823eceba1bae016afa584bc67ef931dde167fe683bea58761dac31abaaf223afa4cd41fe609b06f7809f2e01ae8792e08591419e591d652d7580af3b7cdfa27e63dd4838fc7ec2aa485757d6c1c6c33bf305cb8fb7eaa1b47ac00825b08a20606a320e988733294957e03012064b61c74a3d41bfebddd4fdd739ab9e220ae48d32a9edf8ff5aec1e13807fc76cd84b9bba914926a14e6f5aacb0c584fa306b4d11280ff107e6aeee9f68c419c7084dc5504990aa7e31d3e042fa745fdb9ae8207fbc15fc440b5df148252e9c65cccaf3a5d6d6919a5c12912ef41761afde4561ca70696bba37452b32584684fa2d50e4f138e101f13dab6125aa5680bd9658c`);
 async function fakeSignature() {
   // read the template and modify the text to
   // invalidate the signature.
-  let fake = await cleartext.readArmored(
+  let fake = await readArmoredCleartextMessage(
     ORIGINAL.replace(
       'You owe me',
       'I owe you'));
   // read the standalone signature packet
-  const tmp = new Signature();
+  const tmp = new SignaturePacket();
   await tmp.read(STANDALONE_PKT);
 
   // replace the "text" signature with the
@@ -98,7 +92,7 @@ async function fakeSignature() {
   const faked_armored = await fake.armor();
   // re-read the message to eliminate any
   // behaviour due to cached values.
-  fake = await cleartext.readArmored(faked_armored);
+  fake = await readArmoredCleartextMessage(faked_armored);
   // faked message now verifies correctly
   const res = await openpgp.verify({
     message: fake,
@@ -109,4 +103,4 @@ async function fakeSignature() {
   expect(signatures).to.have.length(0);
 }
 
-it('Does not accept non-binary/text signatures', fakeSignature);
+module.exports = () => it('Does not accept non-binary/text signatures', fakeSignature);
