@@ -4,19 +4,15 @@ const chai = require('chai');
 
 const { expect } = chai;
 
-/* eslint-disable no-invalid-this */
-module.exports = () => tryTests('Application Worker', tests, {
+tryTests('Application Worker', tests, {
   if: typeof window !== 'undefined' && window.Worker && window.MessageChannel
 });
 
 function tests() {
 
   it('Should support loading OpenPGP.js from inside a Web Worker', async function() {
-    if (/Edge/.test(navigator.userAgent)) {
-      this.skip(); // Old Edge doesn't support crypto.getRandomValues inside a Worker.
-    }
     try {
-      globalThis.eval('(async function() {})');
+      eval('(async function() {})');
     } catch (e) {
       console.error(e);
       this.skip();

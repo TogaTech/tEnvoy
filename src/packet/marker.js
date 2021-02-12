@@ -15,8 +15,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-/* eslint class-methods-use-this: ["error", { "exceptMethods": ["read"] }] */
-
 /**
  * @requires enums
  */
@@ -34,32 +32,31 @@ import enums from '../enums';
  *
  * Such a packet MUST be ignored when received.
  * @memberof module:packet
+ * @constructor
  */
-class MarkerPacket {
-  constructor() {
-    this.tag = enums.packet.marker;
-  }
-
-  /**
-   * Parsing function for a literal data packet (tag 10).
-   *
-   * @param {String} input Payload of a tag 10 packet
-   * @param {Integer} position
-   *            Position to start reading from the input string
-   * @param {Integer} len
-   *            Length of the packet or the remaining length of
-   *            input at position
-   * @returns {MarkerPacket} Object representation
-   */
-  read(bytes) {
-    if (bytes[0] === 0x50 && // P
-        bytes[1] === 0x47 && // G
-        bytes[2] === 0x50) { // P
-      return true;
-    }
-    // marker packet does not contain "PGP"
-    return false;
-  }
+function Marker() {
+  this.tag = enums.packet.marker;
 }
 
-export default MarkerPacket;
+/**
+ * Parsing function for a literal data packet (tag 10).
+ *
+ * @param {String} input Payload of a tag 10 packet
+ * @param {Integer} position
+ *            Position to start reading from the input string
+ * @param {Integer} len
+ *            Length of the packet or the remaining length of
+ *            input at position
+ * @returns {module:packet.Marker} Object representation
+ */
+Marker.prototype.read = function (bytes) {
+  if (bytes[0] === 0x50 && // P
+      bytes[1] === 0x47 && // G
+      bytes[2] === 0x50) { // P
+    return true;
+  }
+  // marker packet does not contain "PGP"
+  return false;
+};
+
+export default Marker;

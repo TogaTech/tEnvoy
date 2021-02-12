@@ -42,25 +42,25 @@ onmessage = async function({ data: { action, message }, ports: [port] }) {
     let result;
     switch (action) {
       case 'encrypt': {
-        const publicKey = await openpgp.readArmoredKey(publicKeyArmored);
-        const privateKey = await openpgp.readArmoredKey(privateKeyArmored);
-        await privateKey.decrypt('test');
-        const data = await openpgp.encrypt({
-          message: openpgp.Message.fromText(message),
-          publicKeys: publicKey,
-          privateKeys: privateKey
+        const { keys: publicKeys } = await openpgp.key.readArmored(publicKeyArmored);
+        const { keys: privateKeys } = await openpgp.key.readArmored(privateKeyArmored);
+        await privateKeys[0].decrypt('test');
+        const { data } = await openpgp.encrypt({
+          message: openpgp.message.fromText(message),
+          publicKeys,
+          privateKeys
         });
         result = data;
         break;
       }
       case 'decrypt': {
-        const publicKey = await openpgp.readArmoredKey(publicKeyArmored);
-        const privateKey = await openpgp.readArmoredKey(privateKeyArmored);
-        await privateKey.decrypt('test');
+        const { keys: publicKeys } = await openpgp.key.readArmored(publicKeyArmored);
+        const { keys: privateKeys } = await openpgp.key.readArmored(privateKeyArmored);
+        await privateKeys[0].decrypt('test');
         const { data, signatures } = await openpgp.decrypt({
-          message: await openpgp.readArmoredMessage(message),
-          publicKeys: publicKey,
-          privateKeys: privateKey
+          message: await openpgp.message.readArmored(message),
+          publicKeys,
+          privateKeys
         });
         if (!signatures[0].valid) {
           throw new Error("Couldn't veriy signature");

@@ -17,6 +17,7 @@
 
 /**
  * @fileoverview Implementation of ECDSA following RFC6637 for Openpgpjs
+ * @requires bn.js
  * @requires web-stream-tools
  * @requires enums
  * @requires util
@@ -24,11 +25,12 @@
  * @module crypto/public_key/elliptic/ecdsa
  */
 
+import BN from 'bn.js';
 import enums from '../../../enums';
 import util from '../../../util';
-import { getRandomBytes } from '../../random';
+import random from '../../random';
 import hash from '../../hash';
-import { Curve, webCurves, privateToJwk, rawPublicToJwk, validateStandardParams } from './curves';
+import Curve, { webCurves, privateToJwk, rawPublicToJwk, validateStandardParams } from './curves';
 import { getIndutnyCurve, keyFromPrivate, keyFromPublic } from './indutnyKey';
 
 const webCrypto = util.getWebCrypto();
@@ -46,7 +48,7 @@ const nodeCrypto = util.getNodeCrypto();
  *            s: Uint8Array}}               Signature of the message
  * @async
  */
-export async function sign(oid, hash_algo, message, publicKey, privateKey, hashed) {
+async function sign(oid, hash_algo, message, publicKey, privateKey, hashed) {
   const curve = new Curve(oid);
   if (message && !util.isStream(message)) {
     const keyPair = { publicKey, privateKey };
@@ -63,7 +65,7 @@ export async function sign(oid, hash_algo, message, publicKey, privateKey, hashe
           if (curve.name !== 'p521' && (err.name === 'DataError' || err.name === 'OperationError')) {
             throw err;
           }
-          util.printDebugError("Browser did not support signing: " + err.message);
+          util.print_debug_error("Browser did not support verifying: " + err.message);
         }
         break;
       }
@@ -91,7 +93,7 @@ export async function sign(oid, hash_algo, message, publicKey, privateKey, hashe
  * @returns {Boolean}
  * @async
  */
-export async function verify(oid, hash_algo, signature, message, publicKey, hashed) {
+async function verify(oid, hash_algo, signature, message, publicKey, hashed) {
   const curve = new Curve(oid);
   if (message && !util.isStream(message)) {
     switch (curve.type) {
@@ -101,12 +103,12 @@ export async function verify(oid, hash_algo, signature, message, publicKey, hash
           return await webVerify(curve, hash_algo, signature, message, publicKey);
         } catch (err) {
           // We do not fallback if the error is related to key integrity
-          // Unfortunately Safari does not support p521 and throws a DataError when using it
+          // Unfortunaley Safari does not support p521 and throws a DataError when using it
           // So we need to always fallback for that curve
           if (curve.name !== 'p521' && (err.name === 'DataError' || err.name === 'OperationError')) {
             throw err;
           }
-          util.printDebugError("Browser did not support verifying: " + err.message);
+          util.print_debug_error("Browser did not support verifying: " + err.message);
         }
         break;
       case 'node':
@@ -125,7 +127,7 @@ export async function verify(oid, hash_algo, signature, message, publicKey, hash
  * @returns {Promise<Boolean>} whether params are valid
  * @async
  */
-export async function validateParams(oid, Q, d) {
+async function validateParams(oid, Q, d) {
   const curve = new Curve(oid);
   // Reject curves x25519 and ed25519
   if (curve.keyType !== enums.publicKey.ecdsa) {
@@ -137,7 +139,7 @@ export async function validateParams(oid, Q, d) {
   switch (curve.type) {
     case 'web':
     case 'node': {
-      const message = await getRandomBytes(8);
+      const message = await random.getRandomBytes(8);
       const hashAlgo = enums.hash.sha256;
       const hashed = await hash.digest(hashAlgo, message);
       try {
@@ -151,6 +153,32 @@ export async function validateParams(oid, Q, d) {
       return validateStandardParams(enums.publicKey.ecdsa, oid, Q, d);
   }
 }
+
+/**
+ * Parses MPI params and returns them as byte arrays of fixed length
+ * @param {Array} params key parameters
+ * @returns {Object} parameters in the form
+ *  { oid, d: Uint8Array, Q: Uint8Array }
+ */
+function parseParams(params) {
+  if (params.length < 2 || params.length > 3) {
+    throw new Error('Unexpected number of parameters');
+  }
+
+  const oid = params[0];
+  const curve = new Curve(oid);
+  const parsedParams = { oid };
+  // The public point never has leading zeros, as it is prefixed by 0x40 or 0x04
+  parsedParams.Q = params[1].toUint8Array();
+  if (params.length === 3) {
+    parsedParams.d = params[2].toUint8Array('be', curve.payloadSize);
+  }
+
+  return parsedParams;
+}
+
+
+export default { sign, verify, ellipticVerify, ellipticSign, validateParams, parseParams };
 
 
 //////////////////////////
@@ -207,6 +235,7 @@ async function webSign(curve, hash_algo, message, keyPair) {
 }
 
 async function webVerify(curve, hash_algo, { r, s }, message, publicKey) {
+  const len = curve.payloadSize;
   const jwk = rawPublicToJwk(curve.payloadSize, webCurves[curve.name], publicKey);
   const key = await webCrypto.importKey(
     "jwk",
@@ -220,7 +249,10 @@ async function webVerify(curve, hash_algo, { r, s }, message, publicKey) {
     ["verify"]
   );
 
-  const signature = util.concatUint8Array([r, s]).buffer;
+  const signature = util.concatUint8Array([
+    new Uint8Array(len - r.length), r,
+    new Uint8Array(len - s.length), s
+  ]).buffer;
 
   return webCrypto.verify(
     {
@@ -251,8 +283,6 @@ async function nodeSign(curve, hash_algo, message, keyPair) {
 }
 
 async function nodeVerify(curve, hash_algo, { r, s }, message, publicKey) {
-  const { default: BN } = await import('bn.js');
-
   const verify = nodeCrypto.createVerify(enums.read(enums.hash, hash_algo));
   verify.write(message);
   verify.end();

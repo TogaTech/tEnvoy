@@ -1,10 +1,10 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 
 const { expect } = chai;
 
-module.exports = () => describe.skip('HKP unit tests', function() {
+describe.skip('HKP unit tests', function() {
   this.timeout(60000);
 
   let hkp;

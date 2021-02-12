@@ -20,7 +20,7 @@
  * @requires enums
  */
 
-import PublicKeyPacket from './public_key';
+import PublicKey from './public_key';
 import enums from '../enums';
 
 /**
@@ -30,13 +30,15 @@ import enums from '../enums';
  * provides signature services, and the subkeys provide encryption
  * services.
  * @memberof module:packet
- * @extends PublicKeyPacket
+ * @constructor
+ * @extends module:packet.PublicKey
  */
-class PublicSubkeyPacket extends PublicKeyPacket {
-  constructor() {
-    super();
-    this.tag = enums.packet.publicSubkey;
-  }
+function PublicSubkey() {
+  PublicKey.call(this);
+  this.tag = enums.packet.publicSubkey;
 }
 
-export default PublicSubkeyPacket;
+PublicSubkey.prototype = new PublicKey();
+PublicSubkey.prototype.constructor = PublicSubkey;
+
+export default PublicSubkey;

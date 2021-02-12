@@ -4,27 +4,19 @@ set -e
 
 if [ $OPENPGPJSTEST = "coverage" ]; then
   echo "Running OpenPGP.js unit tests on node.js with code coverage."
-  npm run coverage
+  grunt coverage
   codeclimate-test-reporter < coverage/lcov.info
-
-elif [ $OPENPGPJSTEST = "lint" ]; then
-  echo "Running OpenPGP.js eslint."
-  npm run lint
-
-elif [ $OPENPGPJSTEST = "test-type-definitions" ]; then
-  echo "Testing OpenPGP.js type definitions."
-  npm run test-type-definitions
 
 elif [ $OPENPGPJSTEST = "unit" ]; then
   echo "Running OpenPGP.js unit tests on node.js."
-  npm test ${LIGHTWEIGHT+ -- --grep lightweight}
+  grunt build test --lightweight=$LIGHTWEIGHT
 
 elif [ $OPENPGPJSTEST = "browserstack" ]; then
   echo "Running OpenPGP.js browser unit tests on Browserstack."
 
-  npm run build-test
+  grunt build browserify:unittests copy:browsertest --compat=$COMPAT
   echo -n "Using config: "
-  echo "{\"browsers\": [$BROWSER], \"test_framework\": \"mocha\", \"test_path\": [\"test/unittests.html?ci=true${LIGHTWEIGHT+&lightweight=true&grep=lightweight}\"], \"timeout\": 1800, \"exit_with_fail\": true, \"project\": \"openpgpjs/${TRAVIS_EVENT_TYPE:-push}${LIGHTWEIGHT:+/lightweight}\"}" > browserstack.json
+  echo "{\"browsers\": [$BROWSER], \"test_framework\": \"mocha\", \"test_path\": [\"test/unittests.html?ci=true\"], \"timeout\": 1800, \"exit_with_fail\": true, \"project\": \"openpgpjs/${TRAVIS_EVENT_TYPE:-push}${COMPAT:+/compat}${LIGHTWEIGHT:+/lightweight}\"}" > browserstack.json
   cat browserstack.json
 
   result=0

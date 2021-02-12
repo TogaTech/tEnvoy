@@ -7,32 +7,14 @@
  * @module key/helper
  */
 
-import {
-  PublicKeyPacket,
-  PublicSubkeyPacket,
-  SecretKeyPacket,
-  SecretSubkeyPacket,
-  UserIDPacket,
-  UserAttributePacket,
-  SignaturePacket
-} from '../packet';
+import packet from '../packet';
 import enums from '../enums';
 import config from '../config';
 import crypto from '../crypto';
 import util from '../util';
 
-export const allowedKeyPackets = {
-  PublicKeyPacket,
-  PublicSubkeyPacket,
-  SecretKeyPacket,
-  SecretSubkeyPacket,
-  UserIDPacket,
-  UserAttributePacket,
-  SignaturePacket
-};
-
 export async function generateSecretSubkey(options) {
-  const secretSubkeyPacket = new SecretSubkeyPacket(options.date);
+  const secretSubkeyPacket = new packet.SecretSubkey(options.date);
   secretSubkeyPacket.packets = null;
   secretSubkeyPacket.algorithm = enums.read(enums.publicKey, options.algorithm);
   await secretSubkeyPacket.generate(options.rsaBits, options.curve);
@@ -40,7 +22,7 @@ export async function generateSecretSubkey(options) {
 }
 
 export async function generateSecretKey(options) {
-  const secretKeyPacket = new SecretKeyPacket(options.date);
+  const secretKeyPacket = new packet.SecretKey(options.date);
   secretKeyPacket.packets = null;
   secretKeyPacket.algorithm = enums.read(enums.publicKey, options.algorithm);
   await secretKeyPacket.generate(options.rsaBits, options.curve);
@@ -49,9 +31,9 @@ export async function generateSecretKey(options) {
 
 /**
  * Returns the valid and non-expired signature that has the latest creation date, while ignoring signatures created in the future.
- * @param  {Array<SignaturePacket>}         signatures  List of signatures
+ * @param  {Array<module:packet.Signature>} signatures  List of signatures
  * @param  {Date}                           date        Use the given date instead of the current time
- * @returns {Promise<SignaturePacket>} The latest valid signature
+ * @returns {Promise<module:packet.Signature>} The latest valid signature
  * @async
  */
 export async function getLatestValidSignature(signatures, primaryKey, signatureType, dataToVerify, date = new Date()) {
@@ -62,10 +44,10 @@ export async function getLatestValidSignature(signatures, primaryKey, signatureT
       if (
         (!signature || signatures[i].created >= signature.created) &&
         // check binding signature is not expired (ie, check for V4 expiration time)
-        !signatures[i].isExpired(date)
-      ) {
+        !signatures[i].isExpired(date) &&
         // check binding signature is verified
-        signatures[i].verified || await signatures[i].verify(primaryKey, signatureType, dataToVerify);
+        (signatures[i].verified || await signatures[i].verify(primaryKey, signatureType, dataToVerify))
+      ) {
         signature = signatures[i];
       }
     } catch (e) {
@@ -75,8 +57,8 @@ export async function getLatestValidSignature(signatures, primaryKey, signatureT
   if (!signature) {
     throw util.wrapError(
       `Could not find valid ${enums.read(enums.signature, signatureType)} signature in key ${primaryKey.getKeyId().toHex()}`
-        .replace('certGeneric ', 'self-')
-        .replace(/([a-z])([A-Z])/g, (_, $1, $2) => $1 + ' ' + $2.toLowerCase())
+        .replace('cert_generic ', 'self-')
+        .replace('_', ' ')
       , exception);
   }
   return signature;
@@ -94,25 +76,25 @@ export function isDataExpired(keyPacket, signature, date = new Date()) {
 
 /**
  * Create Binding signature to the key according to the {@link https://tools.ietf.org/html/rfc4880#section-5.2.1}
- * @param {SecretSubkeyPacket} subkey Subkey key packet
- * @param {SecretKeyPacket} primaryKey Primary key packet
+ * @param {module:packet.SecretSubkey} subkey Subkey key packet
+ * @param {module:packet.SecretKey} primaryKey Primary key packet
  * @param {Object} options
  */
 export async function createBindingSignature(subkey, primaryKey, options) {
   const dataToSign = {};
   dataToSign.key = primaryKey;
   dataToSign.bind = subkey;
-  const subkeySignaturePacket = new SignaturePacket(options.date);
-  subkeySignaturePacket.signatureType = enums.signature.subkeyBinding;
+  const subkeySignaturePacket = new packet.Signature(options.date);
+  subkeySignaturePacket.signatureType = enums.signature.subkey_binding;
   subkeySignaturePacket.publicKeyAlgorithm = primaryKey.algorithm;
   subkeySignaturePacket.hashAlgorithm = await getPreferredHashAlgo(null, subkey);
   if (options.sign) {
-    subkeySignaturePacket.keyFlags = [enums.keyFlags.signData];
+    subkeySignaturePacket.keyFlags = [enums.keyFlags.sign_data];
     subkeySignaturePacket.embeddedSignature = await createSignaturePacket(dataToSign, null, subkey, {
-      signatureType: enums.signature.keyBinding
+      signatureType: enums.signature.key_binding
     }, options.date);
   } else {
-    subkeySignaturePacket.keyFlags = [enums.keyFlags.encryptCommunication | enums.keyFlags.encryptStorage];
+    subkeySignaturePacket.keyFlags = [enums.keyFlags.encrypt_communication | enums.keyFlags.encrypt_storage];
   }
   if (options.keyExpirationTime > 0) {
     subkeySignaturePacket.keyExpirationTime = options.keyExpirationTime;
@@ -125,14 +107,14 @@ export async function createBindingSignature(subkey, primaryKey, options) {
 /**
  * Returns the preferred signature hash algorithm of a key
  * @param  {module:key.Key} key (optional) the key to get preferences from
- * @param  {SecretKeyPacket|SecretSubkeyPacket} keyPacket key packet used for signing
+ * @param  {module:packet.SecretKey|module:packet.SecretSubkey} keyPacket key packet used for signing
  * @param  {Date} date (optional) use the given date for verification instead of the current time
  * @param  {Object} userId (optional) user ID
  * @returns {Promise<String>}
  * @async
  */
 export async function getPreferredHashAlgo(key, keyPacket, date = new Date(), userId = {}) {
-  let hash_algo = config.preferHashAlgorithm;
+  let hash_algo = config.prefer_hash_algorithm;
   let pref_algo = hash_algo;
   if (key) {
     const primaryUser = await key.getPrimaryUser(date, userId);
@@ -143,15 +125,15 @@ export async function getPreferredHashAlgo(key, keyPacket, date = new Date(), us
     }
   }
   switch (Object.getPrototypeOf(keyPacket)) {
-    case SecretKeyPacket.prototype:
-    case PublicKeyPacket.prototype:
-    case SecretSubkeyPacket.prototype:
-    case PublicSubkeyPacket.prototype:
+    case packet.SecretKey.prototype:
+    case packet.PublicKey.prototype:
+    case packet.SecretSubkey.prototype:
+    case packet.PublicSubkey.prototype:
       switch (keyPacket.algorithm) {
         case 'ecdh':
         case 'ecdsa':
         case 'eddsa':
-          pref_algo = crypto.publicKey.elliptic.getPreferredHashAlgo(keyPacket.publicParams.oid);
+          pref_algo = crypto.publicKey.elliptic.getPreferredHashAlgo(keyPacket.params[0]);
       }
   }
   return crypto.hash.getHashByteLength(hash_algo) <= crypto.hash.getHashByteLength(pref_algo) ?
@@ -200,8 +182,8 @@ export async function getPreferredAlgo(type, keys, date = new Date(), userIds = 
 /**
  * Create signature packet
  * @param  {Object}                          dataToSign Contains packets to be signed
- * @param  {SecretKeyPacket|
- *          SecretSubkeyPacket}              signingKeyPacket secret key packet for signing
+ * @param  {module:packet.SecretKey|
+ *          module:packet.SecretSubkey}      signingKeyPacket secret key packet for signing
  * @param  {Object} signatureProperties      (optional) properties to write on the signature packet before signing
  * @param  {Date} date                       (optional) override the creationtime of the signature
  * @param  {Object} userId                   (optional) user ID
@@ -210,13 +192,10 @@ export async function getPreferredAlgo(type, keys, date = new Date(), userIds = 
  * @returns {module:packet/signature}         signature packet
  */
 export async function createSignaturePacket(dataToSign, privateKey, signingKeyPacket, signatureProperties, date, userId, detached = false, streaming = false) {
-  if (signingKeyPacket.isDummy()) {
-    throw new Error('Cannot sign with a gnu-dummy key.');
-  }
   if (!signingKeyPacket.isDecrypted()) {
     throw new Error('Private key is not decrypted.');
   }
-  const signaturePacket = new SignaturePacket(date);
+  const signaturePacket = new packet.Signature(date);
   Object.assign(signaturePacket, signatureProperties);
   signaturePacket.publicKeyAlgorithm = signingKeyPacket.algorithm;
   signaturePacket.hashAlgorithm = await getPreferredHashAlgo(privateKey, signingKeyPacket, date, userId);
@@ -241,7 +220,7 @@ export async function mergeSignatures(source, dest, attr, checkFn) {
       await Promise.all(source.map(async function(sourceSig) {
         if (!sourceSig.isExpired() && (!checkFn || await checkFn(sourceSig)) &&
             !dest[attr].some(function(destSig) {
-              return util.equalsUint8Array(destSig.write_params(), sourceSig.write_params());
+              return util.equalsUint8Array(destSig.signature, sourceSig.signature);
             })) {
           dest[attr].push(sourceSig);
         }
@@ -252,15 +231,15 @@ export async function mergeSignatures(source, dest, attr, checkFn) {
 
 /**
  * Checks if a given certificate or binding signature is revoked
- * @param  {SecretKeyPacket|
- *          PublicKeyPacket}        primaryKey   The primary key packet
- * @param  {Object}                 dataToVerify The data to check
- * @param  {Array<SignaturePacket>} revocations  The revocation signatures to check
- * @param  {SignaturePacket}        signature    The certificate or signature to check
- * @param  {PublicSubkeyPacket|
- *          SecretSubkeyPacket|
- *          PublicKeyPacket|
- *          SecretKeyPacket} key, optional The key packet to check the signature
+ * @param  {module:packet.SecretKey|
+ *          module:packet.PublicKey}       primaryKey   The primary key packet
+ * @param  {Object}                         dataToVerify The data to check
+ * @param  {Array<module:packet.Signature>} revocations  The revocation signatures to check
+ * @param  {module:packet.Signature}        signature    The certificate or signature to check
+ * @param  {module:packet.PublicSubkey|
+ *          module:packet.SecretSubkey|
+ *          module:packet.PublicKey|
+ *          module:packet.SecretKey} key, optional The key packet to check the signature
  * @param  {Date}                     date          Use the given date instead of the current time
  * @returns {Promise<Boolean>}                      True if the signature revokes the data
  * @async
@@ -281,10 +260,9 @@ export async function isDataRevoked(primaryKey, signatureType, dataToVerify, rev
         // third-party key certification, which should only affect
         // `verifyAllCertifications`.)
         (!signature || revocationSignature.issuerKeyId.equals(signature.issuerKeyId)) &&
-        !(config.revocationsExpire && revocationSignature.isExpired(normDate))
+        !(config.revocations_expire && revocationSignature.isExpired(normDate)) &&
+        (revocationSignature.verified || await revocationSignature.verify(key, signatureType, dataToVerify))
       ) {
-        revocationSignature.verified || await revocationSignature.verify(key, signatureType, dataToVerify);
-
         // TODO get an identifier of the revoked object instead
         revocationKeyIds.push(revocationSignature.issuerKeyId);
       }
@@ -330,7 +308,6 @@ export async function isAeadSupported(keys, date = new Date(), userIds = []) {
 }
 
 export function sanitizeKeyOptions(options, subkeyDefaults = {}) {
-  options.type = options.type || subkeyDefaults.type;
   options.curve = options.curve || subkeyDefaults.curve;
   options.rsaBits = options.rsaBits || subkeyDefaults.rsaBits;
   options.keyExpirationTime = options.keyExpirationTime !== undefined ? options.keyExpirationTime : subkeyDefaults.keyExpirationTime;
@@ -339,27 +316,24 @@ export function sanitizeKeyOptions(options, subkeyDefaults = {}) {
 
   options.sign = options.sign || false;
 
-  switch (options.type) {
-    case 'ecc':
-      try {
-        options.curve = enums.write(enums.curve, options.curve);
-      } catch (e) {
-        throw new Error('Invalid curve');
-      }
-      if (options.curve === enums.curve.ed25519 || options.curve === enums.curve.curve25519) {
-        options.curve = options.sign ? enums.curve.ed25519 : enums.curve.curve25519;
-      }
-      if (options.sign) {
-        options.algorithm = options.curve === enums.curve.ed25519 ? enums.publicKey.eddsa : enums.publicKey.ecdsa;
-      } else {
-        options.algorithm = enums.publicKey.ecdh;
-      }
-      break;
-    case 'rsa':
-      options.algorithm = enums.publicKey.rsaEncryptSign;
-      break;
-    default:
-      throw new Error(`Unsupported key type ${options.type}`);
+  if (options.curve) {
+    try {
+      options.curve = enums.write(enums.curve, options.curve);
+    } catch (e) {
+      throw new Error('Not valid curve.');
+    }
+    if (options.curve === enums.curve.ed25519 || options.curve === enums.curve.curve25519) {
+      options.curve = options.sign ? enums.curve.ed25519 : enums.curve.curve25519;
+    }
+    if (options.sign) {
+      options.algorithm = options.curve === enums.curve.ed25519 ? enums.publicKey.eddsa : enums.publicKey.ecdsa;
+    } else {
+      options.algorithm = enums.publicKey.ecdh;
+    }
+  } else if (options.rsaBits) {
+    options.algorithm = enums.publicKey.rsa_encrypt_sign;
+  } else {
+    throw new Error('Unrecognized key type');
   }
   return options;
 }
@@ -368,11 +342,11 @@ export function isValidSigningKeyPacket(keyPacket, signature) {
   if (!signature.verified || signature.revoked !== false) { // Sanity check
     throw new Error('Signature not verified');
   }
-  return keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.rsaEncrypt) &&
+  return keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.rsa_encrypt) &&
     keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.elgamal) &&
     keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.ecdh) &&
     (!signature.keyFlags ||
-      (signature.keyFlags[0] & enums.keyFlags.signData) !== 0);
+      (signature.keyFlags[0] & enums.keyFlags.sign_data) !== 0);
 }
 
 export function isValidEncryptionKeyPacket(keyPacket, signature) {
@@ -380,12 +354,12 @@ export function isValidEncryptionKeyPacket(keyPacket, signature) {
     throw new Error('Signature not verified');
   }
   return keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.dsa) &&
-    keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.rsaSign) &&
+    keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.rsa_sign) &&
     keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.ecdsa) &&
     keyPacket.algorithm !== enums.read(enums.publicKey, enums.publicKey.eddsa) &&
     (!signature.keyFlags ||
-      (signature.keyFlags[0] & enums.keyFlags.encryptCommunication) !== 0 ||
-      (signature.keyFlags[0] & enums.keyFlags.encryptStorage) !== 0);
+      (signature.keyFlags[0] & enums.keyFlags.encrypt_communication) !== 0 ||
+      (signature.keyFlags[0] & enums.keyFlags.encrypt_storage) !== 0);
 }
 
 export function isValidDecryptionKeyPacket(signature) {
@@ -393,12 +367,12 @@ export function isValidDecryptionKeyPacket(signature) {
     throw new Error('Signature not verified');
   }
 
-  if (config.allowInsecureDecryptionWithSigningKeys) {
+  if (config.allow_insecure_decryption_with_signing_keys) {
     // This is only relevant for RSA keys, all other signing ciphers cannot decrypt
     return true;
   }
 
   return !signature.keyFlags ||
-    (signature.keyFlags[0] & enums.keyFlags.encryptCommunication) !== 0 ||
-    (signature.keyFlags[0] & enums.keyFlags.encryptStorage) !== 0;
+    (signature.keyFlags[0] & enums.keyFlags.encrypt_communication) !== 0 ||
+    (signature.keyFlags[0] & enums.keyFlags.encrypt_storage) !== 0;
 }

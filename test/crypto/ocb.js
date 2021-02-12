@@ -2,18 +2,17 @@
 
 // Adapted from https://github.com/artjomb/cryptojs-extension/blob/8c61d159/test/eax.js
 
-const OCB = require('../../src/crypto/ocb');
-const util = require('../../src/util');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 
 const expect = chai.expect;
 
-module.exports = () => describe('Symmetric AES-OCB', function() {
+describe('Symmetric AES-OCB', function() {
   it('Passes all test vectors', async function() {
     const K = '000102030405060708090A0B0C0D0E0F';
-    const keyBytes = util.hexToUint8Array(K);
+    const keyBytes = openpgp.util.hex_to_Uint8Array(K);
 
     const vectors = [
       // From https://tools.ietf.org/html/rfc7253#appendix-A
@@ -118,20 +117,20 @@ module.exports = () => describe('Symmetric AES-OCB', function() {
     const cipher = 'aes128';
 
     await Promise.all(vectors.map(async vec => {
-      const msgBytes = util.hexToUint8Array(vec.P);
-      const nonceBytes = util.hexToUint8Array(vec.N);
-      const headerBytes = util.hexToUint8Array(vec.A);
-      const ctBytes = util.hexToUint8Array(vec.C);
+      const msgBytes = openpgp.util.hex_to_Uint8Array(vec.P);
+      const nonceBytes = openpgp.util.hex_to_Uint8Array(vec.N);
+      const headerBytes = openpgp.util.hex_to_Uint8Array(vec.A);
+      const ctBytes = openpgp.util.hex_to_Uint8Array(vec.C);
 
-      const ocb = await OCB(cipher, keyBytes);
+      const ocb = await openpgp.crypto.ocb(cipher, keyBytes);
 
       // encryption test
       let ct = await ocb.encrypt(msgBytes, nonceBytes, headerBytes);
-      expect(util.uint8ArrayToHex(ct)).to.equal(vec.C.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(ct)).to.equal(vec.C.toLowerCase());
 
       // decryption test with verification
       let pt = await ocb.decrypt(ctBytes, nonceBytes, headerBytes);
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.P.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.P.toLowerCase());
 
       // tampering detection test
       ct = await ocb.encrypt(msgBytes, nonceBytes, headerBytes);
@@ -142,12 +141,12 @@ module.exports = () => describe('Symmetric AES-OCB', function() {
       // testing without additional data
       ct = await ocb.encrypt(msgBytes, nonceBytes, new Uint8Array());
       pt = await ocb.decrypt(ct, nonceBytes, new Uint8Array());
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.P.toLowerCase());
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.P.toLowerCase());
 
       // testing with multiple additional data
-      ct = await ocb.encrypt(msgBytes, nonceBytes, util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
-      pt = await ocb.decrypt(ct, nonceBytes, util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
-      expect(util.uint8ArrayToHex(pt)).to.equal(vec.P.toLowerCase());
+      ct = await ocb.encrypt(msgBytes, nonceBytes, openpgp.util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
+      pt = await ocb.decrypt(ct, nonceBytes, openpgp.util.concatUint8Array([headerBytes, headerBytes, headerBytes]));
+      expect(openpgp.util.Uint8Array_to_hex(pt)).to.equal(vec.P.toLowerCase());
     }));
   });
 
@@ -163,22 +162,22 @@ module.exports = () => describe('Symmetric AES-OCB', function() {
       const k = new Uint8Array(keylen / 8);
       k[k.length - 1] = taglen;
 
-      const ocb = await OCB('aes' + keylen, k);
+      const ocb = await openpgp.crypto.ocb('aes' + keylen, k);
 
       const c = [];
       let n;
       for (let i = 0; i < 128; i++) {
         const s = new Uint8Array(i);
-        n = util.concatUint8Array([new Uint8Array(8), util.writeNumber(3 * i + 1, 4)]);
+        n = openpgp.util.concatUint8Array([new Uint8Array(8), openpgp.util.writeNumber(3 * i + 1, 4)]);
         c.push(await ocb.encrypt(s, n, s));
-        n = util.concatUint8Array([new Uint8Array(8), util.writeNumber(3 * i + 2, 4)]);
+        n = openpgp.util.concatUint8Array([new Uint8Array(8), openpgp.util.writeNumber(3 * i + 2, 4)]);
         c.push(await ocb.encrypt(s, n, new Uint8Array()));
-        n = util.concatUint8Array([new Uint8Array(8), util.writeNumber(3 * i + 3, 4)]);
+        n = openpgp.util.concatUint8Array([new Uint8Array(8), openpgp.util.writeNumber(3 * i + 3, 4)]);
         c.push(await ocb.encrypt(new Uint8Array(), n, s));
       }
-      n = util.concatUint8Array([new Uint8Array(8), util.writeNumber(385, 4)]);
-      const output = await ocb.encrypt(new Uint8Array(), n, util.concatUint8Array(c));
-      expect(util.uint8ArrayToHex(output)).to.equal(outputs[keylen].toLowerCase());
+      n = openpgp.util.concatUint8Array([new Uint8Array(8), openpgp.util.writeNumber(385, 4)]);
+      const output = await ocb.encrypt(new Uint8Array(), n, openpgp.util.concatUint8Array(c));
+      expect(openpgp.util.Uint8Array_to_hex(output)).to.equal(outputs[keylen].toLowerCase());
     }));
   });
 });

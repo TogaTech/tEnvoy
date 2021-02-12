@@ -1,4 +1,4 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 const chai = require('chai');
 const BN = require('bn.js');
 
@@ -74,281 +74,314 @@ vqBGKJzmO5q3cECw
 =X9kJ
 -----END PGP PRIVATE KEY BLOCK-----`;
 
-function cloneKeyPacket(key) {
-  const keyPacket = new openpgp.SecretKeyPacket();
-  keyPacket.read(key.keyPacket.write());
-  return keyPacket;
-}
+describe('EdDSA parameter validation', function() {
+  let keyParams;
+  before(async () => {
+    keyParams = await openpgp.crypto.generateParams(openpgp.enums.publicKey.eddsa, null, 'ed25519');
+  });
 
-/* eslint-disable no-invalid-this */
-module.exports = () => {
-  describe('EdDSA parameter validation', function() {
-    let eddsaKey;
+  it('EdDSA params should be valid', async function() {
+    const { oid, Q, seed } = openpgp.crypto.publicKey.elliptic.eddsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.eddsa.validateParams(oid, Q, seed);
+    expect(valid).to.be.true;
+  });
+
+  it('detect invalid edDSA Q', async function() {
+    const { oid, Q, seed } = openpgp.crypto.publicKey.elliptic.eddsa.parseParams(keyParams);
+
+
+    Q[0]++;
+    let valid = await openpgp.crypto.publicKey.elliptic.eddsa.validateParams(oid, Q, seed);
+    expect(valid).to.be.false;
+
+    const infQ = new Uint8Array(Q.length);
+    valid = await openpgp.crypto.publicKey.elliptic.eddsa.validateParams(oid, infQ, seed);
+    expect(valid).to.be.false;
+  });
+});
+
+describe('ECC curve validation', function() {
+  it('EdDSA params are not valid for ECDH', async function() {
+    const keyParams = await openpgp.crypto.generateParams(
+      openpgp.enums.publicKey.eddsa,
+      null,
+      'ed25519'
+    );
+    const { oid, Q, seed } = openpgp.crypto.publicKey.elliptic.eddsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.ecdh.validateParams(oid, Q, seed);
+    expect(valid).to.be.false;
+  });
+
+  it('EdDSA params are not valid for EcDSA', async function() {
+    const keyParams = await openpgp.crypto.generateParams(
+      openpgp.enums.publicKey.eddsa,
+      null,
+      'ed25519'
+    );
+    const { oid, Q, seed } = openpgp.crypto.publicKey.elliptic.eddsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.ecdsa.validateParams(oid, Q, seed);
+    expect(valid).to.be.false;
+  });
+
+  it('x25519 params are not valid for EcDSA', async function() {
+    const keyParams = await openpgp.crypto.generateParams(
+      openpgp.enums.publicKey.ecdsa,
+      null,
+      'curve25519'
+    );
+    const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.ecdsa.validateParams(oid, Q, d);
+    expect(valid).to.be.false;
+  });
+
+  it('EcDSA params are not valid for EdDSA', async function() {
+    const keyParams = await openpgp.crypto.generateParams(
+      openpgp.enums.publicKey.ecdsa, null, 'p256'
+    );
+    const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.eddsa.validateParams(oid, Q, d);
+    expect(valid).to.be.false;
+  });
+
+  it('x25519 params are not valid for EdDSA', async function() {
+    const keyParams = await openpgp.crypto.generateParams(
+      openpgp.enums.publicKey.ecdsa, null, 'curve25519'
+    );
+    const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+    const valid = await openpgp.crypto.publicKey.elliptic.eddsa.validateParams(oid, Q, d);
+    expect(valid).to.be.false;
+  });
+});
+
+
+const curves = ['curve25519', 'p256', 'p384', 'p521', 'secp256k1', 'brainpoolP256r1', 'brainpoolP384r1', 'brainpoolP512r1'];
+curves.forEach(curve => {
+  describe(`ECC ${curve} parameter validation`, () => {
+    let keyParams;
     before(async () => {
-      eddsaKey = (await openpgp.generateKey({ curve: 'ed25519', userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
+      // we generate also ecdh params as ecdsa ones since we do not need the kdf params
+      keyParams = await openpgp.crypto.generateParams(
+        openpgp.enums.publicKey.ecdsa, null, curve
+      );
     });
 
-    it('EdDSA params should be valid', async function() {
-      await expect(eddsaKey.keyPacket.validate()).to.not.be.rejected;
+    if (curve !== 'curve25519') {
+      it(`EcDSA ${curve} params should be valid`, async function() {
+        const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+        const valid = await openpgp.crypto.publicKey.elliptic.ecdsa.validateParams(oid, Q, d);
+        expect(valid).to.be.true;
+      });
+
+      it('detect invalid EcDSA Q', async function() {
+        const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+
+        Q[16]++;
+        let valid = await openpgp.crypto.publicKey.elliptic.ecdsa.validateParams(oid, Q, d);
+        expect(valid).to.be.false;
+
+        const infQ = new Uint8Array(Q.length);
+        valid = await openpgp.crypto.publicKey.elliptic.ecdsa.validateParams(oid, infQ, d);
+        expect(valid).to.be.false;
+      });
+    }
+
+    it(`ECDH ${curve} params should be valid`, async function() {
+      const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+      const valid = await openpgp.crypto.publicKey.elliptic.ecdh.validateParams(oid, Q, d);
+      expect(valid).to.be.true;
     });
 
-    it('detect invalid edDSA Q', async function() {
-      const eddsaKeyPacket = cloneKeyPacket(eddsaKey);
-      const Q = eddsaKeyPacket.publicParams.Q;
-      Q[0]++;
-      await expect(eddsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
+    it('detect invalid ECDH Q', async function() {
+      const { oid, Q, d } = openpgp.crypto.publicKey.elliptic.ecdsa.parseParams(keyParams);
+
+      Q[16]++;
+      let valid = await openpgp.crypto.publicKey.elliptic.ecdh.validateParams(oid, Q, d);
+      expect(valid).to.be.false;
 
       const infQ = new Uint8Array(Q.length);
-      eddsaKeyPacket.publicParams.Q = infQ;
-      await expect(eddsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
+      valid = await openpgp.crypto.publicKey.elliptic.ecdh.validateParams(oid, infQ, d);
+      expect(valid).to.be.false;
     });
   });
+});
 
-  describe('ECC curve validation', function() {
-    let eddsaKey;
-    let ecdhKey;
-    let ecdsaKey;
-    before(async () => {
-      eddsaKey = (await openpgp.generateKey({ curve: 'ed25519', userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
-      ecdhKey = eddsaKey.subKeys[0];
-      ecdsaKey = (await openpgp.generateKey({ curve: 'p256', userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
-    });
-
-    it('EdDSA params are not valid for ECDH', async function() {
-      const { oid, Q } = eddsaKey.keyPacket.publicParams;
-      const { seed } = eddsaKey.keyPacket.privateParams;
-
-      const ecdhKeyPacket = cloneKeyPacket(ecdhKey);
-      const ecdhOID = ecdhKeyPacket.publicParams.oid;
-
-      ecdhKeyPacket.publicParams.oid = oid;
-      await expect(ecdhKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      ecdhKeyPacket.publicParams.oid = ecdhOID;
-      ecdhKeyPacket.publicParams.Q = Q;
-      ecdhKeyPacket.privateParams.d = seed;
-      await expect(ecdhKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('EdDSA params are not valid for EcDSA', async function() {
-      const { oid, Q } = eddsaKey.keyPacket.publicParams;
-      const { seed } = eddsaKey.keyPacket.privateParams;
-
-      const ecdsaKeyPacket = cloneKeyPacket(ecdsaKey);
-      const ecdsaOID = ecdsaKeyPacket.publicParams.oid;
-      ecdsaKeyPacket.publicParams.oid = oid;
-      await expect(ecdsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      ecdsaKeyPacket.publicParams.oid = ecdsaOID;
-      ecdsaKeyPacket.publicParams.Q = Q;
-      ecdsaKeyPacket.privateParams.d = seed;
-      await expect(ecdsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('ECDH x25519 params are not valid for EcDSA', async function() {
-      const { oid, Q } = ecdhKey.keyPacket.publicParams;
-      const { d } = ecdhKey.keyPacket.privateParams;
-
-      const ecdsaKeyPacket = cloneKeyPacket(ecdsaKey);
-      ecdsaKeyPacket.publicParams.oid = oid;
-      ecdsaKeyPacket.publicParams.Q = Q;
-      ecdsaKeyPacket.privateParams.d = d;
-      await expect(ecdsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('EcDSA params are not valid for EdDSA', async function() {
-      const { oid, Q } = ecdsaKey.keyPacket.publicParams;
-      const { d } = ecdsaKey.keyPacket.privateParams;
-
-      const eddsaKeyPacket = cloneKeyPacket(eddsaKey);
-      const eddsaOID = eddsaKeyPacket.publicParams.oid;
-      eddsaKeyPacket.publicParams.oid = oid;
-      await expect(eddsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      eddsaKeyPacket.publicParams.oid = eddsaOID;
-      eddsaKeyPacket.publicParams.Q = Q;
-      eddsaKeyPacket.privateParams.seed = d;
-      await expect(eddsaKeyPacket.validate()).to.be.rejected;
-    });
-
-    it('ECDH x25519 params are not valid for EdDSA', async function() {
-      const { oid, Q } = ecdhKey.keyPacket.publicParams;
-      const { d } = ecdhKey.keyPacket.privateParams;
-
-      const eddsaKeyPacket = cloneKeyPacket(eddsaKey);
-      const eddsaOID = eddsaKeyPacket.publicParams.oid;
-      eddsaKeyPacket.publicParams.oid = oid;
-      await expect(eddsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      eddsaKeyPacket.publicParams.oid = eddsaOID;
-      eddsaKeyPacket.publicParams.Q = Q;
-      eddsaKeyPacket.privateParams.seed = d;
-      await expect(eddsaKeyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
+describe('RSA parameter validation', function() {
+  let keyParams;
+  before(async () => {
+    keyParams = await openpgp.crypto.generateParams(openpgp.enums.publicKey.rsa_sign, 2048);
   });
 
-  const curves = ['curve25519', 'p256', 'p384', 'p521', 'secp256k1', 'brainpoolP256r1', 'brainpoolP384r1', 'brainpoolP512r1'];
-  curves.forEach(curve => {
-    describe(`ECC ${curve} parameter validation`, () => {
-      let ecdsaKey;
-      let ecdhKey;
-      before(async () => {
-        if (curve !== 'curve25519') {
-          ecdsaKey = (await openpgp.generateKey({ curve, userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
-          ecdhKey = ecdsaKey.subKeys[0];
-        } else {
-          const eddsaKey = (await openpgp.generateKey({ curve: 'ed25519', userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
-          ecdhKey = eddsaKey.subKeys[0];
-        }
-      });
-
-      it(`EcDSA ${curve} params should be valid`, async function() {
-        if (!ecdsaKey) {
-          this.skip();
-        }
-        await expect(ecdsaKey.keyPacket.validate()).to.not.be.rejected;
-      });
-
-      it(`ECDSA ${curve} - detect invalid Q`, async function() {
-        if (!ecdsaKey) {
-          this.skip();
-        }
-        const keyPacket = cloneKeyPacket(ecdsaKey);
-        const Q = keyPacket.publicParams.Q;
-        Q[16]++;
-        await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-        const infQ = new Uint8Array(Q.length);
-        infQ[0] = 4;
-        keyPacket.publicParams.Q = infQ;
-        await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-      });
-
-      it(`ECDH ${curve} params should be valid`, async function() {
-        await expect(ecdhKey.keyPacket.validate()).to.not.be.rejected;
-      });
-
-      it(`ECDH ${curve} - detect invalid Q`, async function() {
-        const keyPacket = cloneKeyPacket(ecdhKey);
-        const Q = keyPacket.publicParams.Q;
-        Q[16]++;
-        await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-        const infQ = new Uint8Array(Q.length);
-        keyPacket.publicParams.Q = infQ;
-        infQ[0] = 4;
-        await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-      });
-    });
+  it('generated RSA params are valid', async function() {
+    const n = keyParams[0].toUint8Array();
+    const e = keyParams[1].toUint8Array();
+    const d = keyParams[2].toUint8Array();
+    const p = keyParams[3].toUint8Array();
+    const q = keyParams[4].toUint8Array();
+    const u = keyParams[5].toUint8Array();
+    const valid = await openpgp.crypto.publicKey.rsa.validateParams(n, e, d, p, q, u);
+    expect(valid).to.be.true;
   });
 
-  describe('RSA parameter validation', function() {
-    let rsaKey;
-    before(async () => {
-      rsaKey = (await openpgp.generateKey({ type: 'rsa', rsaBits: 2048, userIds: [{ name: 'Test', email: 'test@test.com' }] })).key;
-    });
+  it('detect invalid RSA n', async function() {
+    const n = keyParams[0].toUint8Array();
+    const e = keyParams[1].toUint8Array();
+    const d = keyParams[2].toUint8Array();
+    const p = keyParams[3].toUint8Array();
+    const q = keyParams[4].toUint8Array();
+    const u = keyParams[5].toUint8Array();
 
-    it('generated RSA params are valid', async function() {
-      await expect(rsaKey.keyPacket.validate()).to.not.be.rejected;
-    });
-
-    it('detect invalid RSA n', async function() {
-      const keyPacket = cloneKeyPacket(rsaKey);
-      const n = keyPacket.publicParams.n;
-      n[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect invalid RSA e', async function() {
-      const keyPacket = cloneKeyPacket(rsaKey);
-      const e = keyPacket.publicParams.e;
-      e[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
+    n[0]++;
+    const valid = await openpgp.crypto.publicKey.rsa.validateParams(n, e, d, p, q, u);
+    expect(valid).to.be.false;
   });
 
-  describe('DSA parameter validation', function() {
-    let dsaKey;
-    before(async () => {
-      dsaKey = await openpgp.readArmoredKey(armoredDSAKey);
-    });
+  it('detect invalid RSA e', async function() {
+    const n = keyParams[0].toUint8Array();
+    const e = keyParams[1].toUint8Array();
+    const d = keyParams[2].toUint8Array();
+    const p = keyParams[3].toUint8Array();
+    const q = keyParams[4].toUint8Array();
+    const u = keyParams[5].toUint8Array();
 
-    it('DSA params should be valid', async function() {
-      await expect(dsaKey.keyPacket.validate()).to.not.be.rejected;
-    });
+    e[0]++;
+    const valid = await openpgp.crypto.publicKey.rsa.validateParams(n, e, d, p, q, u);
+    expect(valid).to.be.false;
+  });
+});
 
-    it('detect invalid DSA p', async function() {
-      const keyPacket = cloneKeyPacket(dsaKey);
-      const p = keyPacket.publicParams.p;
-      p[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect invalid DSA y', async function() {
-      const keyPacket = cloneKeyPacket(dsaKey);
-      const y = keyPacket.publicParams.y;
-
-      y[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect invalid DSA g', async function() {
-      const keyPacket = cloneKeyPacket(dsaKey);
-      const g = keyPacket.publicParams.g;
-
-      g[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      keyPacket.publicParams.g = new Uint8Array([1]);
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
+describe('DSA parameter validation', function() {
+  let dsaKey;
+  before(async () => {
+    dsaKey = (await openpgp.key.readArmored(armoredDSAKey)).keys[0];
   });
 
-  describe('ElGamal parameter validation', function() {
-    let egKey;
-    before(async () => {
-      egKey = (await openpgp.readArmoredKey(armoredElGamalKey)).subKeys[0];
-    });
-
-    it('params should be valid', async function() {
-      await expect(egKey.keyPacket.validate()).to.not.be.rejected;
-    });
-
-    it('detect invalid p', async function() {
-      const keyPacket = cloneKeyPacket(egKey);
-      const p = keyPacket.publicParams.p;
-      p[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect invalid y', async function() {
-      const keyPacket = cloneKeyPacket(egKey);
-      const y = keyPacket.publicParams.y;
-      y[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect invalid g', async function() {
-      const keyPacket = cloneKeyPacket(egKey);
-      const g = keyPacket.publicParams.g;
-
-      g[0]++;
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-
-      keyPacket.publicParams.g = new Uint8Array([1]);
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
-
-    it('detect g with small order', async function() {
-      const keyPacket = cloneKeyPacket(egKey);
-      const p = keyPacket.publicParams.p;
-      const g = keyPacket.publicParams.g;
-
-      const pBN = new BN(p);
-      const gModP = new BN(g).toRed(new BN.red(pBN));
-      // g**(p-1)/2 has order 2
-      const gOrd2 = gModP.redPow(pBN.subn(1).shrn(1));
-      keyPacket.publicParams.g = gOrd2.toArrayLike(Uint8Array, 'be');
-      await expect(keyPacket.validate()).to.be.rejectedWith('Key is invalid');
-    });
+  it('DSA params should be valid', async function() {
+    const params = dsaKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const q = params[1].toUint8Array();
+    const g = params[2].toUint8Array();
+    const y = params[3].toUint8Array();
+    const x = params[4].toUint8Array();
+    const valid = await openpgp.crypto.publicKey.dsa.validateParams(p, q, g, y, x);
+    expect(valid).to.be.true;
   });
-};
+
+  it('detect invalid DSA p', async function() {
+    const params = dsaKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const q = params[1].toUint8Array();
+    const g = params[2].toUint8Array();
+    const y = params[3].toUint8Array();
+    const x = params[4].toUint8Array();
+
+    p[0]++;
+    const valid = await openpgp.crypto.publicKey.dsa.validateParams(p, q, g, y, x);
+
+    expect(valid).to.be.false;
+  });
+
+  it('detect invalid DSA y', async function() {
+    const params = dsaKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const q = params[1].toUint8Array();
+    const g = params[2].toUint8Array();
+    const y = params[3].toUint8Array();
+    const x = params[4].toUint8Array();
+
+    y[0]++;
+    const valid = await openpgp.crypto.publicKey.dsa.validateParams(p, q, g, y, x);
+
+    expect(valid).to.be.false;
+  });
+
+  it('detect invalid DSA g', async function() {
+    const params = dsaKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const q = params[1].toUint8Array();
+    const g = params[2].toUint8Array();
+    const y = params[3].toUint8Array();
+    const x = params[4].toUint8Array();
+
+    g[0]++;
+    let valid = await openpgp.crypto.publicKey.dsa.validateParams(p, q, g, y, x);
+    expect(valid).to.be.false;
+
+    const gOne = new Uint8Array([1]);
+    valid = await openpgp.crypto.publicKey.dsa.validateParams(p, q, gOne, y, x);
+    expect(valid).to.be.false;
+  });
+});
+
+describe('ElGamal parameter validation', function() {
+  let egKey;
+  before(async () => {
+    egKey = (await openpgp.key.readArmored(armoredElGamalKey)).keys[0].subKeys[0];
+  });
+
+  it('params should be valid', async function() {
+    const params = egKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const g = params[1].toUint8Array();
+    const y = params[2].toUint8Array();
+    const x = params[3].toUint8Array();
+
+    const valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, g, y, x);
+    expect(valid).to.be.true;
+  });
+
+  it('detect invalid p', async function() {
+    const params = egKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const g = params[1].toUint8Array();
+    const y = params[2].toUint8Array();
+    const x = params[3].toUint8Array();
+    p[0]++;
+    const valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, g, y, x);
+
+    expect(valid).to.be.false;
+  });
+
+  it('detect invalid y', async function() {
+    const params = egKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const g = params[1].toUint8Array();
+    const y = params[2].toUint8Array();
+    const x = params[3].toUint8Array();
+
+    y[0]++;
+    const valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, g, y, x);
+
+    expect(valid).to.be.false;
+  });
+
+  it('detect invalid g', async function() {
+    const params = egKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const g = params[1].toUint8Array();
+    const y = params[2].toUint8Array();
+    const x = params[3].toUint8Array();
+
+    g[0]++;
+    let valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, g, y, x);
+    expect(valid).to.be.false;
+
+    const gOne = new Uint8Array([1]);
+    valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, gOne, y, x);
+    expect(valid).to.be.false;
+  });
+
+  it('detect g with small order', async function() {
+    const params = egKey.keyPacket.params;
+    const p = params[0].toUint8Array();
+    const g = params[1].toUint8Array();
+    const y = params[2].toUint8Array();
+    const x = params[3].toUint8Array();
+
+    const pBN = new BN(p);
+    const gModP = new BN(g).toRed(new BN.red(pBN));
+    // g**(p-1)/2 has order 2
+    const gOrd2 = gModP.redPow(pBN.subn(1).shrn(1));
+    const valid = await openpgp.crypto.publicKey.elgamal.validateParams(p, gOrd2.toArrayLike(Uint8Array, 'be'), y, x);
+    expect(valid).to.be.false;
+  });
+});

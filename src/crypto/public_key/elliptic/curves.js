@@ -17,6 +17,7 @@
 
 /**
  * @fileoverview Wrapper of an instance of an Elliptic Curve
+ * @requires bn.js
  * @requires tweetnacl
  * @requires crypto/public_key/elliptic/key
  * @requires crypto/random
@@ -27,11 +28,11 @@
  * @module crypto/public_key/elliptic/curve
  */
 
+import BN from 'bn.js';
 import nacl from 'tweetnacl/nacl-fast-light.js';
-import { getRandomBytes } from '../../random';
+import random from '../../random';
 import enums from '../../../enums';
 import util from '../../../util';
-import { uint8ArrayToB64, b64ToUint8Array } from '../../../encoding/base64';
 import OID from '../../../type/oid';
 import { keyFromPublic, keyFromPrivate, getIndutnyCurve } from './indutnyKey';
 
@@ -136,91 +137,88 @@ const curves = {
   }
 };
 
-class Curve {
-  constructor(oid_or_name, params) {
-    try {
-      if (util.isArray(oid_or_name) ||
-          util.isUint8Array(oid_or_name)) {
-        // by oid byte array
-        oid_or_name = new OID(oid_or_name);
-      }
-      if (oid_or_name instanceof OID) {
-        // by curve OID
-        oid_or_name = oid_or_name.getName();
-      }
-      // by curve name or oid string
-      this.name = enums.write(enums.curve, oid_or_name);
-    } catch (err) {
-      throw new Error('Not valid curve');
+/**
+ * @constructor
+ */
+function Curve(oid_or_name, params) {
+  try {
+    if (util.isArray(oid_or_name) ||
+        util.isUint8Array(oid_or_name)) {
+      // by oid byte array
+      oid_or_name = new OID(oid_or_name);
     }
-    params = params || curves[this.name];
-
-    this.keyType = params.keyType;
-
-    this.oid = params.oid;
-    this.hash = params.hash;
-    this.cipher = params.cipher;
-    this.node = params.node && curves[this.name];
-    this.web = params.web && curves[this.name];
-    this.payloadSize = params.payloadSize;
-    if (this.web && util.getWebCrypto()) {
-      this.type = 'web';
-    } else if (this.node && util.getNodeCrypto()) {
-      this.type = 'node';
-    } else if (this.name === 'curve25519') {
-      this.type = 'curve25519';
-    } else if (this.name === 'ed25519') {
-      this.type = 'ed25519';
+    if (oid_or_name instanceof OID) {
+      // by curve OID
+      oid_or_name = oid_or_name.getName();
     }
+    // by curve name or oid string
+    this.name = enums.write(enums.curve, oid_or_name);
+  } catch (err) {
+    throw new Error('Not valid curve');
   }
+  params = params || curves[this.name];
 
-  async genKeyPair() {
-    let keyPair;
-    switch (this.type) {
-      case 'web':
-        try {
-          return await webGenKeyPair(this.name);
-        } catch (err) {
-          util.printDebugError("Browser did not support generating ec key " + err.message);
-          break;
-        }
-      case 'node':
-        return nodeGenKeyPair(this.name);
-      case 'curve25519': {
-        const privateKey = await getRandomBytes(32);
-        privateKey[0] = (privateKey[0] & 127) | 64;
-        privateKey[31] &= 248;
-        const secretKey = privateKey.slice().reverse();
-        keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-        const publicKey = util.concatUint8Array([new Uint8Array([0x40]), keyPair.publicKey]);
-        return { publicKey, privateKey };
-      }
-      case 'ed25519': {
-        const privateKey = await getRandomBytes(32);
-        const keyPair = nacl.sign.keyPair.fromSeed(privateKey);
-        const publicKey = util.concatUint8Array([new Uint8Array([0x40]), keyPair.publicKey]);
-        return { publicKey, privateKey };
-      }
-    }
-    const indutnyCurve = await getIndutnyCurve(this.name);
-    keyPair = await indutnyCurve.genKeyPair({
-      entropy: util.uint8ArrayToStr(await getRandomBytes(32))
-    });
-    return { publicKey: new Uint8Array(keyPair.getPublic('array', false)), privateKey: keyPair.getPrivate().toArrayLike(Uint8Array) };
+  this.keyType = params.keyType;
+
+  this.oid = params.oid;
+  this.hash = params.hash;
+  this.cipher = params.cipher;
+  this.node = params.node && curves[this.name];
+  this.web = params.web && curves[this.name];
+  this.payloadSize = params.payloadSize;
+  if (this.web && util.getWebCrypto()) {
+    this.type = 'web';
+  } else if (this.node && util.getNodeCrypto()) {
+    this.type = 'node';
+  } else if (this.name === 'curve25519') {
+    this.type = 'curve25519';
+  } else if (this.name === 'ed25519') {
+    this.type = 'ed25519';
   }
 }
 
-async function generate(curve) {
-  const BigInteger = await util.getBigInteger();
+Curve.prototype.genKeyPair = async function () {
+  let keyPair;
+  switch (this.type) {
+    case 'web':
+      try {
+        return await webGenKeyPair(this.name);
+      } catch (err) {
+        util.print_debug_error("Browser did not support generating ec key " + err.message);
+        break;
+      }
+    case 'node':
+      return nodeGenKeyPair(this.name);
+    case 'curve25519': {
+      const privateKey = await random.getRandomBytes(32);
+      privateKey[0] = (privateKey[0] & 127) | 64;
+      privateKey[31] &= 248;
+      const secretKey = privateKey.slice().reverse();
+      keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+      const publicKey = util.concatUint8Array([new Uint8Array([0x40]), keyPair.publicKey]);
+      return { publicKey, privateKey };
+    }
+    case 'ed25519': {
+      const privateKey = await random.getRandomBytes(32);
+      const keyPair = nacl.sign.keyPair.fromSeed(privateKey);
+      const publicKey = util.concatUint8Array([new Uint8Array([0x40]), keyPair.publicKey]);
+      return { publicKey, privateKey };
+    }
+  }
+  const indutnyCurve = await getIndutnyCurve(this.name);
+  keyPair = await indutnyCurve.genKeyPair({
+    entropy: util.Uint8Array_to_str(await random.getRandomBytes(32))
+  });
+  return { publicKey: new Uint8Array(keyPair.getPublic('array', false)), privateKey: keyPair.getPrivate().toArrayLike(Uint8Array) };
+};
 
+async function generate(curve) {
   curve = new Curve(curve);
   const keyPair = await curve.genKeyPair();
-  const Q = new BigInteger(keyPair.publicKey).toUint8Array();
-  const secret = new BigInteger(keyPair.privateKey).toUint8Array('be', curve.payloadSize);
   return {
     oid: curve.oid,
-    Q,
-    secret,
+    Q: new BN(keyPair.publicKey),
+    d: new BN(keyPair.privateKey),
     hash: curve.hash,
     cipher: curve.cipher
   };
@@ -284,6 +282,7 @@ async function validateStandardParams(algo, oid, Q, d) {
    * Re-derive public point Q' = dG from private key
    * Expect Q == Q'
    */
+  d = new BN(d);
   const dG = keyFromPrivate(curve, d).getPublic();
   if (!dG.eq(Q)) {
     return false;
@@ -292,8 +291,10 @@ async function validateStandardParams(algo, oid, Q, d) {
   return true;
 }
 
+export default Curve;
+
 export {
-  Curve, curves, webCurves, nodeCurves, generate, getPreferredHashAlgo, jwkToRawPublic, rawPublicToJwk, privateToJwk, validateStandardParams
+  curves, webCurves, nodeCurves, generate, getPreferredHashAlgo, jwkToRawPublic, rawPublicToJwk, privateToJwk, validateStandardParams
 };
 
 //////////////////////////
@@ -312,7 +313,7 @@ async function webGenKeyPair(name) {
 
   return {
     publicKey: jwkToRawPublic(publicKey),
-    privateKey: b64ToUint8Array(privateKey.d, true)
+    privateKey: util.b64_to_Uint8Array(privateKey.d, true)
   };
 }
 
@@ -338,8 +339,8 @@ async function nodeGenKeyPair(name) {
  * @returns {Uint8Array}                    raw public key
  */
 function jwkToRawPublic(jwk) {
-  const bufX = b64ToUint8Array(jwk.x);
-  const bufY = b64ToUint8Array(jwk.y);
+  const bufX = util.b64_to_Uint8Array(jwk.x);
+  const bufY = util.b64_to_Uint8Array(jwk.y);
   const publicKey = new Uint8Array(bufX.length + bufY.length + 1);
   publicKey[0] = 0x04;
   publicKey.set(bufX, 1);
@@ -362,8 +363,8 @@ function rawPublicToJwk(payloadSize, name, publicKey) {
   const jwk = {
     kty: "EC",
     crv: name,
-    x: uint8ArrayToB64(bufX, true),
-    y: uint8ArrayToB64(bufY, true),
+    x: util.Uint8Array_to_b64(bufX, true),
+    y: util.Uint8Array_to_b64(bufY, true),
     ext: true
   };
   return jwk;
@@ -379,6 +380,6 @@ function rawPublicToJwk(payloadSize, name, publicKey) {
  */
 function privateToJwk(payloadSize, name, publicKey, privateKey) {
   const jwk = rawPublicToJwk(payloadSize, name, publicKey);
-  jwk.d = uint8ArrayToB64(privateKey, true);
+  jwk.d = util.Uint8Array_to_b64(privateKey, true);
   return jwk;
 }

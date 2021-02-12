@@ -24,10 +24,10 @@
  * @module crypto/cfb
  */
 
-import { AES_CFB } from 'asmcrypto.js/dist_es8/aes/cfb';
+import { AES_CFB } from 'asmcrypto.js/dist_es5/aes/cfb';
 
 import stream from 'web-stream-tools';
-import * as cipher from './cipher';
+import cipher from './cipher';
 import config from '../config';
 import util from '../util';
 
@@ -38,6 +38,7 @@ const Buffer = util.getNodeBuffer();
 const knownAlgos = nodeCrypto ? nodeCrypto.getCiphers() : [];
 const nodeAlgos = {
   idea: knownAlgos.includes('idea-cfb') ? 'idea-cfb' : undefined, /* Unused, not implemented */
+  '3des': knownAlgos.includes('des-ede3-cfb') ? 'des-ede3-cfb' : undefined,
   tripledes: knownAlgos.includes('des-ede3-cfb') ? 'des-ede3-cfb' : undefined,
   cast5: knownAlgos.includes('cast5-cfb') ? 'cast5-cfb' : undefined,
   blowfish: knownAlgos.includes('bf-cfb') ? 'bf-cfb' : undefined,
@@ -47,90 +48,92 @@ const nodeAlgos = {
   /* twofish is not implemented in OpenSSL */
 };
 
-export async function encrypt(algo, key, plaintext, iv) {
-  if (util.getNodeCrypto() && nodeAlgos[algo]) { // Node crypto library.
-    return nodeEncrypt(algo, key, plaintext, iv);
-  }
-  if (algo.substr(0, 3) === 'aes') {
-    return aesEncrypt(algo, key, plaintext, iv);
-  }
-
-  const cipherfn = new cipher[algo](key);
-  const block_size = cipherfn.blockSize;
-
-  const blockc = iv.slice();
-  let pt = new Uint8Array();
-  const process = chunk => {
-    if (chunk) {
-      pt = util.concatUint8Array([pt, chunk]);
+export default {
+  encrypt: function(algo, key, plaintext, iv) {
+    if (util.getNodeCrypto() && nodeAlgos[algo]) { // Node crypto library.
+      return nodeEncrypt(algo, key, plaintext, iv);
     }
-    const ciphertext = new Uint8Array(pt.length);
-    let i;
-    let j = 0;
-    while (chunk ? pt.length >= block_size : pt.length) {
-      const encblock = cipherfn.encrypt(blockc);
-      for (i = 0; i < block_size; i++) {
-        blockc[i] = pt[i] ^ encblock[i];
-        ciphertext[j++] = blockc[i];
+    if (algo.substr(0, 3) === 'aes') {
+      return aesEncrypt(algo, key, plaintext, iv);
+    }
+
+    const cipherfn = new cipher[algo](key);
+    const block_size = cipherfn.blockSize;
+
+    const blockc = iv.slice();
+    let pt = new Uint8Array();
+    const process = chunk => {
+      if (chunk) {
+        pt = util.concatUint8Array([pt, chunk]);
       }
-      pt = pt.subarray(block_size);
-    }
-    return ciphertext.subarray(0, j);
-  };
-  return stream.transform(plaintext, process, process);
-}
-
-export async function decrypt(algo, key, ciphertext, iv) {
-  if (util.getNodeCrypto() && nodeAlgos[algo]) { // Node crypto library.
-    return nodeDecrypt(algo, key, ciphertext, iv);
-  }
-  if (algo.substr(0, 3) === 'aes') {
-    return aesDecrypt(algo, key, ciphertext, iv);
-  }
-
-  const cipherfn = new cipher[algo](key);
-  const block_size = cipherfn.blockSize;
-
-  let blockp = iv;
-  let ct = new Uint8Array();
-  const process = chunk => {
-    if (chunk) {
-      ct = util.concatUint8Array([ct, chunk]);
-    }
-    const plaintext = new Uint8Array(ct.length);
-    let i;
-    let j = 0;
-    while (chunk ? ct.length >= block_size : ct.length) {
-      const decblock = cipherfn.encrypt(blockp);
-      blockp = ct;
-      for (i = 0; i < block_size; i++) {
-        plaintext[j++] = blockp[i] ^ decblock[i];
+      const ciphertext = new Uint8Array(pt.length);
+      let i;
+      let j = 0;
+      while (chunk ? pt.length >= block_size : pt.length) {
+        const encblock = cipherfn.encrypt(blockc);
+        for (i = 0; i < block_size; i++) {
+          blockc[i] = pt[i] ^ encblock[i];
+          ciphertext[j++] = blockc[i];
+        }
+        pt = pt.subarray(block_size);
       }
-      ct = ct.subarray(block_size);
+      return ciphertext.subarray(0, j);
+    };
+    return stream.transform(plaintext, process, process);
+  },
+
+  decrypt: async function(algo, key, ciphertext, iv) {
+    if (util.getNodeCrypto() && nodeAlgos[algo]) { // Node crypto library.
+      return nodeDecrypt(algo, key, ciphertext, iv);
     }
-    return plaintext.subarray(0, j);
-  };
-  return stream.transform(ciphertext, process, process);
-}
+    if (algo.substr(0, 3) === 'aes') {
+      return aesDecrypt(algo, key, ciphertext, iv);
+    }
+
+    const cipherfn = new cipher[algo](key);
+    const block_size = cipherfn.blockSize;
+
+    let blockp = iv;
+    let ct = new Uint8Array();
+    const process = chunk => {
+      if (chunk) {
+        ct = util.concatUint8Array([ct, chunk]);
+      }
+      const plaintext = new Uint8Array(ct.length);
+      let i;
+      let j = 0;
+      while (chunk ? ct.length >= block_size : ct.length) {
+        const decblock = cipherfn.encrypt(blockp);
+        blockp = ct;
+        for (i = 0; i < block_size; i++) {
+          plaintext[j++] = blockp[i] ^ decblock[i];
+        }
+        ct = ct.subarray(block_size);
+      }
+      return plaintext.subarray(0, j);
+    };
+    return stream.transform(ciphertext, process, process);
+  }
+};
 
 function aesEncrypt(algo, key, pt, iv) {
   if (
     util.getWebCrypto() &&
     key.length !== 24 && // Chrome doesn't support 192 bit keys, see https://www.chromium.org/blink/webcrypto#TOC-AES-support
     !util.isStream(pt) &&
-    pt.length >= 3000 * config.minBytesForWebCrypto // Default to a 3MB minimum. Chrome is pretty slow for small messages, see: https://bugs.chromium.org/p/chromium/issues/detail?id=701188#c2
+    pt.length >= 3000 * config.min_bytes_for_web_crypto // Default to a 3MB minimum. Chrome is pretty slow for small messages, see: https://bugs.chromium.org/p/chromium/issues/detail?id=701188#c2
   ) { // Web Crypto
     return webEncrypt(algo, key, pt, iv);
   }
   // asm.js fallback
   const cfb = new AES_CFB(key, iv);
-  return stream.transform(pt, value => cfb.aes.AES_Encrypt_process(value), () => cfb.aes.AES_Encrypt_finish());
+  return stream.transform(pt, value => cfb.AES_Encrypt_process(value), () => cfb.AES_Encrypt_finish());
 }
 
 function aesDecrypt(algo, key, ct, iv) {
   if (util.isStream(ct)) {
     const cfb = new AES_CFB(key, iv);
-    return stream.transform(ct, value => cfb.aes.AES_Decrypt_process(value), () => cfb.aes.AES_Decrypt_finish());
+    return stream.transform(ct, value => cfb.AES_Decrypt_process(value), () => cfb.AES_Decrypt_finish());
   }
   return AES_CFB.decrypt(ct, key, iv);
 }

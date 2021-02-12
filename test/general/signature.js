@@ -1,12 +1,11 @@
-const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../..');
-const util = require('../../src/util');
+const openpgp = typeof window !== 'undefined' && window.openpgp ? window.openpgp : require('../../dist/openpgp');
 
 const chai = require('chai');
 chai.use(require('chai-as-promised'));
 
 const expect = chai.expect;
 
-module.exports = () => describe("Signature", function() {
+describe("Signature", function() {
   const priv_key_arm1 =
     ['-----BEGIN PGP PRIVATE KEY BLOCK-----',
       'Version: GnuPG v1.4.11 (GNU/Linux)',
@@ -657,7 +656,7 @@ WPVMYDzj6X7I1A+nWeNiPlp2PoUUUvdCLisY1aU1wyTJa7wBsLARsrhXk5/R1pQt
 Blk+CJ7ytHy6En8542bB/yC+Z9/zWbVuhg==
 =jmT1
 -----END PGP PUBLIC KEY BLOCK-----`;
-
+      
     const msg_sig_expired =
     ['-----BEGIN PGP MESSAGE-----',
       'Comment: GPGTools - https://gpgtools.org',
@@ -842,32 +841,32 @@ hUhMKMuiM3pRwdIyDOItkUWQmjEEw7/XmhgInkXsCw==
 `;
 
   it('Testing signature checking on CAST5-enciphered message', async function() {
-    const { rejectMessageHashAlgorithms } = openpgp.config;
-    Object.assign(openpgp.config, { rejectMessageHashAlgorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
+    const { reject_message_hash_algorithms } = openpgp.config;
+    Object.assign(openpgp.config, { reject_message_hash_algorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
     try {
-      const priv_key = await openpgp.readArmoredKey(priv_key_arm1);
-      const pub_key = await openpgp.readArmoredKey(pub_key_arm1);
-      const msg = await openpgp.readArmoredMessage(msg_arm1);
+      const priv_key = (await openpgp.key.readArmored(priv_key_arm1)).keys[0];
+      const pub_key = (await openpgp.key.readArmored(pub_key_arm1)).keys[0];
+      const msg = await openpgp.message.readArmored(msg_arm1);
       await priv_key.decrypt("abcd");
       const decrypted = await openpgp.decrypt({ privateKeys: priv_key, publicKeys:[pub_key], message:msg });
       expect(decrypted.data).to.exist;
       expect(decrypted.signatures[0].valid).to.be.true;
       expect(decrypted.signatures[0].signature.packets.length).to.equal(1);
     } finally {
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms });
+      Object.assign(openpgp.config, { reject_message_hash_algorithms });
     }
   });
 
   it('Supports decrypting with GnuPG stripped-key extension', async function() {
-    const { rejectMessageHashAlgorithms } = openpgp.config;
-    Object.assign(openpgp.config, { rejectMessageHashAlgorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
+    const { reject_message_hash_algorithms } = openpgp.config;
+    Object.assign(openpgp.config, { reject_message_hash_algorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
     try {
       // exercises the GnuPG s2k type 1001 extension:
       // the secrets on the primary key have been stripped.
-      const priv_key_gnupg_ext = await openpgp.readArmoredKey(priv_key_arm1_stripped);
-      const priv_key_gnupg_ext_2 = await openpgp.readArmoredKey(priv_key_arm1_stripped);
-      const pub_key = await openpgp.readArmoredKey(pub_key_arm1);
-      const message = await openpgp.readArmoredMessage(msg_arm1);
+      const priv_key_gnupg_ext = (await openpgp.key.readArmored(priv_key_arm1_stripped)).keys[0];
+      const priv_key_gnupg_ext_2 = (await openpgp.key.readArmored(priv_key_arm1_stripped)).keys[0];
+      const pub_key = (await openpgp.key.readArmored(pub_key_arm1)).keys[0];
+      const message = await openpgp.message.readArmored(msg_arm1);
       const primaryKey_packet = priv_key_gnupg_ext.primaryKey.write();
       expect(priv_key_gnupg_ext.isDecrypted()).to.be.false;
       await priv_key_gnupg_ext.decrypt("abcd");
@@ -878,27 +877,27 @@ hUhMKMuiM3pRwdIyDOItkUWQmjEEw7/XmhgInkXsCw==
       expect(msg.signatures).to.have.length(1);
       expect(msg.signatures[0].valid).to.be.true;
       expect(msg.signatures[0].signature.packets.length).to.equal(1);
-      await expect(openpgp.sign({ message: openpgp.Message.fromText('test'), privateKeys: [priv_key_gnupg_ext] })).to.eventually.be.rejectedWith(/Cannot sign with a gnu-dummy key/);
-      await expect(openpgp.reformatKey({ userIds: { name: 'test' }, privateKey: priv_key_gnupg_ext })).to.eventually.be.rejectedWith(/Cannot reformat a gnu-dummy primary key/);
-      await expect(openpgp.reformatKey({ userIds: { name: 'test' }, privateKey: priv_key_gnupg_ext_2, passphrase: 'test' })).to.eventually.be.rejectedWith(/Cannot reformat a gnu-dummy primary key/);
+      await expect(openpgp.sign({ message: openpgp.message.fromText('test'), privateKeys: [priv_key_gnupg_ext] })).to.eventually.be.rejectedWith('Missing private key parameters');
+      await expect(openpgp.reformatKey({ userIds: { name: 'test' }, privateKey: priv_key_gnupg_ext })).to.eventually.be.rejectedWith('Missing private key parameters');
+      await expect(openpgp.reformatKey({ userIds: { name: 'test' }, privateKey: priv_key_gnupg_ext_2, passphrase: 'test' })).to.eventually.be.rejectedWith('Missing private key parameters');
       await priv_key_gnupg_ext.encrypt("abcd");
       expect(priv_key_gnupg_ext.isDecrypted()).to.be.false;
       const primaryKey_packet2 = priv_key_gnupg_ext.primaryKey.write();
       expect(primaryKey_packet).to.deep.equal(primaryKey_packet2);
     } finally {
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms });
+      Object.assign(openpgp.config, { reject_message_hash_algorithms });
     }
   });
 
   it('Supports signing with GnuPG stripped-key extension', async function() {
-    const priv_key_gnupg_ext = await openpgp.readArmoredKey(flowcrypt_stripped_key);
+    const priv_key_gnupg_ext = (await openpgp.key.readArmored(flowcrypt_stripped_key)).keys[0];
     await priv_key_gnupg_ext.decrypt('FlowCrypt');
-    const sig = await openpgp.sign({ message: openpgp.Message.fromText('test'), privateKeys: [priv_key_gnupg_ext], date: new Date('2018-12-17T03:24:00') });
-    expect(sig).to.match(/-----END PGP MESSAGE-----\n$/);
+    const sig = await openpgp.sign({ message: openpgp.message.fromText('test'), privateKeys: [priv_key_gnupg_ext], date: new Date('2018-12-17T03:24:00') });
+    expect(sig.data).to.match(/-----END PGP MESSAGE-----\r\n$/);
   });
 
   it('Supports non-human-readable notations', async function() {
-    const { packets: [signature] } = await openpgp.readArmoredMessage(signature_with_non_human_readable_notations);
+    const { packets: [signature] } = await openpgp.message.readArmored(signature_with_non_human_readable_notations);
     // There are no human-readable notations so `notations` property does not
     // expose the `test@key.com` notation.
     expect(Object.keys(signature.notations).length).to.equal(0);
@@ -915,7 +914,7 @@ hUhMKMuiM3pRwdIyDOItkUWQmjEEw7/XmhgInkXsCw==
   it('Checks for critical bit in non-human-readable notations', async function() {
     try {
       openpgp.config.tolerant = false;
-      await openpgp.readArmoredMessage(`-----BEGIN PGP SIGNATURE-----
+      await openpgp.message.readArmored(`-----BEGIN PGP SIGNATURE-----
 
 wsEfBAABCABJBYJfKDH0K5QAAAAAAB0ABXVua25vd25AdGVzdHMuc2VxdW9pYS1w
 Z3Aub3JndmFsdWUWIQTRpm4aI7GCyZgPeIz7/MgqAV5zMAAKCRD7/MgqAV5zMLBK
@@ -930,7 +929,7 @@ IYs+aFmldMg4p1t1Ab/bRHbBxIlzhtbNE6IyOfc17mgOcjQzVJBc/EaxD7S3KjU2
 bwM=
 =0x2S
 -----END PGP SIGNATURE-----`);
-      throw new Error('openpgp.readArmoredMessage should throw but it did not.');
+      throw new Error('openpgp.message.readArmored should throw but it did not.');
     } catch (e) {
       expect(e.message).to.equal('Unknown critical notation: unknown@tests.sequoia-pgp.org');
     } finally {
@@ -939,8 +938,8 @@ bwM=
   });
 
   it('Verify V4 signature. Hash: SHA1. PK: RSA. Signature Type: 0x00 (binary document)', async function() {
-    const { rejectMessageHashAlgorithms } = openpgp.config;
-    Object.assign(openpgp.config, { rejectMessageHashAlgorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
+    const { reject_message_hash_algorithms } = openpgp.config;
+    Object.assign(openpgp.config, { reject_message_hash_algorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
     try {
       const signedArmor =
         ['-----BEGIN PGP MESSAGE-----',
@@ -954,16 +953,16 @@ bwM=
           '=VH8F',
           '-----END PGP MESSAGE-----'].join('\n');
 
-      const sMsg = await openpgp.readArmoredMessage(signedArmor);
-      const pub_key = await openpgp.readArmoredKey(pub_key_arm2);
+      const sMsg = await openpgp.message.readArmored(signedArmor);
+      const pub_key = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
       const verified = await sMsg.verify([pub_key]);
-      openpgp.stream.pipe(sMsg.getLiteralData(), new openpgp.stream.WritableStream());
+      openpgp.stream.pipe(sMsg.getLiteralData(), new WritableStream());
       expect(verified).to.exist;
       expect(verified).to.have.length(1);
       expect(await verified[0].verified).to.be.true;
       expect((await verified[0].signature).packets.length).to.equal(1);
     } finally {
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms });
+      Object.assign(openpgp.config, { reject_message_hash_algorithms });
     }
   });
 
@@ -985,9 +984,9 @@ bwM=
         '-----END PGP MESSAGE-----'].join('\n');
 
     const plaintext = 'short message\nnext line\n한국어/조선말';
-    const esMsg = await openpgp.readArmoredMessage(msg_armor);
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const esMsg = await openpgp.message.readArmored(msg_armor);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
 
     await Promise.all(esMsg.getEncryptionKeyIds().map(keyId => privKey.decrypt('hello world', keyId)));
 
@@ -1020,9 +1019,9 @@ bwM=
         '-----END PGP MESSAGE-----'].join('\n');
 
     const plaintext = 'short message\nnext line\n한국어/조선말';
-    const sMsg = await openpgp.readArmoredMessage(msg_armor);
-    const pubKey2 = await openpgp.readArmoredKey(pub_key_arm2);
-    const pubKey3 = await openpgp.readArmoredKey(pub_key_arm3);
+    const sMsg = await openpgp.message.readArmored(msg_armor);
+    const pubKey2 = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const pubKey3 = (await openpgp.key.readArmored(pub_key_arm3)).keys[0];
 
     const keyids = sMsg.getSigningKeyIds();
 
@@ -1044,8 +1043,8 @@ bwM=
     let testFailed = true;
     try {
       openpgp.config.tolerant = false;
-      const sMsg = await openpgp.readArmoredMessage(signature_with_critical_notation);
-      const pub_key = await openpgp.readArmoredKey(pub_key_arm2);
+      const sMsg = await openpgp.message.readArmored(signature_with_critical_notation);
+      const pub_key = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
       const verified = await sMsg.verify([pub_key]);
       await verified[0].verified;
       testFailed = false;
@@ -1060,15 +1059,15 @@ bwM=
 
   it('Verify succeeds with known signed message with critical notations', async function() {
     openpgp.config.tolerant = false;
-    openpgp.config.knownNotations.push('test@example.com');
+    openpgp.config.known_notations.push('test@example.com');
     try {
-      const sMsg = await openpgp.readArmoredMessage(signature_with_critical_notation);
-      const pub_key = await openpgp.readArmoredKey(pub_key_arm2);
+      const sMsg = await openpgp.message.readArmored(signature_with_critical_notation);
+      const pub_key = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
       const verified = await sMsg.verify([pub_key]);
-      openpgp.stream.pipe(sMsg.getLiteralData(), new openpgp.stream.WritableStream());
+      openpgp.stream.pipe(sMsg.getLiteralData(), new WritableStream());
       expect(await verified[0].verified).to.be.true;
     } finally {
-      openpgp.config.knownNotations.pop();
+      openpgp.config.known_notations.pop();
       openpgp.config.tolerant = true;
     }
   });
@@ -1098,9 +1097,9 @@ bwM=
         '-----END PGP SIGNATURE-----'].join('\n');
 
     const plaintext = 'short message\nnext line\n한국어/조선말';
-    const csMsg = await openpgp.readArmoredCleartextMessage(msg_armor);
-    const pubKey2 = await openpgp.readArmoredKey(pub_key_arm2);
-    const pubKey3 = await openpgp.readArmoredKey(pub_key_arm3);
+    const csMsg = await openpgp.cleartext.readArmored(msg_armor);
+    const pubKey2 = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const pubKey3 = (await openpgp.key.readArmored(pub_key_arm3)).keys[0];
 
     const keyids = csMsg.getSigningKeyIds();
 
@@ -1119,8 +1118,8 @@ bwM=
   });
 
   it('Verify latin-1 signed message', async function() {
-    const latin1Binary = util.hexToUint8Array('48e46c6cf62057e86c74');
-    const message = openpgp.Message.fromBinary(latin1Binary);
+    const latin1Binary = openpgp.util.hex_to_Uint8Array('48e46c6cf62057e86c74');
+    const message = openpgp.message.fromBinary(latin1Binary);
 
     message.appendSignature(`-----BEGIN PGP SIGNATURE-----
 
@@ -1139,7 +1138,7 @@ PAAeuQTUrcJdZeJ86eQ9cCUB216HCwSKOWTQRzL+hBWKXij4WD4=
 =ZEFm
 -----END PGP SIGNATURE-----`);
 
-    const pubKey = await openpgp.readArmoredKey(pub_latin1_msg);
+    const pubKey = (await openpgp.key.readArmored(pub_latin1_msg)).keys[0];
 
     return message.verify([pubKey]).then(async verifiedSig => {
       expect(await openpgp.stream.readToEnd(message.getLiteralData())).to.equal(latin1Binary);
@@ -1152,8 +1151,8 @@ PAAeuQTUrcJdZeJ86eQ9cCUB216HCwSKOWTQRzL+hBWKXij4WD4=
 
 
   it('Verify cleartext signed message with trailing spaces from GPG', async function() {
-    const { rejectMessageHashAlgorithms } = openpgp.config;
-    Object.assign(openpgp.config, { rejectMessageHashAlgorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
+    const { reject_message_hash_algorithms } = openpgp.config;
+    Object.assign(openpgp.config, { reject_message_hash_algorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
     try {
       const msg_armor =
         `-----BEGIN PGP SIGNED MESSAGE-----
@@ -1176,8 +1175,8 @@ zmuVOdNuWQqxT9Sqa84=
 -----END PGP SIGNATURE-----`;
 
       const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-      const csMsg = await openpgp.readArmoredCleartextMessage(msg_armor);
-      const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+      const csMsg = await openpgp.cleartext.readArmored(msg_armor);
+      const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
 
       const keyids = csMsg.getSigningKeyIds();
 
@@ -1190,7 +1189,7 @@ zmuVOdNuWQqxT9Sqa84=
       expect(cleartextSig.signatures[0].valid).to.be.true;
       expect(cleartextSig.signatures[0].signature.packets.length).to.equal(1);
     } finally {
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms });
+      Object.assign(openpgp.config, { reject_message_hash_algorithms });
     }
   });
 
@@ -1210,8 +1209,8 @@ yYDnCgA=
 -----END PGP MESSAGE-----`;
 
       const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-      const sMsg = await openpgp.readArmoredMessage(msg_armor);
-      const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+      const sMsg = await openpgp.message.readArmored(msg_armor);
+      const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
 
       const keyids = sMsg.getSigningKeyIds();
 
@@ -1219,9 +1218,9 @@ yYDnCgA=
 
       return openpgp.verify({ publicKeys: [pubKey], message: sMsg }).then(function(cleartextSig) {
         expect(cleartextSig).to.exist;
-        expect(cleartextSig.data).to.equal(plaintext);
+        expect(openpgp.util.Uint8Array_to_str(openpgp.util.nativeEOL(cleartextSig.data))).to.equal(plaintext);
         expect(cleartextSig.signatures).to.have.length(1);
-        expect(cleartextSig.signatures[0].valid).to.equal(!openpgp.config.rejectMessageHashAlgorithms.has(openpgp.enums.hash.sha1));
+        expect(cleartextSig.signatures[0].valid).to.equal(!openpgp.config.reject_message_hash_algorithms.has(openpgp.enums.hash.sha1));
         expect(cleartextSig.signatures[0].signature.packets.length).to.equal(1);
       });
     });
@@ -1241,14 +1240,14 @@ yYDnCgA=
 -----END PGP MESSAGE-----`.split('');
 
       const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-      const sMsg = await openpgp.readArmoredMessage(new openpgp.stream.ReadableStream({
+      const sMsg = await openpgp.message.readArmored(new ReadableStream({
         async pull(controller) {
           await new Promise(setTimeout);
           controller.enqueue(msg_armor.shift());
           if (!msg_armor.length) controller.close();
         }
       }));
-      const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+      const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
 
       const keyids = sMsg.getSigningKeyIds();
 
@@ -1256,9 +1255,9 @@ yYDnCgA=
 
       return openpgp.verify({ publicKeys: [pubKey], message: sMsg }).then(async function(cleartextSig) {
         expect(cleartextSig).to.exist;
-        expect(await openpgp.stream.readToEnd(cleartextSig.data)).to.equal(plaintext);
+        expect(openpgp.util.Uint8Array_to_str(openpgp.util.nativeEOL(await openpgp.stream.readToEnd(cleartextSig.data)))).to.equal(plaintext);
         expect(cleartextSig.signatures).to.have.length(1);
-        if (!openpgp.config.rejectMessageHashAlgorithms.has(openpgp.enums.hash.sha1)) {
+        if (!openpgp.config.reject_message_hash_algorithms.has(openpgp.enums.hash.sha1)) {
           expect(await cleartextSig.signatures[0].verified).to.be.true;
         } else {
           await expect(cleartextSig.signatures[0].verified).to.be.rejectedWith('Insecure message hash algorithm: SHA1');
@@ -1280,8 +1279,8 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 -----END PGP MESSAGE-----`;
 
       const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-      const sMsg = await openpgp.readArmoredMessage(msg_armor);
-      const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+      const sMsg = await openpgp.message.readArmored(msg_armor);
+      const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
 
       const keyids = sMsg.getSigningKeyIds();
 
@@ -1289,7 +1288,7 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
       return openpgp.verify({ publicKeys: [pubKey], message: sMsg }).then(async function(cleartextSig) {
         expect(cleartextSig).to.exist;
-        expect(await openpgp.stream.readToEnd(cleartextSig.data)).to.equal(plaintext);
+        expect(openpgp.util.Uint8Array_to_str(openpgp.util.nativeEOL(await openpgp.stream.readToEnd(cleartextSig.data)))).to.equal(plaintext);
         expect(cleartextSig.signatures).to.have.length(0);
       });
     });
@@ -1307,14 +1306,14 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 -----END PGP MESSAGE-----`.split('');
 
       const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-      const sMsg = await openpgp.readArmoredMessage(new openpgp.stream.ReadableStream({
+      const sMsg = await openpgp.message.readArmored(new ReadableStream({
         async pull(controller) {
           await new Promise(setTimeout);
           controller.enqueue(msg_armor.shift());
           if (!msg_armor.length) controller.close();
         }
       }));
-      const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+      const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
 
       const keyids = sMsg.getSigningKeyIds();
 
@@ -1322,7 +1321,7 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
       return openpgp.verify({ publicKeys: [pubKey], message: sMsg }).then(async function(cleartextSig) {
         expect(cleartextSig).to.exist;
-        expect(await openpgp.stream.readToEnd(cleartextSig.data)).to.equal(plaintext);
+        expect(openpgp.util.Uint8Array_to_str(openpgp.util.nativeEOL(await openpgp.stream.readToEnd(cleartextSig.data)))).to.equal(plaintext);
         expect(cleartextSig.signatures).to.have.length(1);
         await expect(cleartextSig.signatures[0].verified).to.be.rejectedWith('Corresponding signature packet missing');
         expect((await cleartextSig.signatures[0].signature).packets.length).to.equal(0);
@@ -1332,27 +1331,37 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   tests();
 
-  let rejectMessageHashAlgorithms;
+  tryTests('With Worker', tests, {
+    if: typeof window !== 'undefined' && window.Worker,
+    before: async function() {
+      await openpgp.initWorker({ path: '../dist/openpgp.worker.js' });
+    },
+    after: function() {
+      openpgp.destroyWorker();
+    }
+  });
+
+  let reject_message_hash_algorithms;
   tryTests('Accept SHA-1 signatures', tests, {
     if: true,
     before: function() {
-      ({ rejectMessageHashAlgorithms } = openpgp.config);
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
+      ({ reject_message_hash_algorithms } = openpgp.config);
+      Object.assign(openpgp.config, { reject_message_hash_algorithms: new Set([openpgp.enums.hash.md5, openpgp.enums.hash.ripemd]) });
     },
     after: function() {
-      Object.assign(openpgp.config, { rejectMessageHashAlgorithms });
+      Object.assign(openpgp.config, { reject_message_hash_algorithms });
     }
   });
 
   it('Sign text with openpgp.sign and verify with openpgp.verify leads to same string cleartext and valid signatures', async function() {
     const plaintext = 'short message\nnext line \n한국어/조선말';
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
 
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.CleartextMessage.fromText(plaintext) }).then(async function(signed) {
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.cleartext.fromText(plaintext) }).then(async function(signed) {
 
-      const csMsg = await openpgp.readArmoredCleartextMessage(signed);
+      const csMsg = await openpgp.cleartext.readArmored(signed.data);
       return openpgp.verify({ publicKeys:[pubKey], message:csMsg });
 
     }).then(function(cleartextSig) {
@@ -1366,13 +1375,13 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   it('Sign text with openpgp.sign and verify with openpgp.verify leads to same string cleartext and valid signatures -- escape armored message', async function() {
     const plaintext = pub_key_arm2;
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
 
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.CleartextMessage.fromText(plaintext) }).then(async function(signed) {
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.cleartext.fromText(plaintext) }).then(async function(signed) {
 
-      const csMsg = await openpgp.readArmoredCleartextMessage(signed);
+      const csMsg = await openpgp.cleartext.readArmored(signed.data);
       return openpgp.verify({ publicKeys:[pubKey], message:csMsg });
 
     }).then(function(cleartextSig) {
@@ -1386,13 +1395,13 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   it('Sign text with openpgp.sign and verify with openpgp.verify leads to same string cleartext and valid signatures -- trailing spaces', async function() {
     const plaintext = 'space: \nspace and tab: \t\nno trailing space\n  \ntab:\t\ntab and space:\t ';
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
 
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.CleartextMessage.fromText(plaintext) }).then(async function(signed) {
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.cleartext.fromText(plaintext) }).then(async function(signed) {
 
-      const csMsg = await openpgp.readArmoredCleartextMessage(signed);
+      const csMsg = await openpgp.cleartext.readArmored(signed.data);
       return openpgp.verify({ publicKeys:[pubKey], message:csMsg });
 
     }).then(function(cleartextSig) {
@@ -1405,15 +1414,15 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
   });
 
   it('Sign text with openpgp.sign and verify with openpgp.verify leads to same bytes cleartext and valid signatures - armored', async function() {
-    const plaintext = util.strToUint8Array('short message\nnext line \n한국어/조선말');
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const plaintext = openpgp.util.str_to_Uint8Array('short message\nnext line \n한국어/조선말');
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
 
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.Message.fromBinary(plaintext) }).then(async function(signed) {
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.message.fromBinary(plaintext) }).then(async function(signed) {
 
-      const csMsg = await openpgp.readArmoredMessage(signed);
-      return openpgp.verify({ publicKeys:[pubKey], message:csMsg, format: 'binary' });
+      const csMsg = await openpgp.message.readArmored(signed.data);
+      return openpgp.verify({ publicKeys:[pubKey], message:csMsg });
 
     }).then(async function(cleartextSig) {
       expect(cleartextSig).to.exist;
@@ -1425,15 +1434,15 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
   });
 
   it('Sign text with openpgp.sign and verify with openpgp.verify leads to same bytes cleartext and valid signatures - not armored', async function() {
-    const plaintext = util.strToUint8Array('short message\nnext line \n한국어/조선말');
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const plaintext = openpgp.util.str_to_Uint8Array('short message\nnext line \n한국어/조선말');
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
 
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.Message.fromBinary(plaintext), armor:false }).then(async function(signed) {
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.message.fromBinary(plaintext), armor:false }).then(function(signed) {
 
-      const csMsg = await openpgp.readMessage(signed);
-      return openpgp.verify({ publicKeys:[pubKey], message:csMsg, format: 'binary' });
+      const csMsg = signed.message;
+      return openpgp.verify({ publicKeys:[pubKey], message:csMsg });
 
     }).then(function(cleartextSig) {
       expect(cleartextSig).to.exist;
@@ -1446,12 +1455,12 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   it('Should verify cleartext message correctly when using a detached cleartext signature and binary literal data', async function () {
     const plaintext = 'short message\nnext line \n한국어/조선말';
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.Message.fromText(plaintext), detached: true}).then(async function(signed) {
-      const signature = await openpgp.readArmoredSignature(signed);
-      return openpgp.verify({ publicKeys:[pubKey], message: openpgp.Message.fromBinary(util.encodeUtf8(plaintext)), signature: signature });
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.message.fromText(plaintext), detached: true}).then(async function(signed) {
+      const signature = await openpgp.signature.readArmored(signed.signature);
+      return openpgp.verify({ publicKeys:[pubKey], message: openpgp.message.fromBinary(openpgp.util.encode_utf8(plaintext)), signature: signature });
     }).then(function(cleartextSig) {
       expect(cleartextSig).to.exist;
       expect(cleartextSig.signatures).to.have.length(1);
@@ -1462,13 +1471,13 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   it('Should verify cleartext message correctly when using a detached binary signature and text literal data', async function () {
     const plaintext = 'short message\nnext line \n한국어/조선말';
-    const plaintextArray = util.encodeUtf8(plaintext);
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const plaintextArray = openpgp.util.encode_utf8(plaintext);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey.decrypt('hello world');
-    return openpgp.sign({ privateKeys:[privKey], message:openpgp.Message.fromBinary(plaintextArray), detached: true}).then(async function(signed) {
-      const signature = await openpgp.readArmoredSignature(signed);
-      return openpgp.verify({ publicKeys:[pubKey], message: openpgp.Message.fromText(plaintext), signature: signature });
+    return openpgp.sign({ privateKeys:[privKey], message:openpgp.message.fromBinary(plaintextArray), detached: true}).then(async function(signed) {
+      const signature = await openpgp.signature.readArmored(signed.signature);
+      return openpgp.verify({ publicKeys:[pubKey], message: openpgp.message.fromText(plaintext), signature: signature });
     }).then(function(cleartextSig) {
       expect(cleartextSig).to.exist;
       expect(cleartextSig.signatures).to.have.length(1);
@@ -1479,14 +1488,14 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   it('Should verify encrypted cleartext message correctly when encrypting binary literal data with a canonical text signature', async function () {
     const plaintext = 'short message\nnext line \n한국어/조선말';
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey = await openpgp.readArmoredKey(priv_key_arm2);
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await Promise.all([privKey.primaryKey.decrypt('hello world'), privKey.subKeys[0].keyPacket.decrypt('hello world')]);
-    return openpgp.sign({ privateKeys:[privKey], message: openpgp.Message.fromText(plaintext), detached: true}).then(async function(signed) {
-      const signature = await openpgp.readArmoredSignature(signed);
-      return openpgp.encrypt({ message: openpgp.Message.fromBinary(util.encodeUtf8(plaintext)), publicKeys: [pubKey], signature })
-    }).then(async data => {
-      const csMsg = await openpgp.readArmoredMessage(data);
+    return openpgp.sign({ privateKeys:[privKey], message: openpgp.message.fromText(plaintext), detached: true}).then(async function(signed) {
+      const signature = await openpgp.signature.readArmored(signed.signature);
+      return openpgp.encrypt({ message: openpgp.message.fromBinary(openpgp.util.encode_utf8(plaintext)), publicKeys: [pubKey], signature })
+    }).then(async ({ data }) => {
+      const csMsg = await openpgp.message.readArmored(data);
       return openpgp.decrypt({ message: csMsg, privateKeys: [ privKey ], publicKeys: [ pubKey ] });
     }).then(function(cleartextSig) {
       expect(cleartextSig).to.exist;
@@ -1497,8 +1506,8 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
   });
 
   it('Verify test with expired verification public key', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_expired);
-    const message = await openpgp.readArmoredMessage(msg_sig_expired);
+    const pubKey = (await openpgp.key.readArmored(pub_expired)).keys[0];
+    const message = await openpgp.message.readArmored(msg_sig_expired);
     return openpgp.verify({ publicKeys:[pubKey], message:message }).then(function(verified) {
       expect(verified).to.exist;
       expect(verified.signatures).to.have.length(1);
@@ -1508,8 +1517,8 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
   });
 
   it('Verify test with expired verification public key and disable expiration checks using null date', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_expired);
-    const message = await openpgp.readArmoredMessage(msg_sig_expired);
+    const pubKey = (await openpgp.key.readArmored(pub_expired)).keys[0];
+    const message = await openpgp.message.readArmored(msg_sig_expired);
     return openpgp.verify({ publicKeys:[pubKey], message:message, date: null }).then(function(verified) {
       expect(verified).to.exist;
       expect(verified.signatures).to.have.length(1);
@@ -1520,26 +1529,22 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
 
   // TODO add test with multiple revocation signatures
   it('Verify primary key revocation signatures', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_revoked);
-    const revSig = pubKey.revocationSignatures[0];
-    revSig.verified = null;
-    await pubKey.revocationSignatures[0].verify(
-      pubKey.primaryKey, openpgp.enums.signature.keyRevocation, { key: pubKey.primaryKey }
-    ).then(() => expect(revSig.verified).to.be.true);
+    const pubKey = (await openpgp.key.readArmored(pub_revoked)).keys[0];
+    await expect(pubKey.revocationSignatures[0].verify(
+      pubKey.primaryKey, openpgp.enums.signature.key_revocation, {key: pubKey.primaryKey}
+    )).to.eventually.be.true;
   });
 
   // TODO add test with multiple revocation signatures
   it('Verify subkey revocation signatures', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_revoked);
-    const revSig = pubKey.subKeys[0].revocationSignatures[0];
-    revSig.verified = null;
-    await revSig.verify(
-      pubKey.primaryKey, openpgp.enums.signature.subkeyRevocation, { key: pubKey.primaryKey, bind: pubKey.subKeys[0].keyPacket }
-    ).then(() => expect(revSig.verified).to.be.true);
+    const pubKey = (await openpgp.key.readArmored(pub_revoked)).keys[0];
+    await expect(pubKey.subKeys[0].revocationSignatures[0].verify(
+      pubKey.primaryKey, openpgp.enums.signature.subkey_revocation, {key: pubKey.primaryKey, bind: pubKey.subKeys[0].keyPacket}
+    )).to.eventually.be.true;
   });
 
   it('Verify key expiration date', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_revoked);
+    const pubKey = (await openpgp.key.readArmored(pub_revoked)).keys[0];
 
     expect(pubKey).to.exist;
     expect(pubKey.users[0].selfCertifications[0].keyNeverExpires).to.be.false;
@@ -1547,15 +1552,15 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
   });
 
   it('Write unhashed subpackets', async function() {
-    let pubKey = await openpgp.readArmoredKey(pub_key_arm2);
+    let pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
     expect(pubKey.users[0].selfCertifications).to.exist;
-    pubKey = await openpgp.readArmoredKey(pubKey.armor());
+    pubKey = (await openpgp.key.readArmored(pubKey.armor())).keys[0];
     expect(pubKey.users[0].selfCertifications).to.exist;
   });
 
   it('Write V4 signatures', async function() {
-    const pubKey = await openpgp.readArmoredKey(pub_key_arm2);
-    const pubKey2 = await openpgp.readArmoredKey(pubKey.armor());
+    const pubKey = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const pubKey2 = (await openpgp.key.readArmored(pubKey.armor())).keys[0];
     expect(pubKey2).to.exist;
     expect(pubKey.users[0].selfCertifications).to.eql(pubKey2.users[0].selfCertifications);
   });
@@ -1597,37 +1602,42 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
       ''].join('\r\n');
 
     const publicKeyArmored = '-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: OpenPGP.js v.1.20131116\r\nComment: Whiteout Mail - https://whiteout.io\r\n\r\nxsBNBFKODs4BB/9iOF4THsjQMY+WEpT7ShgKxj4bHzRRaQkqczS4nZvP0U3g\r\nqeqCnbpagyeKXA+bhWFQW4GmXtgAoeD5PXs6AZYrw3tWNxLKu2Oe6Tp9K/XI\r\nxTMQ2wl4qZKDXHvuPsJ7cmgaWqpPyXtxA4zHHS3WrkI/6VzHAcI/y6x4szSB\r\nKgSuhI3hjh3s7TybUC1U6AfoQGx/S7e3WwlCOrK8GTClirN/2mCPRC5wuIft\r\nnkoMfA6jK8d2OPrJ63shy5cgwHOjQg/xuk46dNS7tkvGmbaa+X0PgqSKB+Hf\r\nYPPNS/ylg911DH9qa8BqYU2QpNh9jUKXSF+HbaOM+plWkCSAL7czV+R3ABEB\r\nAAHNLVdoaXRlb3V0IFVzZXIgPHNhZmV3aXRobWUudGVzdHVzZXJAZ21haWwu\r\nY29tPsLAXAQQAQgAEAUCUo4O2gkQ1/uT/N+/wjwAAN2cB/9gFRmAfvEQ2qz+\r\nWubmT2EsSSnjPMxzG4uyykFoa+TaZCWo2Xa2tQghmU103kEkQb1OEjRjpgwJ\r\nYX9Kghnl8DByM686L5AXnRyHP78qRJCLXSXl0AGicboUDp5sovaa4rswQceH\r\nvcdWgZ/mgHTRoiQeJddy9k+H6MPFiyFaVcFwegVsmpc+dCcC8yT+qh8ZIbyG\r\nRJU60PmKKN7LUusP+8DbSv39zCGJCBlVVKyA4MzdF5uM+sqTdXbKzOrT5DGd\r\nCZaox4s+w16Sq1rHzZKFWfQPfKLDB9pyA0ufCVRA3AF6BUi7G3ZqhZiHNhMP\r\nNvE45V/hS1PbZcfPVoUjE2qc1Ix1\r\n=7Wpe\r\n-----END PGP PUBLIC KEY BLOCK-----';
-    const publicKey = await openpgp.readArmoredKey(publicKeyArmored);
+    const publicKeys = (await openpgp.key.readArmored(publicKeyArmored)).keys;
 
     // Text
-    const msg = openpgp.Message.fromText(content);
+    const msg = openpgp.message.fromText(content);
     await msg.appendSignature(detachedSig);
-    return msg.verify([publicKey]).then(async result => {
-      openpgp.stream.pipe(msg.getLiteralData(), new openpgp.stream.WritableStream());
+    return msg.verify(publicKeys).then(async result => {
+      openpgp.stream.pipe(msg.getLiteralData(), new WritableStream());
       expect(await result[0].verified).to.be.true;
     });
   });
 
   it('Detached signature signing and verification', async function() {
-    const msg = openpgp.Message.fromText('hello');
-    const pubKey2 = await openpgp.readArmoredKey(pub_key_arm2);
-    const privKey2 = await openpgp.readArmoredKey(priv_key_arm2);
+    const msg = openpgp.message.fromText('hello');
+    const pubKey2 = (await openpgp.key.readArmored(pub_key_arm2)).keys[0];
+    const privKey2 = (await openpgp.key.readArmored(priv_key_arm2)).keys[0];
     await privKey2.decrypt('hello world');
 
-    const opt = { rsaBits: 512, userIds: { name:'test', email:'a@b.com' }, passphrase: null };
-    if (util.getWebCryptoAll()) { opt.rsaBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
-    const { key: generatedKey } = await openpgp.generateKey(opt);
-    const detachedSig = await msg.signDetached([generatedKey, privKey2]);
-    const result = await msg.verifyDetached(detachedSig, [generatedKey.toPublic(), pubKey2]);
-    expect(await result[0].verified).to.be.true;
-    expect(await result[1].verified).to.be.true;
+    const opt = {numBits: 512, userIds: { name:'test', email:'a@b.com' }, passphrase: null};
+    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
+    return openpgp.generateKey(opt).then(function(gen) {
+      const generatedKey = gen.key;
+      return msg.signDetached([generatedKey, privKey2]).then(detachedSig => {
+        return msg.verifyDetached(detachedSig, [generatedKey.toPublic(), pubKey2]).then(async result => {
+          expect(await result[0].verified).to.be.true;
+          expect(await result[1].verified).to.be.true;
+        });
+      });
+    });
   });
 
   it('Sign message with key without password', function() {
-    const opt = { userIds: { name:'test', email:'a@b.com' }, passphrase: null };
+    const opt = {numBits: 512, userIds: { name:'test', email:'a@b.com' }, passphrase: null};
+    if (openpgp.util.getWebCryptoAll()) { opt.numBits = 2048; } // webkit webcrypto accepts minimum 2048 bit keys
     return openpgp.generateKey(opt).then(function(gen) {
       const key = gen.key;
-      let message = openpgp.Message.fromText('hello world');
+      let message = openpgp.message.fromText('hello world');
       message = message.sign([key]);
       expect(message).to.exist;
     });
@@ -1661,8 +1671,8 @@ hkJiXopCSWKSlQInL1devkJJUWJmTmZeugJYlpdLAagQJM0JpsCqIQZwKgAA
       '-----END PGP PUBLIC KEY BLOCK-----'
     ].join('\n');
 
-    const signedKey = await openpgp.readArmoredKey(signedArmor);
-    const signerKey = await openpgp.readArmoredKey(priv_key_arm1);
+    const signedKey = (await openpgp.key.readArmored(signedArmor)).keys[0];
+    const signerKey = (await openpgp.key.readArmored(priv_key_arm1)).keys[0];
     return signedKey.verifyPrimaryUser([signerKey]).then(signatures => {
       expect(signatures[0].valid).to.be.null;
       expect(signatures[0].keyid.toHex()).to.equal(signedKey.getKeyId().toHex());
@@ -1696,141 +1706,10 @@ iTuGu4fEU1UligAXSrZmCdE=
 =VK6I
 -----END PGP PUBLIC KEY BLOCK-----`;
 
-    const key = await openpgp.readArmoredKey(armoredKeyWithPhoto);
+    const key = (await openpgp.key.readArmored(armoredKeyWithPhoto)).keys[0];
     for (const user of key.users) {
       await user.verify(key.primaryKey);
     }
   });
 
-  it('should verify a shorter RSA signature', async function () {
-    const encrypted = `-----BEGIN PGP MESSAGE-----
-
-wYwD4IT3RGwgLJcBBACmH+a2c2yieZJ3wFchKeTVqzWkoltiidWgHHNE5v5x
-8aZGNzZFBd02v80VS23P9oxeJOpqKX2IZyuD36SniNoi+eXdT3zraqIe9x5p
-0RY9OrTP9pl58iogFBi1ARls41j7ui8KKDt2/iyQDCWHW1LoOVstiEb5/Xi3
-EWI+34EbNNTBMgEJAQAwEXImkOPmhYhE7bB3FnXe9rb7Fo3GZYA4/8B9YVf7
-GGZRLGwbICGu8E0MolmzLYW9hRThEfusAsNPGSgB+Yaqp0drsk01N4JJj3FT
-RKEUvd5EcL3u+Z5EoUUW6GpUL5p8Hvy2thqQfeem7XUbDBY6V3wqydOjbN9u
-c4CWB5Zu3GjDGDOvXFsy6cgdQvd/B9xbugKvUbAIsecTPlLtjZwfQklIu63T
-DA/3Pz/+zTAknBCsuIM0m7U/ZP3N6AGQIp4To7RJk0I6AxthHF5LbU11MjDZ
-iB7+vmhqlrPyIS11g25UNijottJm13f84glVwBdWTJCiEqjh3KbcnTQCckCY
-V39DDLtbZG/XIx1ktqp765O9D/9xp2IA4zTyZzH4TuDbYs1j+JRdMsAq254k
-1m+wtW5gxJGcD5nh2T2T+ABL0n3jW0G504kR0LNBAQOZhVSKnSLn+F0GkjmI
-iGw8+BOy8p2pX/WCLOf776ppSL77TpzhpG6wSE2oQxDrudazmRgVkZpyGzFE
-fDjspLTJHOhZ5zlLuoiKS9qEARGp39ysQnElR4dsx7tyVZz0uJvIrVzrQBlB
-ekoD0DH0bhfqiwDrqeTJT2ORk8I/Q3jWnhQ3MnRN+q9d0yf1LWApMCwA7xU2
-C4KUFRC/wuF2TR9NvA==
-=v3WS
------END PGP MESSAGE-----`;
-    const armoredKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
-
-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
-oaBUyhCKt8tz6Q==
-=52k1
------END PGP PRIVATE KEY BLOCK-----`;
-    const key = await openpgp.readArmoredKey(armoredKey);
-    const decrypted = await openpgp.decrypt({
-      message: await openpgp.readArmoredMessage(encrypted),
-      publicKeys: key,
-      privateKeys: key
-    });
-    expect(decrypted.signatures[0].valid).to.be.true;
-  });
-
-  it('should verify a shorter EdDSA signature', async function() {
-    const key = await openpgp.readArmoredKey(`-----BEGIN PGP PRIVATE KEY BLOCK-----
-
-xVgEX8+jfBYJKwYBBAHaRw8BAQdA9GbdDjprR0sWf0R5a5IpulUauc0FsmzJ
-mOYCfoowt8EAAP9UwaqC0LWWQ5RlX7mps3728vFa/If1KBVwAjk7Uqhi2BKL
-zQ90ZXN0MiA8YkBhLmNvbT7CjAQQFgoAHQUCX8+jfAQLCQcIAxUICgQWAgEA
-AhkBAhsDAh4BACEJEG464aV2od77FiEEIcg441MtKnyJnPDRbjrhpXah3vuR
-gQD+Il6Gw2oIok4/ANyDDLBYZtKqRrMv4NcfF9DHYuAFcP4BAPhFOffyP3qU
-AEZb7QPrWdLfhn8/FeSFZxJvnmupQ9sDx10EX8+jfBIKKwYBBAGXVQEFAQEH
-QOSzo9cX1U2esGFClprOt0QWXNJ97228R5tKFxo6/0NoAwEIBwAA/0n4sq2i
-N6/jE+6rVO4o/7LW0xahxpV1tTA6qv1Op9TwFIDCeAQYFggACQUCX8+jfAIb
-DAAhCRBuOuGldqHe+xYhBCHIOONTLSp8iZzw0W464aV2od773XcA/jlmX8/c
-1/zIotEkyMZB4mI+GAg3FQ6bIACFBH1sz0MzAP9Snri0P4FRZ8D5THRCJoUm
-GBgpBmrf6IVv484jBswGDA==
-=8rBO
------END PGP PRIVATE KEY BLOCK-----`);
-    const encrypted = `-----BEGIN PGP MESSAGE-----
-
-wV4DWlRRjuYiLSsSAQdAWwDKQLN4ZUS5fqiwFtAMrRfZZe9J4SgClhG6avEe
-AEowkSZwWRT+8Hy8aBIb4oPehYUFXXZ7BtlJCyd7LOTUtqyc00OE0721PC3M
-v0+zird60sACATlDmTwweR5GFtEAjHVheIL5rbkOBRD+oSqB8z+IovNg83Pz
-FVwsFZnCLtECoYgpF2MJdopuC/bPHcrvf4ndwmD11uXtms4Rq4y25QyqApbn
-Hj/hljufk0OkavUXxrNKjGQtxLHMpa3Nsi0MHWY8JguxOKFKpAIMP32CD1e+
-j+GItrR+QbbN13ODlcR3hf66cwjLLsJCx5VcBaRspKF05O3ix/u9KVjJqtbi
-Ie6jnY0zP2ldtS4JmhKBa43qmOHCxHc=
-=7B58
------END PGP MESSAGE-----`;
-    const decrypted = await openpgp.decrypt({ message: await openpgp.readArmoredMessage(encrypted), privateKeys: key, publicKeys: key.toPublic() });
-    expect(decrypted.signatures[0].valid).to.be.true;
-  });
-
-  it('should verify a shorter ECDSA signature', async function() {
-    const key = await openpgp.readArmoredKey(`-----BEGIN PGP PRIVATE KEY BLOCK-----
-
-xYAFX9JrLRMAAABMCCqGSM49AwEHAgMErtQdX4vh7ng/ut+k1mooYNh3Ywqt
-wr0tSS8hxZMvQRIFQ53Weq0e97ioZKXGimprEL571yvAN7I19wtQtqi61AAA
-AAAAJAEAjWdW+qlMFaKwXCls3O/X8I1rbZ0OdFgeE3TnRP3YETAP5s0KYSA8
-YUBhLml0PsKSBRATCAAhBQJf0mstBAsJBwgDFQgKBBYCAQACGQECGwMCHgcD
-IgECACMiIQUee6Tb+GlhTk/ozKrt7RhInCyR6w3OJb/tYAN1+qbIoYUqAP9S
-XmJCmSMrq6KfAD1aWSTBhtmujh+6y/pYTaf6VJVBYQEAt18zK0tw5EihHASY
-FXbfdFHBzrMmPJ4UV6UiBvH6k2zHhAVf0mstEgAAAFAIKoZIzj0DAQcCAwQx
-qnVPmWex365Nx8X8BGuMNI2TITXzTh9+AuPftZjPm09dhxdT9xmrCstPu/U1
-cpacIp0LIq13ngLgeZWcGFcnAwEIBwAAAAAAJAEAsTvBsKk/XoCz2mi8sz5q
-EYaN9YdDOU2jF+HOaSNaJAsPF8J6BRgTCAAJBQJf0mstAhsMACMiIQUee6Tb
-+GlhTk/ozKrt7RhInCyR6w3OJb/tYAN1+qbIoVutAP9GHPLn7D9Uahm81lhK
-AcvDfr9a0Cp4WAVzKDKLUzrRMgEAozi0VyjiBo1U2LcwTPJkA4PEQqQRVW1D
-KZTMSAH7JEo=
-=tqWy
------END PGP PRIVATE KEY BLOCK-----`);
-    const signed = `-----BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA256
-
-short message
------BEGIN PGP SIGNATURE-----
-
-wnYFARMIAAYFAl/Say0AIyIhBR57pNv4aWFOT+jMqu3tGEicLJHrDc4lv+1g
-A3X6psihFkcA+Nuog2qpAq20Zc2lzVjDZzQosb8MLvKMg3UFCX12Oc0BAJwd
-JImeZLY02MctIpGZULbqgcUGK0P/yqrPL8Pe4lQM
-=Pacb
------END PGP SIGNATURE-----`;
-    const message = await openpgp.readArmoredCleartextMessage(signed);
-    const verified = await openpgp.verify({ publicKeys: key, message });
-    expect(verified.signatures[0].valid).to.be.true;
-  });
 });
