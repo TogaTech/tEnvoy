@@ -2392,8 +2392,30 @@ zoo`;
 
 class tEnvoyKey {
 	#privateKey;
-	constructor(private) {
-		this.#privateKey = private;
+	#locked;
+	constructor(privateKey, locked = false) {
+		this.#privateKey = privateKey;
+		this.#locked = locked;
+	}
+	lock() {
+		this.#locked = true;
+	}
+	getPrivate() {
+		if(this.#locked) {
+			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
+		} else {
+			return this.#privateKey;
+		}
+	}
+	setPrivate(privateKey) {
+		if(privateKey == null) {
+			throw "tEnvoyKey Fatal Error: property privateKey of method setPrivate is required and does not have a default value.";
+		}
+		if(this.#locked) {
+			throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the private key.";
+		} else {
+			this.#privateKey = privateKey;
+		}
 	}
 }
 
