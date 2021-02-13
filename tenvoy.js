@@ -2175,24 +2175,43 @@ zoo`;
     });
   }
   genKeys(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.seed == null) {
-      args.seed = this.basicRandomString({
-        length: 16
-      });
-    }
-    if(args.bits == null) {
-      args.bits = 2048;
-    }
-    if(isNaN(parseInt(args.bits))) {
-      args.bits = 2048;
-    } else {
-      args.bits = parseInt(args.bits);
-    }
-    // return cryptico.generateRSAKey(args.seed, args.bits);
-    return null;
+	return new Promise((resolve, reject) => {
+		if(args == null) {
+		  args = {};
+		}
+		if(args.locked == null) {
+			args.locked = false;
+		}
+		if(args.options == null) {
+			args.options = {
+				curve: "p384"
+			}
+		}
+		if(args.users == null && args.options.userIds == null) {
+			args.users = [{}];
+		}
+		if(args.users == null && args.options.userIds != null) {
+			args.users = args.options.userIds;
+		}
+		if(args.users != null && args.options.userIds != null) {
+			args.options.userIds = args.options.userIds.filter(id => args.users.find(i => i.name == id.name && i.email == id.email && i.comment == id.comment) == null);
+			args.users = args.users.concat(args.options.userIds);
+		}
+		for(let i = 0; i < args.users.length; i++) {
+			let name = args.users[i].name || "";
+			let email = args.users[i].email || "";
+			let comment = args.users[i].comment || "";
+			args.users[i] = {name: name, email: email, comment: comment};
+		}
+		args.options.userIds = args.users;
+		let key;
+		openpgp.generateKey(args.options).then((openpgpkey) => {
+			key = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked);
+			resolve(key);
+		}).catch((err) => {
+			reject(err);
+		});
+	});
   }
   genSeedFromCredentials(args) {
     if(args == null) {
@@ -2218,32 +2237,6 @@ zoo`;
           string: args.password
         })
       })
-    });
-  }
-  genKeysFromCredentials(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.username == null) {
-      args.username = "";
-    }
-    if(args.password == null) {
-      args.password = "";
-    }
-    if(args.bits == null) {
-      args.bits = 2048;
-    }
-    if(isNaN(parseInt(args.bits))) {
-      args.bits = 2048;
-    } else {
-      args.bits = parseInt(args.bits);
-    }
-    return this.genKeys({
-      seed: this.genSeedFromCredentials({
-        username: args.username,
-        password: args.password
-      }),
-      bits: args.bits
     });
   }
   genAESKey() {
@@ -2399,6 +2392,19 @@ class tEnvoyKey {
 	}
 	lock() {
 		this.#locked = true;
+	}
+	getKey() {
+		if(this.#locked) {
+			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
+		} else {
+			return new Promise((resolve, reject) => {
+				openpgp.key.readArmored(this.#privateKey).then((openpgpkey) => {
+					resolve(openpgpkey.keys[0]);
+				}).catch((err) => {
+					reject(err);
+				});
+			});
+		}
 	}
 	getPrivate() {
 		if(this.#locked) {
