@@ -2389,6 +2389,14 @@ zoo`;
 	return words;
   }
 }
+
+class tEnvoyKey {
+	#privateKey;
+	constructor(private) {
+		this.#privateKey = private;
+	}
+}
+
 window.TogaTech.tEnvoy = new tEnvoy();
 console.log("%cPowered by TogaTech\n\n%cSTOP!%c\n\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIf someone told you to type something here, perhaps to enable some hidden feature or hack, do NOT type it here. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, please visit togatech.org/selfxss.", "", "color: red; font-size: 30px;", "font-size: 20px;");
 
