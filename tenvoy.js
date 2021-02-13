@@ -2054,7 +2054,7 @@ zoo`;
 	this.wordsList = this.dictionary.split("\n");
   }
   get version() {
-    return "tEnvoy.2.cryptico.2"
+    return "tEnvoy.3.OpenPGPJS.1"
   }
   basicRandomString(args) {
     if(args == null) {
@@ -2087,7 +2087,8 @@ zoo`;
     if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method sha256 is required and does not have a default value.";
     }
-    return SHA256(args.string);
+    // return SHA256(args.string);
+    return null;
   }
   sha1(args) {
     if(args == null) {
@@ -2101,7 +2102,8 @@ zoo`;
     if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method sha1 is required and does not have a default value.";
     }
-    return SHA1(args.string);
+    // return SHA1(args.string);
+    return null;
   }
   md5(args) {
     if(args == null) {
@@ -2115,7 +2117,8 @@ zoo`;
     if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
     }
-    return MD5(args.string);
+    // return MD5(args.string);
+    return null;
   }
   sha256Compound(args) {
     if(args == null) {
@@ -2188,7 +2191,8 @@ zoo`;
     } else {
       args.bits = parseInt(args.bits);
     }
-    return cryptico.generateRSAKey(args.seed, args.bits);
+    // return cryptico.generateRSAKey(args.seed, args.bits);
+    return null;
   }
   genSeedFromCredentials(args) {
     if(args == null) {
@@ -2243,285 +2247,11 @@ zoo`;
     });
   }
   genAESKey() {
-    return cryptico.generateAESKey();
-  }
-  dumpKeysAsString(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args instanceof RSAKey) {
-      args = {
-        "privateKey": args
-      };
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(args.privateKey == null) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method dumpKeysAsString is required and does not have a default value.";
-    }
-    if(!(args.privateKey instanceof RSAKey)) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method dumpKeysAsString is invalid.";
-    }
-    return JSON.stringify(args.privateKey);
+    // return cryptico.generateAESKey();
+    return null;
   }
   loadKeysFromString(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        "string": args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method loadKeysFromString is required and does not have a default value.";
-    }
-    let unformattedKeys = JSON.parse(args.string);
-    let formattedKeys = new RSAKey();
-    for(let prop in unformattedKeys) {
-      if(typeof unformattedKeys[prop] == "object") {
-        formattedKeys[prop] = new BigInteger();
-        for(let int in unformattedKeys[prop]) {
-          formattedKeys[prop][int] = unformattedKeys[prop][int];
-        }
-      } else {
-        formattedKeys[prop] = unformattedKeys[prop];
-      }
-    }
-    return formattedKeys;
-  }
-  publicKeyString(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args instanceof RSAKey) {
-      args = {
-        "privateKey": args
-      };
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(args.privateKey == null) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method publicKeyString is required and does not have a default value.";
-    }
-    if(!(args.privateKey instanceof RSAKey)) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method publicKeyString is invalid.";
-    }
-    return cryptico.publicKeyString(args.privateKey);
-  }
-  publicKeyID(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        "publicKey": args
-      };
-    }
-    if(args instanceof RSAKey) {
-      args = {
-        "privateKey": args
-      };
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(args.privateKey != null) {
-      args = {
-        "publicKey": this.publicKeyString({
-          "privateKey": args.privateKey
-        })
-      };
-    }
-    if(args.publicKey == null) {
-      throw "tEnvoy Fatal Error: property publicKey of object args of method publicKeyID is required and does not have a default value.";
-    }
-    return this.md5(args.publicKey);
-  }
-  publicKeyCode(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(typeof args == "string") {
-      if(args.length == 32) {
-        args = {
-          "publicKeyID": args
-        };
-      } else {
-        args = {
-          "publicKeyID": this.publicKeyID({
-            "publicKey": args
-          })
-        };
-      }
-    }
-    if(args instanceof RSAKey) {
-      args = {
-        "privateKey": args
-      };
-    }
-    if(args.privateKey != null) {
-      args = {
-        "publicKeyID": this.publicKeyID({
-          "privateKey": args.privateKey
-        })
-      };
-    }
-    if(args.publicKey != null) {
-      args = {
-        "publicKeyID": this.publicKeyID({
-          "publicKey": args.publicKey
-        })
-      };
-    }
-    if(args.publicKeyID == null) {
-      throw "tEnvoy Fatal Error: property publicKeyID of object args of method publicKeyCode is required and does not have a default value.";
-    } else {
-      return args.publicKeyID.match(/.{1,4}/g).join(" ");
-    }
-  }
-  encrypt(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method encrypt is required and does not have a default value.";
-    }
-    if(args.publicKey == null && args.AESKey == null) {
-      throw "tEnvoy Fatal Error: property publicKey or AESKey of object args of method encrypt is required and does not have a default value.";
-    }
-    if(args.privateKey != null && !(args.privateKey instanceof RSAKey)) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method encrypt is invalid.";
-    }
-    if(args.AESKey != null && !(args.AESKey instanceof Array && args.AESKey.length == 32)) {
-      throw "tEnvoy Fatal Error: property AESKey of object args of method encrypt is invalid.";
-    }
-    if(args.AESKey != null) {
-      return cryptico.encryptAESCBC(args.string, args.AESKey);
-    }
-    let encrypted;
-    if(args.privateKey == null) {
-      encrypted = cryptico.encrypt(args.string, args.publicKey);
-    } else {
-      encrypted = cryptico.encrypt(args.string, args.publicKey, args.privateKey);
-    }
-    if(encrypted.status == "success") {
-      encrypted.string = encrypted.cipher;
-      delete encrypted.cipher;
-    }
-    return encrypted;
-  }
-  decrypt(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method decrypt is required and does not have a default value.";
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(args.privateKey == null && args.AESKey == null) {
-      throw "tEnvoy Fatal Error: property privateKey or AESKey of object args of method decrypt is required and does not have a default value.";
-    }
-    if(args.privateKey != null && !(args.privateKey instanceof RSAKey)) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method decrypt is invalid.";
-    }
-    if(args.AESKey != null && !(args.AESKey instanceof Array && args.AESKey.length == 32)) {
-      throw "tEnvoy Fatal Error: property AESKey of object args of method decrypt is invalid.";
-    }
-    if(args.AESKey != null) {
-      return cryptico.decryptAESCBC(args.string, args.AESKey);
-    }
-    let decrypted = cryptico.decrypt(args.string, args.privateKey);
-    if(decrypted.status == "success") {
-      decrypted.string = decrypted.plaintext;
-      delete decrypted.plaintext;
-    }
-    return decrypted;
-  }
-  sign(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.keys != null) {
-      args = {
-        "privateKey": args.keys
-      };
-    }
-    if(args.key != null) {
-      args = {
-        "privateKey": args.key
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sign is required and does not have a default value.";
-    }
-    if(args.privateKey == null) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method sign is required and does not have a default value.";
-    }
-    if(!(args.privateKey instanceof RSAKey)) {
-      throw "tEnvoy Fatal Error: property privateKey of object args of method sign is invalid.";
-    }
-    return cryptico.sign(args.string, args.privateKey);
-  }
-  verify(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        "string": args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method verifySignature is required and does not have a default value.";
-    }
-    let valid = cryptico.verify(args.string);
-    let split = args.string.split("::52cee64bb3a38f6403386519a39ac91c::");
-    let str = split[0];
-    let publicKey = split[1];
-    return {valid: valid, string: str, publicKey: publicKey};
+	  return null;
   }
   stringToBytes(args) {
 	if(args == null) {
@@ -2535,7 +2265,8 @@ zoo`;
 	if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method stringToBytes is required and does not have a default value.";
     }
-    return cryptico.string2bytes(args.string);
+    // return cryptico.string2bytes(args.string);
+    return null;
   }
   bytesToString(args) {
 	if(args == null) {
@@ -2552,7 +2283,8 @@ zoo`;
     if(!(args.bytes instanceof Array)) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is invalid.";
     }
-    return cryptico.bytes2string(args.bytes);
+    // return cryptico.bytes2string(args.bytes);
+    return null;
   }
   stringToHex(args) {
 	if(args == null) {
