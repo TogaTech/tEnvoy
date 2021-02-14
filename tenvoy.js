@@ -71,9 +71,15 @@ class tEnvoy {
       throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
-	    resolve(openpgp.util.Uint8Array_to_hex(await openpgp.crypto.hash.md5(openpgp.util.encode_utf8(args.string)).catch((err) => {
-		    reject(err);
-	    })));
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.md5(openpgp.util.encode_utf8(args.string)).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
     });
     return null;
   }
@@ -261,7 +267,11 @@ class tEnvoy {
     }
 	let hex = "";
 	for(let i = 0; i < args.string.length; i++) {
-      hex += args.string.charCodeAt(i).toString(16);
+	  let c = args.string.charCodeAt(i).toString(16);
+	  while(c.length < 2) {
+		  c = "0" + c;
+	  }
+      hex += c;
 	}
     return hex;
   }
