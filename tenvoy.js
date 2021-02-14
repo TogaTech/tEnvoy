@@ -524,15 +524,21 @@ class tEnvoy {
     if(args.length == null) {
       args.length = 12;
     }
-	
-	let words = "";
-	for(let i = 0; i < args.length; i++) {
-		words += this.wordsList[parseInt(Math.random() * 2047)];
-		if(i + 1 != args.length) {
-			words += " ";
+	return new Promise(async (resolve, reject) => {
+		let words = "";
+		for(let i = 0; i < args.length; i++) {
+			words += this.wordsList[Math.floor(await this.randomNumber({
+				min: 0,
+				max: 2047
+			}).catch((err) => {
+				reject(err);
+			}))];
+			if(i + 1 != args.length) {
+				words += " ";
+			}
 		}
-	}
-	return words;
+		resolve(words);
+	});
   }
   wordsToNumbers(args) {
 	if(args == null) {
