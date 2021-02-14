@@ -128,7 +128,7 @@ class tEnvoy {
     });
   }
   genKeys(args) {
-	return new Promise((resolve, reject) => {
+	return new Promise(async (resolve, reject) => {
 		if(args == null) {
 		  args = {};
 		}
@@ -158,12 +158,21 @@ class tEnvoy {
 		}
 		args.options.userIds = args.users;
 		let key;
-		openpgp.generateKey(args.options).then((openpgpkey) => {
-			key = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked);
-			resolve(key);
-		}).catch((err) => {
+		let openpgpkey = await openpgp.generateKey(args.options).catch((err) => {
 			reject(err);
 		});
+		if(args.password == null) {
+			key = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked);
+		} else {
+			let encryptedKey = await openpgp.encrypt({
+				message: await openpgp.message.readArmored(openpgpkey.privateKeyArmored),
+				passwords: [args.password]
+			}).catch((err) => {
+				rejct(err);
+			});
+			key = new tEnvoyKey(encryptedKey.data, args.locked, args.password);
+		}
+		resolve(key);
 	});
   }
   genSeedFromCredentials(args) {
@@ -339,9 +348,11 @@ class tEnvoy {
 class tEnvoyKey {
 	#privateKey;
 	#locked;
-	constructor(privateKey, locked = false) {
-		this.#privateKey = privateKey;
+	#password;
+	constructor(privateKey, locked = false, password) {
 		this.#locked = locked;
+		this.#password = password;
+		this.#privateKey = privateKey;
 	}
 	lock() {
 		this.#locked = true;
