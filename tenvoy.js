@@ -235,7 +235,7 @@ class tEnvoy {
 		"bytes": args
 	  };
 	}
-	if(!args.bytes instanceof Uint8Array) {
+	if(!(args.bytes instanceof Uint8Array)) {
 		let bytes = new Uint8Array(args.bytes.length);
 		for(let i = 0; i < args.bytes.length; i++) {
 			bytes[i] = args.bytes[i];
@@ -244,9 +244,6 @@ class tEnvoy {
 	}
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is required and does not have a default value.";
-    }
-    if(!(args.bytes instanceof Uint8Array)) {
-      throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is invalid.";
     }
     return openpgp.util.Uint8Array_to_str(args.bytes);
   }
