@@ -218,6 +218,41 @@ class tEnvoy {
   loadKeysFromString(args) {
 	  return null;
   }
+  utf8encode(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(typeof args == "string") {
+	  args = {
+		"string": args
+	  };
+	}
+	if(args.string == null) {
+      throw "tEnvoy Fatal Error: property string of object args of method utf8encode is required and does not have a default value.";
+    }
+    return openpgp.util.encode_utf8(args.string);
+  }
+  utf8decode(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(args instanceof Uint8Array || args instanceof Array) {
+	  args = {
+		"bytes": args
+	  };
+	}
+	if(!(args.bytes instanceof Uint8Array)) {
+		let bytes = new Uint8Array(args.bytes.length);
+		for(let i = 0; i < args.bytes.length; i++) {
+			bytes[i] = args.bytes[i];
+		}
+		args.bytes = bytes;
+	}
+	if(args.bytes == null) {
+      throw "tEnvoy Fatal Error: property bytes of object args of method utf8decode is required and does not have a default value.";
+    }
+    return openpgp.util.decode_utf8(args.bytes);
+  }
   stringToBytes(args) {
 	if(args == null) {
 	  args = {};
