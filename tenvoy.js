@@ -165,7 +165,7 @@ class tEnvoy {
 			key = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked);
 		} else {
 			let encryptedKey = await openpgp.encrypt({
-				message: await openpgp.message.readArmored(openpgpkey.privateKeyArmored),
+				message: await openpgp.message.fromText(openpgpkey.privateKeyArmored),
 				passwords: [args.password]
 			}).catch((err) => {
 				rejct(err);
@@ -357,24 +357,56 @@ class tEnvoyKey {
 	lock() {
 		this.#locked = true;
 	}
-	getKey() {
+	getKey(password) {
 		if(this.#locked) {
 			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
 		} else {
-			return new Promise((resolve, reject) => {
-				openpgp.key.readArmored(this.#privateKey).then((openpgpkey) => {
+			return new Promise(async (resolve, reject) => {
+				if(this.#password == null) {
+					let openpgpkey = await openpgp.key.readArmored(this.#privateKey).catch((err) => {
+						reject(err);
+					});
 					resolve(openpgpkey.keys[0]);
-				}).catch((err) => {
-					reject(err);
-				});
+				} else if(password == null) {
+					throw "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified.";
+				} else if(password != this.#password) {
+					throw "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified.";
+				} else {
+					let decryptedKey = await openpgp.decrypt({
+						message: await openpgp.message.readArmored(this.#privateKey),
+						passwords: [password]
+					}).catch((err) => {
+						reject(err);
+					});
+					let openpgpkey = await openpgp.key.readArmored(decryptedKey.data).catch((err) => {
+						reject(err);
+					});
+					resolve(openpgpkey.keys[0]);
+				}
 			});
 		}
 	}
-	getPrivate() {
+	getPrivate(password) {
 		if(this.#locked) {
 			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
 		} else {
-			return this.#privateKey;
+			return new Promise(async (resolve, rejct) => {
+				if(this.#password == null) {
+					resolve(this.#privateKey);
+				} else if(password == null) {
+					throw "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified.";
+				} else if(password != this.#password) {
+					throw "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified.";
+				} else {
+					let decryptedKey = await openpgp.decrypt({
+						message: await openpgp.message.readArmored(this.#privateKey),
+						passwords: [password]
+					}).catch((err) => {
+						reject(err);
+					});
+					resolve(decryptedKey.data);
+				}
+			});
 		}
 	}
 	setPrivate(privateKey) {
