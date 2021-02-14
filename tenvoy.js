@@ -248,7 +248,7 @@ class tEnvoy {
     if(!(args.bytes instanceof Array)) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is invalid.";
     }
-    return openpgp.util.Uint8Array_to_string(args.bytes);
+    return openpgp.util.Uint8Array_to_str(args.bytes);
   }
   stringToHex(args) {
 	if(args == null) {
