@@ -9,7 +9,7 @@ class tEnvoy {
   get version() {
     return "tEnvoy.3.OpenPGPJS.1"
   }
-  basicRandomString(args) {
+  randomString(args) {
     if(args == null) {
       args = {};
     }
@@ -21,12 +21,62 @@ class tEnvoy {
     if(args.length == null) {
       args.length = 10;
     }
-    var result = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < args.length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    return new Promise(async (resolve, reject) => {
+		var result = "";
+		var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		for (var i = 0; i < args.length; i++) {
+		  result += characters.charAt(Math.floor(await this.randomNumber({
+			min: 0,
+			max: characters.length - 1
+		  }).catch((err) => {
+			  reject(err);
+		  })));
+		}
+		resolve(result);
+	});
+  }
+  randomBytes(args) {
+	if(args == null) {
+	  args = {};
+	}
+    if(typeof args == "string" || typeof args == "number") {
+      args = {
+        length: args
+      };
     }
-    return result;
+    if(args.length == null) {
+      args.length = 1;
+    }
+    return new Promise(async (resolve, reject) => {
+		resolve(await openpgp.crypto.random.getRandomBytes(args.length).catch((err) => {
+			reject(err);
+		}));
+	});
+  }
+  randomNumber(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(typeof args == "string" || typeof args == "number") {
+	  args = {
+		min: 0,
+		max: args
+	  };
+	}
+	if(args.min == null) {
+	  args.min = 0;
+	}
+	if(args.max == null) {
+	  args.max = 1;
+	}
+    return new Promise(async (resolve, reject) => {
+	  let random = await this.randomBytes({
+		length: 1
+	  }).catch((err) => {
+		  reject(err);
+	  });
+	  resolve((random[0] / 255) * (args.max - args.min) + args.min);
+    });
   }
   sha256(args) {
     if(args == null) {
