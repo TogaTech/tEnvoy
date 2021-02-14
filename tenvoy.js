@@ -15,7 +15,7 @@ class tEnvoy {
     }
     if(typeof args == "string" || typeof args == "number") {
       args = {
-        "length": args
+        length: args
       };
     }
     if(args.length == null) {
@@ -34,7 +34,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.string == null) {
@@ -49,7 +49,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.string == null) {
@@ -64,7 +64,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.string == null) {
@@ -91,7 +91,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.count == null) {
@@ -226,7 +226,7 @@ class tEnvoy {
 	}
 	if(typeof args == "string") {
 	  args = {
-		"string": args
+		string: args
 	  };
 	}
 	if(args.string == null) {
@@ -240,7 +240,7 @@ class tEnvoy {
 	}
 	if(args instanceof Uint8Array || args instanceof Array) {
 	  args = {
-		"bytes": args
+		bytes: args
 	  };
 	}
 	if(!(args.bytes instanceof Uint8Array)) {
@@ -261,7 +261,7 @@ class tEnvoy {
 	}
 	if(typeof args == "string") {
 	  args = {
-		"string": args
+		string: args
 	  };
 	}
 	if(args.string == null) {
@@ -275,7 +275,7 @@ class tEnvoy {
 	}
 	if(args instanceof Uint8Array || args instanceof Array) {
 	  args = {
-		"bytes": args
+		bytes: args
 	  };
 	}
 	if(!(args.bytes instanceof Uint8Array)) {
@@ -296,7 +296,7 @@ class tEnvoy {
 	}
 	if(typeof args == "string") {
 	  args = {
-		"string": args
+		string: args
 	  };
 	}
 	if(args.string == null) {
@@ -318,7 +318,7 @@ class tEnvoy {
 	}
 	if(typeof args == "string") {
 	  args = {
-		"hex": args
+		hex: args
 	  };
 	}
 	if(args.hex == null) {
@@ -336,7 +336,7 @@ class tEnvoy {
     }
     if(typeof args == "string" || typeof args == "number") {
       args = {
-        "length": args
+        length: args
       };
     }
     if(args.length == null) {
@@ -358,7 +358,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.string == null) {
@@ -380,7 +380,7 @@ class tEnvoy {
     }
     if(typeof args == "string") {
       args = {
-        "string": args
+        string: args
       };
     }
     if(args.string == null) {
