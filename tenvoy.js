@@ -245,7 +245,7 @@ class tEnvoy {
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is required and does not have a default value.";
     }
-    if(!(args.bytes instanceof Array)) {
+    if(!(args.bytes instanceof Uint8Array)) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is invalid.";
     }
     return openpgp.util.Uint8Array_to_str(args.bytes);
