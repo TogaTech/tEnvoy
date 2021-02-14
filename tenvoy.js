@@ -74,7 +74,9 @@ class tEnvoy {
 	    resolve(
 			this.stringToHex({
 				string: this.bytesToString({
-					bytes: await openpgp.crypto.hash.md5(openpgp.util.encode_utf8(args.string)).catch((err) => {
+					bytes: await openpgp.crypto.hash.md5(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
 						reject(err);
 					})
 				})
