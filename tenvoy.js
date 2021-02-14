@@ -38,9 +38,21 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha256 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
     }
-    // return SHA256(args.string);
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.sha256(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
     return null;
   }
   sha1(args) {
@@ -53,9 +65,102 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha1 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
     }
-    // return SHA1(args.string);
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.sha1(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
+    return null;
+  }
+  sha224(args) {
+    if(args == null) {
+      args = {};
+    }
+    if(typeof args == "string") {
+      args = {
+        string: args
+      };
+    }
+    if(args.string == null) {
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+    }
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.sha224(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
+    return null;
+  }
+  sha384(args) {
+    if(args == null) {
+      args = {};
+    }
+    if(typeof args == "string") {
+      args = {
+        string: args
+      };
+    }
+    if(args.string == null) {
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+    }
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.sha384(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
+    return null;
+  }
+  sha512(args) {
+    if(args == null) {
+      args = {};
+    }
+    if(typeof args == "string") {
+      args = {
+        string: args
+      };
+    }
+    if(args.string == null) {
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+    }
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.sha512(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
     return null;
   }
   md5(args) {
@@ -75,6 +180,33 @@ class tEnvoy {
 			this.stringToHex({
 				string: this.bytesToString({
 					bytes: await openpgp.crypto.hash.md5(this.utf8encode({
+						string: args.string
+					})).catch((err) => {
+						reject(err);
+					})
+				})
+			})
+	    );
+    });
+    return null;
+  }
+  ripemd160(args) {
+    if(args == null) {
+      args = {};
+    }
+    if(typeof args == "string") {
+      args = {
+        string: args
+      };
+    }
+    if(args.string == null) {
+      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+    }
+    return new Promise(async (resolve, reject) => {
+	    resolve(
+			this.stringToHex({
+				string: this.bytesToString({
+					bytes: await openpgp.crypto.hash.ripemd(this.utf8encode({
 						string: args.string
 					})).catch((err) => {
 						reject(err);
