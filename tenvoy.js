@@ -70,7 +70,11 @@ class tEnvoy {
     if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
     }
-    // return MD5(args.string);
+    return new Promise(async (resolve, reject) => {
+	    resolve(openpgp.util.Uint8Array_to_hex(await openpgp.crypto.hash.md5(openpgp.util.encode_utf8(args.string)).catch((err) => {
+		    reject(err);
+	    })));
+    });
     return null;
   }
   sha256Compound(args) {
