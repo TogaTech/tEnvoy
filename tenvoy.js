@@ -224,17 +224,23 @@ class tEnvoy {
 	if(args.string == null) {
       throw "tEnvoy Fatal Error: property string of object args of method stringToBytes is required and does not have a default value.";
     }
-    // return cryptico.string2bytes(args.string);
-    return null;
+    return openpgp.util.str_to_Uint8Array(args.string);
   }
   bytesToString(args) {
 	if(args == null) {
 	  args = {};
 	}
-	if(args instanceof Array) {
+	if(args instanceof Uint8Array || args instanceof Array) {
 	  args = {
 		"bytes": args
 	  };
+	}
+	if(!args.bytes instanceof Uint8Array) {
+		let bytes = new Uint8Array(args.bytes.length);
+		for(let i = 0; i < args.bytes.length; i++) {
+			bytes[i] = args.bytes[i];
+		}
+		args.bytes = bytes;
 	}
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is required and does not have a default value.";
@@ -242,8 +248,7 @@ class tEnvoy {
     if(!(args.bytes instanceof Array)) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is invalid.";
     }
-    // return cryptico.bytes2string(args.bytes);
-    return null;
+    return openpgp.util.Uint8Array_to_string(args.bytes);
   }
   stringToHex(args) {
 	if(args == null) {
