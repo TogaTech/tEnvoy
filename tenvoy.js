@@ -349,7 +349,7 @@ class tEnvoyKey {
 	#privateKey;
 	#locked;
 	#password;
-	constructor(privateKey, locked = false, password) {
+	constructor(privateKeyArmored, locked = false, password) {
 		this.#locked = locked;
 		this.#password = password;
 		this.#privateKey = privateKey;
@@ -357,7 +357,7 @@ class tEnvoyKey {
 	lock() {
 		this.#locked = true;
 	}
-	getKey(password) {
+	getPrivate(password) {
 		if(this.#locked) {
 			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
 		} else {
@@ -386,7 +386,17 @@ class tEnvoyKey {
 			});
 		}
 	}
-	getPrivate(password) {
+	setPrivate(privateKey, password) {
+		if(privateKey == null) {
+			throw "tEnvoyKey Fatal Error: property privateKey of method setPrivate is required and does not have a default value.";
+		}
+		if(this.#locked) {
+			throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the private key.";
+		} else {
+			this.#privateKey = privateKey.armor();
+		}
+	}
+	getPrivateArmored(password) {
 		if(this.#locked) {
 			throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
 		} else {
@@ -409,7 +419,7 @@ class tEnvoyKey {
 			});
 		}
 	}
-	setPrivate(privateKey) {
+	setPrivateArmored(privateKey, password) {
 		if(privateKey == null) {
 			throw "tEnvoyKey Fatal Error: property privateKey of method setPrivate is required and does not have a default value.";
 		}
@@ -418,6 +428,18 @@ class tEnvoyKey {
 		} else {
 			this.#privateKey = privateKey;
 		}
+	}
+	getPublic() {
+		return new Promise(async (resolve, reject) => {
+			let key = await this.getPrivate(this.#password);
+			resolve(key.toPublic());
+		});
+	}
+	getPublicArmored() {
+		return new Promise(async (resolve, reject) => {
+			let key = await this.getPublic();
+			resolve(key.armor());
+		});
 	}
 }
 
