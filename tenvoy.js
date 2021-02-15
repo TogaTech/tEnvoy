@@ -597,10 +597,14 @@ class tEnvoyKey {
 	#password;
 	#type
 	constructor(keyArmored, locked = false, type = "private", password) {
-		this.#locked = locked;
-		this.#password = password;
-		this.#keyArmored = keyArmored;
-		this.#type = type;
+		if((password == null && ((type == "private" && keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") != 0) || (type == "public" && keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") != 0))) || (password != null && keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") != 0)) {
+			throw "tEnvoyKey Fatal Error: property keyArmored of method constructor is invalid.";
+		} else {
+			this.#locked = locked;
+			this.#password = password;
+			this.#keyArmored = keyArmored;
+			this.#type = type;
+		}
 	}
 	lock() {
 		this.#locked = true;
