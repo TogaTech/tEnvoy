@@ -351,22 +351,34 @@ class tEnvoy {
 			args.users[i] = {name: name, email: email, comment: comment};
 		}
 		args.options.userIds = args.users;
-		let key;
+		let privateKey;
+		let publicKey;
 		let openpgpkey = await openpgp.generateKey(args.options).catch((err) => {
 			reject(err);
 		});
 		if(args.password == null) {
-			key = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked, "private");
+			privateKey = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked, "private");
+			publicKey = new tEnvoyKey(openpgpkey.publicKeyArmored, args.locked, "public");
 		} else {
-			let encryptedKey = await openpgp.encrypt({
+			let encryptedPrivateKey = await openpgp.encrypt({
 				message: await openpgp.message.fromText(openpgpkey.privateKeyArmored),
 				passwords: [args.password]
 			}).catch((err) => {
-				rejct(err);
+				reject(err);
 			});
-			key = new tEnvoyKey(encryptedKey.data, args.locked, "private", args.password);
+			let encryptedPublicKey = await openpgp.encrypt({
+				message: await openpgp.message.fromText(openpgpkey.publicKeyArmored),
+				passwords: [args.password]
+			}).catch((err) => {
+				reject(err);
+			});
+			privateKey = new tEnvoyKey(encryptedPrivateKey.data, args.locked, "private", args.password);
+			publicKey = new tEnvoyKey(encryptedPublicKey.data, args.locked, "public", args.password);
 		}
-		resolve(key);
+		resolve({
+			privateKey: privateKey,
+			publicKey: publicKey
+		});
 	});
   }
   genSeedFromCredentials(args) {
@@ -659,7 +671,7 @@ class tEnvoyKey {
 			if(this.#locked) {
 				throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
 			} else {
-				return new Promise(async (resolve, rejct) => {
+				return new Promise(async (resolve, reject) => {
 					if(this.#password == null) {
 						resolve(this.#keyArmored);
 					} else if(password == null) {
