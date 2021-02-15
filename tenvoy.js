@@ -733,6 +733,34 @@ class tEnvoyKey {
 			}
 		});
 	}
+	setPublic(publicKey) {
+		if(this.#type == "public") {
+			if(privateKey == null) {
+				throw "tEnvoyKey Fatal Error: property publicKey of method setPublic is required and does not have a default value.";
+			}
+			if(this.#locked) {
+				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the public key.";
+			} else {
+				return new Promise(async (resolve, reject) => {
+					if(this.#password == null) {
+						this.#keyArmored = publicKey.armor();
+						resolve();
+					} else {
+						let publicKeyEncrypted = await openpgp.encrypt({
+							message: await openpgp.message.fromText(publicKey.armor()),
+							passwords: [this.#password]
+						}).catch((err) => {
+							reject(err);
+						});
+						this.#keyArmored = publicKeyEncrypted.data;
+						resolve();
+					}
+				});
+			}
+		} else {
+			throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+		}
+	}
 	getPublicArmored() {
 		return new Promise(async (resolve, reject) => {
 			if(this.#type == "private") {
@@ -742,6 +770,35 @@ class tEnvoyKey {
 				resolve(this.#keyArmored);
 			}
 		});
+	}
+	setPublicArmored(keyArmored) {
+		if(this.#type == "public") {
+			if(keyArmored == null) {
+				throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
+			}
+			if(this.#locked) {
+				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the public key.";
+			} else {
+				return new Promise(async (resolve, reject) => {
+					if(this.#password == null) {
+						this.#keyArmored = keyArmored;
+						resolve();
+					} else {
+						let publicKeyEncrypted = await openpgp.encrypt({
+							message: await openpgp.message.fromText(keyArmored),
+							passwords: [this.#password]
+						}).catch((err) => {
+							reject(err);
+						});
+						this.#keyArmored = publicKeyEncrypted.data;
+						resolve();
+					}
+				});
+			}
+		} else {
+			throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+		}
+
 	}
 }
 
