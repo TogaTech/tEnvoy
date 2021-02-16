@@ -329,6 +329,9 @@ class tEnvoy {
 		if(args.locked == null) {
 			args.locked = false;
 		}
+		if(args.passwordProtected == null) {
+			args.passwordProtected = [];
+		}
 		if(args.options == null) {
 			args.options = {
 				curve: "p384"
@@ -596,7 +599,7 @@ class tEnvoyKey {
 	#locked;
 	#password;
 	#type
-	constructor(keyArmored, locked = false, password, type = "aes") {
+	constructor(keyArmored, locked = false, password, type = "aes", passwordProtected = []) {
 		let t;
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
 			t = "private";
@@ -614,6 +617,23 @@ class tEnvoyKey {
 			this.#password = password;
 			this.#keyArmored = keyArmored;
 			this.#type = t;
+			this.#passwordProtected = [];
+			let protectable = [];
+			if(type == "private") {
+				protectable = ["getPublic", "setPublic", "getPublicArmored", "setPublicArmored", "encrypt", "decrypt", "sign"];
+			} else if(type == "public") {
+				protectable = ["encrypt"];
+			} else if(type == "aes") {
+				protectable = ["encrypt", "decrypt"];
+			}
+			if(passwordProtected == null) {
+				passwordProtected = [];
+			}
+			for(let i = 0; i < passwordProtected.length; i++) {
+				if(protectable.includes(passwordProtected[i])) {
+					this.#passwordProtected.push(passwordProtected[i]);
+				}
+			}
 		}
 	}
 	lock() {
@@ -735,7 +755,7 @@ class tEnvoyKey {
 			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
 		}
 	}
-	getPublic() {
+	getPublic(password = null) {
 		return new Promise(async (resolve, reject) => {
 			if(this.#type == "private") {
 				let key = await this.getPrivate(this.#password);
@@ -759,7 +779,7 @@ class tEnvoyKey {
 			}
 		});
 	}
-	setPublic(publicKey) {
+	setPublic(publicKey, password = null) {
 		if(this.#type == "public") {
 			if(privateKey == null) {
 				throw "tEnvoyKey Fatal Error: property publicKey of method setPublic is required and does not have a default value.";
@@ -787,7 +807,7 @@ class tEnvoyKey {
 			throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
 		}
 	}
-	getPublicArmored() {
+	getPublicArmored(password = null) {
 		return new Promise(async (resolve, reject) => {
 			if(this.#type == "private") {
 				let key = await this.getPublic();
@@ -797,7 +817,7 @@ class tEnvoyKey {
 			}
 		});
 	}
-	setPublicArmored(keyArmored) {
+	setPublicArmored(keyArmored, password = null) {
 		if(this.#type == "public") {
 			if(keyArmored == null) {
 				throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
@@ -826,13 +846,13 @@ class tEnvoyKey {
 		}
 
 	}
-	encrypt(message) {
+	encrypt(message, password = null) {
 		
 	}
-	decrypt(message) {
+	decrypt(message, password = null) {
 		
 	}
-	sign(message) {
+	sign(message, password = null) {
 		
 	}
 }
