@@ -357,8 +357,8 @@ class tEnvoy {
 			reject(err);
 		});
 		if(args.password == null) {
-			privateKey = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked, "private");
-			publicKey = new tEnvoyKey(openpgpkey.publicKeyArmored, args.locked, "public");
+			privateKey = new tEnvoyKey(openpgpkey.privateKeyArmored, args.locked);
+			publicKey = new tEnvoyKey(openpgpkey.publicKeyArmored, args.locked);
 		} else {
 			let encryptedPrivateKey = await openpgp.encrypt({
 				message: await openpgp.message.fromText(openpgpkey.privateKeyArmored),
@@ -372,8 +372,8 @@ class tEnvoy {
 			}).catch((err) => {
 				reject(err);
 			});
-			privateKey = new tEnvoyKey(encryptedPrivateKey.data, args.locked, "private", args.password);
-			publicKey = new tEnvoyKey(encryptedPublicKey.data, args.locked, "public", args.password);
+			privateKey = new tEnvoyKey(encryptedPrivateKey.data, args.locked, args.password, "private");
+			publicKey = new tEnvoyKey(encryptedPublicKey.data, args.locked, args.password, "public");
 		}
 		resolve({
 			privateKey: privateKey,
@@ -596,14 +596,24 @@ class tEnvoyKey {
 	#locked;
 	#password;
 	#type
-	constructor(keyArmored, locked = false, type = "private", password) {
-		if((password == null && ((type == "private" && keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") != 0) || (type == "public" && keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") != 0))) || (password != null && keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") != 0)) {
-			throw "tEnvoyKey Fatal Error: property keyArmored of method constructor is invalid.";
+	constructor(keyArmored, locked = false, password, type = "aes") {
+		let t;
+		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
+			t = "private";
+		} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
+			t = "public";
+		} else if(keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") == 0) {
+			t = type || "aes";
+		} else {
+			t = "aes";
+		}
+		if(!["public", "private", "aes"].includes(t)) {
+			throw "tEnvoyKey Fatal Error: property type of method constructor is invalid.";
 		} else {
 			this.#locked = locked;
 			this.#password = password;
 			this.#keyArmored = keyArmored;
-			this.#type = type;
+			this.#type = t;
 		}
 	}
 	lock() {
