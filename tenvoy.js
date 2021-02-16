@@ -826,6 +826,15 @@ class tEnvoyKey {
 		}
 
 	}
+	encrypt(message) {
+		
+	}
+	decrypt(message) {
+		
+	}
+	sign(message) {
+		
+	}
 }
 
 window.TogaTech.tEnvoy = new tEnvoy();
