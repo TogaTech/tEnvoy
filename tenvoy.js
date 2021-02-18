@@ -850,13 +850,43 @@ class tEnvoyKey {
 		}
 	}
 	encrypt(message, password = null) {
-		
+		let assertion = this.#assertPassword("encrypt", password);
+		if(assertion.proceed) {
+			let encryptKey;
+			if(this.#type == "aes") {
+				encryptKey = this.getPrivate(this.#password);
+			} else {
+				encryptKey = this.getPrivate(this.#password);
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 	decrypt(message, password = null) {
-		
+		let assertion = this.#assertPassword("decrypt", password);
+		if(assertion.proceed) {
+			let encryptKey;
+			if(this.#type == "aes") {
+				encryptKey = this.getPublic(this.#password);
+			} else {
+				encryptKey = this.getPrivate(this.#password);
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 	sign(message, password = null) {
-		
+		let assertion = this.#assertPassword("sign", password);
+		if(assertion.proceed) {
+			let signKey;
+			if(this.#type == "aes") {
+				throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+			} else {
+				signKey = this.getPrivate(this.#password);
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 }
 
