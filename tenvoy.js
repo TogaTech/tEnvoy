@@ -9,7 +9,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v3-0-1.OpenPGP-js.v4-10-10"
+    return "tEnvoy.v4-0-0.OpenPGP-js.v4-10-10"
   }
   get openpgp() {
 	  return this.#openpgp;
