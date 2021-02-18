@@ -904,12 +904,19 @@ class tEnvoyKey {
 	sign(message, password = null) {
 		let assertion = this.#assertPassword("sign", password);
 		if(assertion.proceed) {
-			let signKey;
-			if(this.#type == "aes") {
-				throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
-			} else {
-				signKey = this.getPrivate(this.#password);
-			}
+			return new Promise(async (resolve, reject) => {
+				let signKey;
+				if(this.#type == "aes") {
+					throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+				} else {
+					signKey = await this.getPrivate(this.#password);
+					let signed = await this.#openpgp.sign({
+						message: await this.#openpgp.cleartext.fromText(message),
+						privateKeys: signKey
+					});
+					resolve(signed.data);
+				}
+			});
 		} else {
 			throw assertion.error;
 		}
@@ -917,12 +924,28 @@ class tEnvoyKey {
 	verify(message, password = null) {
 		let assertion = this.#assertPassword("sign", password);
 		if(assertion.proceed) {
-			let signKey;
-			if(this.#type == "aes") {
-				throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
-			} else {
-				verifyKey = this.getPublic(this.#password);
-			}
+			return new Promise(async (resolve, reject) => {
+				let verifyKey;
+				if(this.#type == "aes") {
+					throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+				} else {
+					verifyKey = await this.getPublic(this.#password);
+					let verified = await this.#openpgp.verify({
+						message: await this.#openpgp.cleartext.readArmored(message),
+						publicKeys: verifyKey
+					});
+					if(verified.signatures[0]) {
+						resolve({
+							verified: true,
+							keyid: verified.signatures[0].keyid.toHex()
+						})
+					} else {
+						resolve({
+							verified: false
+						});
+					}
+				}
+			});
 		} else {
 			throw assertion.error;
 		}
