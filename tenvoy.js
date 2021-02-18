@@ -376,8 +376,8 @@ class tEnvoy {
 		let privateArmored = this.fixArmor(openpgpkey.privateKeyArmored)
 		let publicArmored = this.fixArmor(openpgpkey.publicKeyArmored);
 		if(args.password == null) {
-			privateKey = new tEnvoyKey(privateArmored, args.locked);
-			publicKey = new tEnvoyKey(publicArmored, args.locked);
+			privateKey = new tEnvoyKey(privateArmored, args.locked, "private", args.passwordProtected, this);
+			publicKey = new tEnvoyKey(publicArmored, args.locked, "public", args.passwordProtected, this);
 		} else {
 			let encryptedPrivateKey = await this.#openpgp.encrypt({
 				message: await this.#openpgp.message.fromText(privateArmored),
@@ -391,8 +391,8 @@ class tEnvoy {
 			}).catch((err) => {
 				reject(err);
 			});
-			privateKey = new tEnvoyKey(this.fixArmor(encryptedPrivateKey.data), args.locked, args.password, "private");
-			publicKey = new tEnvoyKey(this.fixArmor(encryptedPublicKey.data), args.locked, args.password, "public");
+			privateKey = new tEnvoyKey(this.fixArmor(encryptedPrivateKey.data), args.locked, args.password, "private", args.passwordProtected, this);
+			publicKey = new tEnvoyKey(this.fixArmor(encryptedPublicKey.data), args.locked, args.password, "public", args.passwordProtected, this);
 		}
 		resolve({
 			privateKey: privateKey,
