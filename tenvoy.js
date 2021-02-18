@@ -621,7 +621,11 @@ class tEnvoyKey {
 		if(!["public", "private", "aes"].includes(t)) {
 			throw "tEnvoyKey Fatal Error: property type of method constructor is invalid.";
 		} else {
-			this.#locked = locked;
+			if(locked) {
+				this.#locked = true;
+			} else {
+				this.#locked = false;
+			}
 			this.#password = password;
 			this.#keyArmored = keyArmored;
 			this.#type = t;
@@ -654,7 +658,7 @@ class tEnvoyKey {
 					} else if(type == "public") {
 						alwaysProtected = ["getPublic", "setPublic"];
 					} else if(type == "aes") {
-						alwaysProtected = ["getPrivate", "setPrivate"];
+						alwaysProtected = ["getKey"];
 					}
 					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
 						if(password == null) {
@@ -691,14 +695,42 @@ class tEnvoyKey {
 		return this.#type;
 	}
 	getId(password = null) {
-		let assertion = this.#assertPassword("getId", password);
-		if(assertion.proceed) {
+		if(this.#type == "private" || this.#type == "public") {
+			let assertion = this.#assertPassword("getId", password);
+			if(assertion.proceed) {
+				return new Promise(async (resolve, reject) => {
+					let publicKey = await this.getPublic(this.#password);
+					resolve(publicKey.getKeyId().toHex());
+				});
+			} else {
+				throw assertion.error;
+			}
+		} else {
+			throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component.";
+		}
+	}
+	getKey(password) {
+		if(this.#type == "aes") {
 			return new Promise(async (resolve, reject) => {
-				let publicKey = await this.getPublic(this.#password);
-				resolve(publicKey.getKeyId().toHex());
+				if(this.#password == null) {
+					resolve(this.#keyArmored);
+				} else {
+					let assertion = this.#assertPassword("getKey", password);
+					if(assertion.proceed) {
+						let decryptedKey = await this.#openpgp.decrypt({
+							message: await this.#openpgp.message.readArmored(this.#keyArmored),
+							passwords: [this.#password]
+						}).catch((err) => {
+							reject(err);
+						});
+						resolve(decryptedKey.data);
+					} else {
+						reject(assertion.error);
+					}
+				}
 			});
 		} else {
-			throw assertion.error;
+			throw "tEnvoyKey Fatal Error: Key does not have a symmetric component.";
 		}
 	}
 	getPrivate(password) {
