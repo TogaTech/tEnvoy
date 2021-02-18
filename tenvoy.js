@@ -628,9 +628,9 @@ class tEnvoyKey {
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(type == "private") {
-				protectable = ["getPublic", "setPublic", "encrypt", "decrypt", "sign"];
+				protectable = ["getId", "getPublic", "setPublic", "encrypt", "decrypt", "sign", "verify"];
 			} else if(type == "public") {
-				protectable = ["encrypt"];
+				protectable = ["getId", "encrypt", "verify"];
 			} else if(type == "aes") {
 				protectable = ["encrypt", "decrypt"];
 			}
@@ -689,6 +689,17 @@ class tEnvoyKey {
 	}
 	getType() {
 		return this.#type;
+	}
+	getId(password = null) {
+		let assertion = this.#assertPassword("getId", password);
+		if(assertion.proceed) {
+			return new Promise(async (resolve, reject) => {
+				let publicKey = await this.getPublic(this.#password);
+				resolve(publicKey.getKeyId().toHex());
+			});
+		} else {
+			throw assertion.error;
+		}
 	}
 	getPrivate(password) {
 		return new Promise(async (resolve, reject) => {
@@ -794,6 +805,8 @@ class tEnvoyKey {
 						});
 						resolve(openpgpkey.keys[0]);
 					}
+				} else {
+					reject("tEnvoyKey Fatal Error: Key does not have a public component.");
 				}
 			} else {
 				reject(assertion.error);
@@ -823,8 +836,10 @@ class tEnvoyKey {
 						}
 					});
 				}
-			} else {
+			} else if(this.#type == "private") {
 				throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+			} else {
+				throw "tEnvoyKey Fatal Error: Key does not have a public component.";
 			}
 		} else {
 			throw assertion.error;
@@ -922,7 +937,7 @@ class tEnvoyKey {
 		}
 	}
 	verify(message, password = null) {
-		let assertion = this.#assertPassword("sign", password);
+		let assertion = this.#assertPassword("verify", password);
 		if(assertion.proceed) {
 			return new Promise(async (resolve, reject) => {
 				let verifyKey;
