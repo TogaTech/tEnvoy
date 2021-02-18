@@ -598,7 +598,9 @@ class tEnvoyKey {
 	#keyArmored;
 	#locked;
 	#password;
-	#type
+	#passwordProtected;
+	#type;
+	#assertPassword;
 	constructor(keyArmored, locked = false, password, type = "aes", passwordProtected = []) {
 		let t;
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
@@ -620,7 +622,7 @@ class tEnvoyKey {
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(type == "private") {
-				protectable = ["getPublic", "setPublic", "getPublicArmored", "setPublicArmored", "encrypt", "decrypt", "sign"];
+				protectable = ["getPublic", "setPublic", "encrypt", "decrypt", "sign"];
 			} else if(type == "public") {
 				protectable = ["encrypt"];
 			} else if(type == "aes") {
@@ -634,71 +636,68 @@ class tEnvoyKey {
 					this.#passwordProtected.push(passwordProtected[i]);
 				}
 			}
+			this.#assertPassword = function(methodName, password) {
+				if(this.#password == null) {
+					return {
+						proceed: true
+					};
+				} else {
+					let alwaysProtected;
+					if(type == "private") {
+						alwaysProtected = ["getPrivate", "setPrivate"];
+					} else if(type == "public") {
+						alwaysProtected = ["getPublic", "setPublic"];
+					} else if(type == "aes") {
+						alwaysProtected = ["getPrivate", "setPrivate"];
+					}
+					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
+						if(password == null) {
+							return {
+								proceed: false,
+								error: "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified."
+							};
+						} else if(password != this.#password) {
+							return {
+								proceed: false,
+								error: "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+							};
+						} else {
+							return {
+								proceed: true
+							};
+						}
+					} else {
+						return {
+							proceed: true
+						};
+					}
+				}
+			}
+			if(this.#type != "aes") {
+				this.getPublic(this.#password);
+			}
 		}
 	}
 	lock() {
 		this.#locked = true;
 	}
-	getPrivate(password) {
-		if(this.#type == "private") {
-			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
-			} else {
-				return new Promise(async (resolve, reject) => {
-					if(this.#password == null) {
-						let openpgpkey = await openpgp.key.readArmored(this.#keyArmored).catch((err) => {
-							reject(err);
-						});
-						resolve(openpgpkey.keys[0]);
-					} else if(password == null) {
-						throw "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified.";
-					} else if(password != this.#password) {
-						throw "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified.";
-					} else {
-						let decryptedKey = await openpgp.decrypt({
-							message: await openpgp.message.readArmored(this.#keyArmored),
-							passwords: [password]
-						}).catch((err) => {
-							reject(err);
-						});
-						let openpgpkey = await openpgp.key.readArmored(decryptedKey.data).catch((err) => {
-							reject(err);
-						});
-						resolve(openpgpkey.keys[0]);
-					}
-				});
-			}
-		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
-		}
+	getType() {
+		return this.#type;
 	}
-	setPrivate(privateKey) {
-		if(this.#type == "private") {
-			if(privateKey == null) {
-				throw "tEnvoyKey Fatal Error: property privateKey of method setPrivate is required and does not have a default value.";
-			}
-			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the private key.";
-			} else {
-				return new Promise(async (resolve, reject) => {
-					if(this.#password == null) {
-						this.#keyArmored = privateKey.armor();
-						resolve();
-					} else {
-						let privateKeyEncrypted = await openpgp.encrypt({
-							message: await openpgp.message.fromText(privateKey.armor()),
-							passwords: [this.#password]
-						}).catch((err) => {
-							reject(err);
-						});
-						this.#keyArmored = privateKeyEncrypted.data;
-						resolve();
-					}
-				});
-			}
-		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
-		}
+	getPrivate(password) {
+		return new Promise(async (resolve, reject) => {
+			let privateKeyArmored = await this.getPrivateArmored(password);
+			let openpgpkey = await openpgp.key.readArmored(privateKeyArmored).catch((err) => {
+				reject(err);
+			});
+			resolve(openpgpkey.keys[0]);
+		});
+	}
+	setPrivate(privateKey, password) {
+		return new Promise(async (resolve, reject) => {
+			await this.setPrivateArmored(privateKey.armor(), password);
+			resolve();
+		});
 	}
 	getPrivateArmored(password) {
 		if(this.#type == "private") {
@@ -708,18 +707,19 @@ class tEnvoyKey {
 				return new Promise(async (resolve, reject) => {
 					if(this.#password == null) {
 						resolve(this.#keyArmored);
-					} else if(password == null) {
-						throw "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified.";
-					} else if(password != this.#password) {
-						throw "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified.";
 					} else {
-						let decryptedKey = await openpgp.decrypt({
-							message: await openpgp.message.readArmored(this.#keyArmored),
-							passwords: [password]
-						}).catch((err) => {
-							reject(err);
-						});
-						resolve(decryptedKey.data);
+						let assertion = this.#assertPassword("getPrivate", password);
+						if(assertion.proceed) {
+							let decryptedKey = await openpgp.decrypt({
+								message: await openpgp.message.readArmored(this.#keyArmored),
+								passwords: [this.#password]
+							}).catch((err) => {
+								reject(err);
+							});
+							resolve(decryptedKey.data);
+						} else {
+							reject(assertion.error);
+						}
 					}
 				});
 			}
@@ -727,7 +727,7 @@ class tEnvoyKey {
 			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
 		}
 	}
-	setPrivateArmored(keyArmored) {
+	setPrivateArmored(keyArmored, password) {
 		if(this.#type == "private") {
 			if(keyArmored == null) {
 				throw "tEnvoyKey Fatal Error: property keyArmored of method setPrivateArmored is required and does not have a default value.";
@@ -740,14 +740,19 @@ class tEnvoyKey {
 						this.#keyArmored = keyArmored;
 						resolve();
 					} else {
-						let privateKeyEncrypted = await openpgp.encrypt({
-							message: await openpgp.message.fromText(keyArmored),
-							passwords: [this.#password]
-						}).catch((err) => {
-							reject(err);
-						});
-						this.#keyArmored = privateKeyEncrypted.data;
-						resolve();
+						let assertion = this.#assertPassword("setPrivate", password);
+						if(assertion.proceed) {
+							let privateKeyEncrypted = await openpgp.encrypt({
+								message: await openpgp.message.fromText(keyArmored),
+								passwords: [this.#password]
+							}).catch((err) => {
+								reject(err);
+							});
+							this.#keyArmored = privateKeyEncrypted.data;
+							resolve();
+						} else {
+							reject(assertion.error);
+						}
 					}
 				});
 			}
@@ -757,94 +762,86 @@ class tEnvoyKey {
 	}
 	getPublic(password = null) {
 		return new Promise(async (resolve, reject) => {
-			if(this.#type == "private") {
-				let key = await this.getPrivate(this.#password);
-				resolve(key.toPublic());
-			} else if(this.#type == "public") {
-				if(this.#password == null) {
-					resolve(this.#keyArmored);
-				} else if(password == null) {
-					reject("tEnvoyKey Fatal Error: Key is password-protected, and no password was specified.");
-				} else if(password != this.#password) {
-					reject("tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified.");
-				} else {
-					let decryptedKey = await openpgp.decrypt({
-						message: await openpgp.message.readArmored(this.#keyArmored),
-						passwords: [password]
-					}).catch((err) => {
-						reject(err);
-					});
-					resolve(decryptedKey.data);
+			let assertion = this.#assertPassword("getPublic", password);
+			if(assertion.proceed) {
+				if(this.#type == "private") {
+					let key = await this.getPrivate(this.#password);
+					resolve(key.toPublic());
+				} else if(this.#type == "public") {
+					if(this.#locked) {
+						throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the public key.";
+					} else {
+						let publicKeyArmored;
+						if(this.#password == null) {
+							publicKeyArmored = this.#keyArmored
+						} else {
+							let decryptedKey = await openpgp.decrypt({
+								message: await openpgp.message.readArmored(this.#keyArmored),
+								passwords: [this.#password]
+							}).catch((err) => {
+								reject(err);
+							});
+							publicKeyArmored = decryptedKey.data;
+						}
+						let openpgpkey = await openpgp.key.readArmored(publicKeyArmored).catch((err) => {
+							reject(err);
+						});
+						resolve(openpgpkey.keys[0]);
+					}
 				}
+			} else {
+				reject(assertion.error);
 			}
 		});
 	}
 	setPublic(publicKey, password = null) {
-		if(this.#type == "public") {
-			if(privateKey == null) {
-				throw "tEnvoyKey Fatal Error: property publicKey of method setPublic is required and does not have a default value.";
-			}
-			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the public key.";
+		let assertion = this.#assertPassword("setPublic", password);
+		if(assertion.proceed) {
+			if(this.#type == "public") {
+				if(this.#locked) {
+					throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the public key.";
+				} else {
+					return new Promise(async (resolve, reject) => {
+						if(this.#password == null) {
+							this.#keyArmored = publicKey.armor();
+							resolve();
+						} else {
+							let publicKeyEncrypted = await openpgp.encrypt({
+								message: await openpgp.message.fromText(publicKey.armor()),
+								passwords: [this.#password]
+							}).catch((err) => {
+								reject(err);
+							});
+							this.#keyArmored = publicKeyEncrypted.data;
+							resolve();
+						}
+					});
+				}
 			} else {
-				return new Promise(async (resolve, reject) => {
-					if(this.#password == null) {
-						this.#keyArmored = publicKey.armor();
-						resolve();
-					} else {
-						let publicKeyEncrypted = await openpgp.encrypt({
-							message: await openpgp.message.fromText(publicKey.armor()),
-							passwords: [this.#password]
-						}).catch((err) => {
-							reject(err);
-						});
-						this.#keyArmored = publicKeyEncrypted.data;
-						resolve();
-					}
-				});
+				throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
 			}
 		} else {
-			throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+			throw assertion.error;
 		}
 	}
 	getPublicArmored(password = null) {
 		return new Promise(async (resolve, reject) => {
-			if(this.#type == "private") {
-				let key = await this.getPublic();
-				resolve(key.armor());
-			} else if(this.#type == "public") {
-				resolve(this.#keyArmored);
-			}
+			let key = await this.getPublic(password);
+			resolve(key.armor());
 		});
 	}
 	setPublicArmored(keyArmored, password = null) {
-		if(this.#type == "public") {
-			if(keyArmored == null) {
-				throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
-			}
-			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the public key.";
-			} else {
-				return new Promise(async (resolve, reject) => {
-					if(this.#password == null) {
-						this.#keyArmored = keyArmored;
-						resolve();
-					} else {
-						let publicKeyEncrypted = await openpgp.encrypt({
-							message: await openpgp.message.fromText(keyArmored),
-							passwords: [this.#password]
-						}).catch((err) => {
-							reject(err);
-						});
-						this.#keyArmored = publicKeyEncrypted.data;
-						resolve();
-					}
-				});
-			}
+		if(keyArmored == null) {
+			throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
 		} else {
-			throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+			return new Promise(async (resolve, reject) => {
+				let openpgpkey = await openpgp.key.readArmored(keyArmored).catch((err) => {
+					reject(err);
+				});
+				await this.setPublic(openpgpkey.keys[0], password);
+				resolve();
+			});
 		}
-
 	}
 	encrypt(message, password = null) {
 		
