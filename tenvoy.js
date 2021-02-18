@@ -914,6 +914,19 @@ class tEnvoyKey {
 			throw assertion.error;
 		}
 	}
+	verify(message, password = null) {
+		let assertion = this.#assertPassword("sign", password);
+		if(assertion.proceed) {
+			let signKey;
+			if(this.#type == "aes") {
+				throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+			} else {
+				verifyKey = this.getPublic(this.#password);
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
 }
 
 window.TogaTech.tEnvoy = new tEnvoy();
