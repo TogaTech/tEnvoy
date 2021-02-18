@@ -901,22 +901,29 @@ class tEnvoyKey {
 		if(assertion.proceed) {
 			return new Promise(async (resolve, reject) => {
 				let encryptKey;
+				let encrypted;
 				if(this.#type == "aes") {
-					encryptKey = await this.getPrivate(this.#password).catch((err) => {
+					encryptKey = await this.getKey(this.#password).catch((err) => {
+						reject(err);
+					});
+					encrypted = await this.#openpgp.encrypt({
+						message: await this.#openpgp.message.fromText(message),
+						passwords: [encryptKey]
+					}).catch((err) => {
 						reject(err);
 					});
 				} else {
 					encryptKey = await this.getPublic(this.#password).catch((err) => {
 						reject(err);
 					});
-					let encrypted = await this.#openpgp.encrypt({
+					encrypted = await this.#openpgp.encrypt({
 						message: this.#openpgp.message.fromText(message),
 						publicKeys: encryptKey
 					}).catch((err) => {
 						reject(err);
 					});
-					resolve(encrypted.data);
 				}
+				resolve(encrypted.data);
 			});
 		} else {
 			throw assertion.error;
@@ -927,22 +934,29 @@ class tEnvoyKey {
 		if(assertion.proceed) {
 			return new Promise(async (resolve, reject) => {
 				let decryptKey;
+				let decrypted;
 				if(this.#type == "aes") {
-					decryptKey = await this.getPrivate(this.#password).catch((err) => {
+					decryptKey = await this.getKey(this.#password).catch((err) => {
+						reject(err);
+					});
+					decrypted = await this.#openpgp.decrypt({
+						message: await this.#openpgp.message.readArmored(message),
+						passwords: [decryptKey]
+					}).catch((err) => {
 						reject(err);
 					});
 				} else {
 					decryptKey = await this.getPrivate(this.#password).catch((err) => {
 						reject(err);
 					});
-					let decrypted = await this.#openpgp.decrypt({
+					decrypted = await this.#openpgp.decrypt({
 						message: await this.#openpgp.message.readArmored(message),
 						privateKeys: decryptKey
 					}).catch((err) => {
 						reject(err);
 					});
-					resolve(decrypted.data);
 				}
+				resolve(decrypted.data);
 			});
 		} else {
 			throw assertion.error;
