@@ -859,7 +859,7 @@ class tEnvoyKey {
 						reject(err);
 					});
 				} else {
-					encryptKey = await this.getPrivate(this.#password).catch((err) => {
+					encryptKey = await this.getPublic(this.#password).catch((err) => {
 						reject(err);
 					});
 					let encrypted = await this.#openpgp.encrypt({
@@ -878,12 +878,25 @@ class tEnvoyKey {
 	decrypt(message, password = null) {
 		let assertion = this.#assertPassword("decrypt", password);
 		if(assertion.proceed) {
-			let decryptKey;
-			if(this.#type == "aes") {
-				decryptKey = this.getPublic(this.#password);
-			} else {
-				decryptKey = this.getPrivate(this.#password);
-			}
+			return new Promise(async (resolve, reject) => {
+				let decryptKey;
+				if(this.#type == "aes") {
+					decryptKey = await this.getPrivate(this.#password).catch((err) => {
+						reject(err);
+					});
+				} else {
+					decryptKey = await this.getPrivate(this.#password).catch((err) => {
+						reject(err);
+					});
+					let decrypted = await this.#openpgp.decrypt({
+						message: await this.#openpgp.message.readArmored(message),
+						privateKeys: decryptKey
+					}).catch((err) => {
+						reject(err);
+					});
+					resolve(decrypted.data);
+				}
+			});
 		} else {
 			throw assertion.error;
 		}
