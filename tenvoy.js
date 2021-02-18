@@ -852,12 +852,25 @@ class tEnvoyKey {
 	encrypt(message, password = null) {
 		let assertion = this.#assertPassword("encrypt", password);
 		if(assertion.proceed) {
-			let encryptKey;
-			if(this.#type == "aes") {
-				encryptKey = this.getPrivate(this.#password);
-			} else {
-				encryptKey = this.getPrivate(this.#password);
-			}
+			return new Promise(async (resolve, reject) => {
+				let encryptKey;
+				if(this.#type == "aes") {
+					encryptKey = await this.getPrivate(this.#password).catch((err) => {
+						reject(err);
+					});
+				} else {
+					encryptKey = await this.getPrivate(this.#password).catch((err) => {
+						reject(err);
+					});
+					let encrypted = await this.#openpgp.encrypt({
+						message: this.#openpgp.message.fromText(message),
+						publicKeys: encryptKey
+					}).catch((err) => {
+						reject(err);
+					});
+					resolve(encrypted.data);
+				}
+			});
 		} else {
 			throw assertion.error;
 		}
@@ -865,11 +878,11 @@ class tEnvoyKey {
 	decrypt(message, password = null) {
 		let assertion = this.#assertPassword("decrypt", password);
 		if(assertion.proceed) {
-			let encryptKey;
+			let decryptKey;
 			if(this.#type == "aes") {
-				encryptKey = this.getPublic(this.#password);
+				decryptKey = this.getPublic(this.#password);
 			} else {
-				encryptKey = this.getPrivate(this.#password);
+				decryptKey = this.getPrivate(this.#password);
 			}
 		} else {
 			throw assertion.error;
