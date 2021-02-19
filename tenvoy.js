@@ -9,7 +9,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v4-0-0.OpenPGP-js.v4-10-10"
+    return "tEnvoy.v4-0-1.OpenPGP-js.v4-10-10"
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -280,6 +280,32 @@ class tEnvoy {
 	    );
     });
     return null;
+  }
+  hash(args) {
+	  if(args == null) {
+		  args = {};
+	  }
+	  if(args.algorithm == null) {
+		  args.algorithm = "sha256";
+	  }
+	  if(args.string == null) {
+		  throw "tEnvoy Fatal Error: property string of object args of method hash is required and does not have a default value.";
+	  }
+	  let algorithms = {
+		  sha256: this.sha256,
+		  sha1: this.sha1,
+		  sha224: this.sha224,
+		  sha384: this.sha384,
+		  sha512: this.sha512,
+		  md5: this.md5,
+		  ripemd160: this.ripemd160
+	  };
+	  if(algorithms[args.algorithm] == null) {
+		  throw "tEnvoy Fatal Error: property algorithm of object args of method hash is invalid.";
+	  }
+	  return new Promise(async (resolve, reject) => {
+		  resolve(await algorithms[args.algorithm].bind(this, args.string)());
+	  });
   }
   sha256Compound(args) {
     if(args == null) {
