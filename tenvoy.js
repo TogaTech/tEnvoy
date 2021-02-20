@@ -9,7 +9,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v4-0-1.OpenPGP-js.v4-10-10"
+    return "tEnvoy.v4-0-2.OpenPGP-js.v4-10-10"
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -21,7 +21,11 @@ class tEnvoy {
 		  vSplit[i] = vSplit[i].replaceAll("-", ".");
 	  }
 	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ")";
-	  return armored.replace("Version: OpenPGP.js v4.10.10", "Version: " + v).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
+	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: " + v).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
+	  while(armored[0] != "-") {
+		  armored = armored.substring(1);
+	  }
+	  return armored;
   }
   randomString(args) {
     if(args == null) {
@@ -649,6 +653,7 @@ class tEnvoyKey {
 		this.#tEnvoy = tEnvoy;
 		this.#openpgp = tEnvoy.openpgp;
 		let t;
+		keyArmored = tEnvoy.fixArmor(keyArmored);
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
 			t = "private";
 		} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
@@ -825,6 +830,7 @@ class tEnvoyKey {
 				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the private key.";
 			} else {
 				return new Promise(async (resolve, reject) => {
+					keyArmored = this.#tEnvoy.fixArmor(keyArmored);
 					if(this.#password == null) {
 						this.#keyArmored = keyArmored;
 						resolve();
@@ -920,7 +926,7 @@ class tEnvoyKey {
 	getPublicArmored(password = null) {
 		return new Promise(async (resolve, reject) => {
 			let key = await this.getPublic(password);
-			resolve(key.armor());
+			resolve(this.#tEnvoy.fixArmor(key.armor()));
 		});
 	}
 	setPublicArmored(keyArmored, password = null) {
@@ -928,6 +934,7 @@ class tEnvoyKey {
 			throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
 		} else {
 			return new Promise(async (resolve, reject) => {
+				keyArmored = this.#tEnvoy.fixArmor(keyArmored);
 				let openpgpkey = await this.#openpgp.key.readArmored(keyArmored).catch((err) => {
 					reject(err);
 				});
@@ -973,6 +980,7 @@ class tEnvoyKey {
 		let assertion = this.#assertPassword("decrypt", password);
 		if(assertion.proceed) {
 			return new Promise(async (resolve, reject) => {
+				message = this.#tEnvoy.fixArmor(message);
 				let decryptKey;
 				let decrypted;
 				if(this.#type == "aes") {
@@ -1026,6 +1034,7 @@ class tEnvoyKey {
 		let assertion = this.#assertPassword("verify", password);
 		if(assertion.proceed) {
 			return new Promise(async (resolve, reject) => {
+				message = this.#tEnvoy.fixArmor(message);
 				let verifyKey;
 				if(this.#type == "aes") {
 					throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
@@ -1039,7 +1048,8 @@ class tEnvoyKey {
 						resolve({
 							verified: true,
 							keyid: verified.signatures[0].keyid.toHex(),
-							signatures: verified.signatures
+							signatures: verified.signatures,
+							content: message.split("\n")[3]
 						})
 					} else {
 						resolve({
