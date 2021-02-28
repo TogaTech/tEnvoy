@@ -406,8 +406,8 @@ class tEnvoy {
 		let privateArmored = this.fixArmor(openpgpkey.privateKeyArmored)
 		let publicArmored = this.fixArmor(openpgpkey.publicKeyArmored);
 		if(args.password == null) {
-			privateKey = new tEnvoyKey(privateArmored, args.locked, "private", args.passwordProtected, this);
-			publicKey = new tEnvoyKey(publicArmored, args.locked, "public", args.passwordProtected, this);
+			privateKey = new tEnvoyKey(privateArmored, args.locked, null, "private", args.passwordProtected, this);
+			publicKey = new tEnvoyKey(publicArmored, args.locked, null, "public", args.passwordProtected, this);
 		} else {
 			let encryptedPrivateKey = await this.#openpgp.encrypt({
 				message: await this.#openpgp.message.fromText(privateArmored),
@@ -676,11 +676,11 @@ class tEnvoyKey {
 			this.#type = t;
 			this.#passwordProtected = [];
 			let protectable = [];
-			if(type == "private") {
+			if(t == "private") {
 				protectable = ["getId", "getPublic", "setPublic", "encrypt", "decrypt", "sign", "verify"];
-			} else if(type == "public") {
+			} else if(t == "public") {
 				protectable = ["getId", "encrypt", "verify"];
-			} else if(type == "aes") {
+			} else if(t == "aes") {
 				protectable = ["encrypt", "decrypt"];
 			}
 			if(passwordProtected == null) {
@@ -698,11 +698,11 @@ class tEnvoyKey {
 					};
 				} else {
 					let alwaysProtected;
-					if(type == "private") {
+					if(this.#type == "private") {
 						alwaysProtected = ["getPrivate", "setPrivate"];
-					} else if(type == "public") {
+					} else if(this.#type == "public") {
 						alwaysProtected = ["getPublic", "setPublic"];
-					} else if(type == "aes") {
+					} else if(this.#type == "aes") {
 						alwaysProtected = ["getKey"];
 					}
 					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
