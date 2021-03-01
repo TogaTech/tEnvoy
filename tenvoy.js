@@ -45608,7 +45608,6 @@ class tEnvoy {
 	  for(let i = 0; i < vSplit.length; i++) {
 		  vSplit[i] = vSplit[i].replaceAll("-", ".");
 	  }
-	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ")";
 	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ", " + vSplit[4] + " " + vSplit[5] + ")";
 	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: " + v).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
 	  while(armored[0] != "-") {
