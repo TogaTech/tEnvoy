@@ -45594,7 +45594,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v4-0-2.OpenPGP-js.v4-10-10"
+    return "tEnvoy.v4-0-3.OpenPGP-js.v4-10-10.TweetNaCl-js.v1-0-3"
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -45609,6 +45609,7 @@ class tEnvoy {
 		  vSplit[i] = vSplit[i].replaceAll("-", ".");
 	  }
 	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ")";
+	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ", " + vSplit[4] + " " + vSplit[5] + ")";
 	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: " + v).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
 	  while(armored[0] != "-") {
 		  armored = armored.substring(1);
