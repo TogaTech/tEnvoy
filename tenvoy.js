@@ -45694,7 +45694,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method sha256 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45721,7 +45721,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method sha1 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45748,7 +45748,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method sha224 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45775,7 +45775,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method sha384 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45802,7 +45802,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method sha512 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45856,7 +45856,7 @@ class tEnvoy {
       };
     }
     if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
+      throw "tEnvoy Fatal Error: property string of object args of method ripemd160 is required and does not have a default value.";
     }
     return new Promise(async (resolve, reject) => {
 	    resolve(
@@ -45953,7 +45953,7 @@ class tEnvoy {
       count: args.count
     });
   }
-  genKeys(args) {
+  genPGPKeys(args) {
 	return new Promise(async (resolve, reject) => {
 		if(args == null) {
 		  args = {};
@@ -45994,8 +45994,8 @@ class tEnvoy {
 		let privateArmored = this.fixArmor(openpgpkey.privateKeyArmored)
 		let publicArmored = this.fixArmor(openpgpkey.publicKeyArmored);
 		if(args.password == null) {
-			privateKey = new tEnvoyKey(privateArmored, args.locked, null, "private", args.passwordProtected, this);
-			publicKey = new tEnvoyKey(publicArmored, args.locked, null, "public", args.passwordProtected, this);
+			privateKey = new tEnvoyPGPKey(privateArmored, args.locked, null, "private", args.passwordProtected, this);
+			publicKey = new tEnvoyPGPKey(publicArmored, args.locked, null, "public", args.passwordProtected, this);
 		} else {
 			let encryptedPrivateKey = await this.#openpgp.encrypt({
 				message: await this.#openpgp.message.fromText(privateArmored),
@@ -46009,8 +46009,8 @@ class tEnvoy {
 			}).catch((err) => {
 				reject(err);
 			});
-			privateKey = new tEnvoyKey(this.fixArmor(encryptedPrivateKey.data), args.locked, args.password, "private", args.passwordProtected, this);
-			publicKey = new tEnvoyKey(this.fixArmor(encryptedPublicKey.data), args.locked, args.password, "public", args.passwordProtected, this);
+			privateKey = new tEnvoyPGPKey(this.fixArmor(encryptedPrivateKey.data), args.locked, args.password, "private", args.passwordProtected, this);
+			publicKey = new tEnvoyPGPKey(this.fixArmor(encryptedPublicKey.data), args.locked, args.password, "public", args.passwordProtected, this);
 		}
 		resolve({
 			privateKey: privateKey,
@@ -46228,7 +46228,7 @@ class tEnvoy {
   }
 }
 
-class tEnvoyKey {
+class tEnvoyPGPKey {
 	#keyArmored;
 	#locked;
 	#password;
@@ -46254,7 +46254,7 @@ class tEnvoyKey {
 			t = "aes";
 		}
 		if(!["public", "private", "aes"].includes(t)) {
-			throw "tEnvoyKey Fatal Error: property type of method constructor is invalid.";
+			throw "tEnvoyPGPKey Fatal Error: property type of method constructor is invalid.";
 		} else {
 			if(locked) {
 				this.#locked = true;
@@ -46299,12 +46299,12 @@ class tEnvoyKey {
 						if(password == null) {
 							return {
 								proceed: false,
-								error: "tEnvoyKey Fatal Error: Key is password-protected, and no password was specified."
+								error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and no password was specified."
 							};
 						} else if(password != this.#password) {
 							return {
 								proceed: false,
-								error: "tEnvoyKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+								error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and an incorrect password was specified."
 							};
 						} else {
 							return {
@@ -46341,7 +46341,7 @@ class tEnvoyKey {
 				throw assertion.error;
 			}
 		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component.";
+			throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component.";
 		}
 	}
 	getKey(password) {
@@ -46365,7 +46365,7 @@ class tEnvoyKey {
 				}
 			});
 		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have a symmetric component.";
+			throw "tEnvoyPGPKey Fatal Error: Key does not have a symmetric component.";
 		}
 	}
 	getPrivate(password) {
@@ -46386,7 +46386,7 @@ class tEnvoyKey {
 	getPrivateArmored(password) {
 		if(this.#type == "private") {
 			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the private key.";
+				throw "tEnvoyPGPKey Fatal Error: Key is locked and will not allow reads to the private key.";
 			} else {
 				return new Promise(async (resolve, reject) => {
 					if(this.#password == null) {
@@ -46408,16 +46408,16 @@ class tEnvoyKey {
 				});
 			}
 		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
+			throw "tEnvoyPGPKey Fatal Error: Key does not have a private component.";
 		}
 	}
 	setPrivateArmored(keyArmored, password) {
 		if(this.#type == "private") {
 			if(keyArmored == null) {
-				throw "tEnvoyKey Fatal Error: property keyArmored of method setPrivateArmored is required and does not have a default value.";
+				throw "tEnvoyPGPKey Fatal Error: property keyArmored of method setPrivateArmored is required and does not have a default value.";
 			}
 			if(this.#locked) {
-				throw "tEnvoyKey Fatal Error: Key is locked and will not allow writes to the private key.";
+				throw "tEnvoyPGPKey Fatal Error: Key is locked and will not allow writes to the private key.";
 			} else {
 				return new Promise(async (resolve, reject) => {
 					keyArmored = this.#tEnvoy.fixArmor(keyArmored);
@@ -46442,7 +46442,7 @@ class tEnvoyKey {
 				});
 			}
 		} else {
-			throw "tEnvoyKey Fatal Error: Key does not have a private component.";
+			throw "tEnvoyPGPKey Fatal Error: Key does not have a private component.";
 		}
 	}
 	getPublic(password = null) {
@@ -46454,7 +46454,7 @@ class tEnvoyKey {
 					resolve(key.toPublic());
 				} else if(this.#type == "public") {
 					if(this.#locked) {
-						throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the public key.";
+						throw "tEnvoyPGPKey Fatal Error: Key is locked and will not allow reads to the public key.";
 					} else {
 						let publicKeyArmored;
 						if(this.#password == null) {
@@ -46474,7 +46474,7 @@ class tEnvoyKey {
 						resolve(openpgpkey.keys[0]);
 					}
 				} else {
-					reject("tEnvoyKey Fatal Error: Key does not have a public component.");
+					reject("tEnvoyPGPKey Fatal Error: Key does not have a public component.");
 				}
 			} else {
 				reject(assertion.error);
@@ -46486,7 +46486,7 @@ class tEnvoyKey {
 		if(assertion.proceed) {
 			if(this.#type == "public") {
 				if(this.#locked) {
-					throw "tEnvoyKey Fatal Error: Key is locked and will not allow reads to the public key.";
+					throw "tEnvoyPGPKey Fatal Error: Key is locked and will not allow reads to the public key.";
 				} else {
 					return new Promise(async (resolve, reject) => {
 						if(this.#password == null) {
@@ -46505,9 +46505,9 @@ class tEnvoyKey {
 					});
 				}
 			} else if(this.#type == "private") {
-				throw "tEnvoyKey Fatal Error: Key has a public component that depends on the private component.";
+				throw "tEnvoyPGPKey Fatal Error: Key has a public component that depends on the private component.";
 			} else {
-				throw "tEnvoyKey Fatal Error: Key does not have a public component.";
+				throw "tEnvoyPGPKey Fatal Error: Key does not have a public component.";
 			}
 		} else {
 			throw assertion.error;
@@ -46521,7 +46521,7 @@ class tEnvoyKey {
 	}
 	setPublicArmored(keyArmored, password = null) {
 		if(keyArmored == null) {
-			throw "tEnvoyKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
+			throw "tEnvoyPGPKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
 		} else {
 			return new Promise(async (resolve, reject) => {
 				keyArmored = this.#tEnvoy.fixArmor(keyArmored);
@@ -46606,7 +46606,7 @@ class tEnvoyKey {
 			return new Promise(async (resolve, reject) => {
 				let signKey;
 				if(this.#type == "aes") {
-					throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+					throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component."
 				} else {
 					signKey = await this.getPrivate(this.#password);
 					let signed = await this.#openpgp.sign({
@@ -46627,7 +46627,7 @@ class tEnvoyKey {
 				message = this.#tEnvoy.fixArmor(message);
 				let verifyKey;
 				if(this.#type == "aes") {
-					throw "tEnvoyKey Fatal Error: Key does not have an asymmetric component."
+					throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component."
 				} else {
 					verifyKey = await this.getPublic(this.#password);
 					let verified = await this.#openpgp.verify({
