@@ -45594,7 +45594,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v4-0-3.OpenPGP-js.v4-10-10.TweetNaCl-js.v1-0-3"
+    return "tEnvoy.v4-1-0.OpenPGP-js.v4-10-10.TweetNaCl-js.v1-0-3"
   }
   get openpgp() {
 	  return this.#openpgp;
