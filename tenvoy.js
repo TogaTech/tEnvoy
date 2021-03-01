@@ -46267,7 +46267,7 @@ class tEnvoyPGPKey {
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(t == "private") {
-				protectable = ["getId", "getPublic", "setPublic", "encrypt", "decrypt", "sign", "verify"];
+				protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
 			} else if(t == "public") {
 				protectable = ["getId", "encrypt", "verify"];
 			} else if(t == "aes") {
