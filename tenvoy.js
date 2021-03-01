@@ -46237,11 +46237,9 @@ class tEnvoyPGPKey {
 	#assertPassword;
 	#tEnvoy;
 	#openpgp;
-	#nacl;
 	constructor(keyArmored, locked = false, password, type = "aes", passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
 		this.#openpgp = tEnvoy.openpgp;
-		this.#nacl = tEnvoy.nacl;
 		let t;
 		keyArmored = tEnvoy.fixArmor(keyArmored);
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
