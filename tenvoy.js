@@ -46101,6 +46101,46 @@ class tEnvoy {
     	return this.#sjcl.misc.pbkdf2(args.password, args.salt, args.rounds, args.size);
     }
   }
+  pbkdf2hex(args) {
+  	return new Promise(async (resolve, reject) => {
+		if(args == null) {
+		  args = {};
+		}
+		if(args.salt == null) {
+		  reject("tEnvoy Fatal Error: property salt of object args of method pbkdf2hex is required and does not have a default value.");
+		}
+		if(args.password == null) {
+		  reject("tEnvoy Fatal Error: property password of object args of method pbkdf2hex is required and does not have a default value.");
+		}
+		if(args.rounds == null) {
+			args.rounds = 25000;
+		}
+		let seed;
+		if(args.size == null) {
+			seed = this.pbkdf2({
+				password: args.password,
+				salt: args.salt,
+				rounds: args.rounds
+			});
+		} else {
+			seed = this.pbkdf2({
+				password: args.password,
+				salt: args.salt,
+				rounds: args.rounds,
+				size: args.size
+			});
+		}
+		let stringSeed = "";
+		for(let i = 0; i < seed.length - 1; i++) {
+			stringSeed += seed[i].toString() + ",";
+		}
+		stringSeed += seed[seed.length - 1].toString();
+		let shaSeed = await this.sha512({
+			string: stringSeed
+		});
+		resolve(shaSeed);
+	});
+  }
   genSeedFromCredentials(args) {
   	return new Promise(async (resolve, reject) => {
 		if(args == null) {
@@ -46118,19 +46158,11 @@ class tEnvoy {
 		if(args.size == null) {
 			args.size = 32;
 		}
-		let seed = this.pbkdf2({
-			password: args.password,
+		let shaSeed = await this.pbkdf2hex({
 			salt: args.username,
+			password: args.password,
 			rounds: args.rounds
-		});
-		let stringSeed = "";
-		for(let i = 0; i < seed.length - 1; i++) {
-			stringSeed += seed[i].toString() + ",";
-		}
-		stringSeed += seed[seed.length - 1].toString();
-		let shaSeed = await this.sha512({
-			string: stringSeed
-		});
+		})
 		while(shaSeed.length < args.size) {
 			shaSeed += await this.sha512({
 				string: shaSeed
