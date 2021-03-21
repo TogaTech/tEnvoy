@@ -1,4 +1,4 @@
-// OpenPGP.js Import
+// Start OpenPGP.js Import
 
 /*! OpenPGP.js v4.10.10 - 2021-01-24 - this is LGPL licensed code, see LICENSE/our website https://openpgpjs.org/ for more information. */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.openpgp = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
@@ -44397,7 +44397,9 @@ exports.default = AsyncProxy;
 },{"../config":79,"../crypto":94,"../packet":131,"../util.js":158}]},{},[115])(115)
 });
 
-// TweetNaCl.js Import
+// End OpenPGP.js Import
+
+// Start TweetNaCl.js Import
 
 (function(nacl) {
 'use strict';
@@ -45578,7 +45580,9 @@ nacl.setPRNG = function(fn) {
 
 })(typeof module !== 'undefined' && module.exports ? module.exports : (self.nacl = self.nacl || {}));
 
-// sjcl.js Import
+// End TweetNaCl.js Import
+
+// Start sjcl.js Import
 
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
@@ -45641,6 +45645,8 @@ null!=d[3]?b[d[2]]=parseInt(d[3],10):null!=d[4]?b[d[2]]=d[2].match(/^(ct|adata|s
 b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return c}};sjcl.encrypt=sjcl.json.encrypt;sjcl.decrypt=sjcl.json.decrypt;sjcl.misc.pa={};sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.pa,d;b=b||{};d=b.iter||1E3;c=c[a]=c[a]||{};d=c[d]=c[d]||{firstSalt:b.salt&&b.salt.length?b.salt.slice(0):sjcl.random.randomWords(2,0)};c=void 0===b.salt?d.firstSalt:b.salt;d[c]=d[c]||sjcl.misc.pbkdf2(a,c,b.iter);return{key:d[c].slice(0),salt:c.slice(0)}};
 "undefined"!==typeof module&&module.exports&&(module.exports=sjcl);"function"===typeof define&&define([],function(){return sjcl});
 
+// End sjcl.js Import
+
 // Begin tEnvoy code
 
 if(window.TogaTech == null) {
@@ -45658,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "tEnvoy.v4-1-1.OpenPGP-js.v4-10-10.TweetNaCl-js.v1-0-3"
+    return "v4.1.2";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -45667,13 +45673,7 @@ class tEnvoy {
 	  return this.#nacl;
   }
   fixArmor(armored) {
-	  let v = this.version;
-	  let vSplit = v.split(".");
-	  for(let i = 0; i < vSplit.length; i++) {
-		  vSplit[i] = vSplit[i].replaceAll("-", ".");
-	  }
-	  v += " (" + vSplit[0] + " " + vSplit[1] + ", " + vSplit[2] + " " + vSplit[3] + ", " + vSplit[4] + " " + vSplit[5] + ")";
-	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: " + v).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
+	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: tEnvoy " + this.version).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
 	  while(armored[0] != "-") {
 		  armored = armored.substring(1);
 	  }
@@ -46096,6 +46096,9 @@ class tEnvoy {
     	args.rounds = 25000;
     }
     if(args.size == null) {
+    	args.size = 32 * 8;
+    }
+    if(args.size == null) {
     	return this.#sjcl.misc.pbkdf2(args.password, args.salt, args.rounds);
     } else {
     	return this.#sjcl.misc.pbkdf2(args.password, args.salt, args.rounds, args.size);
@@ -46115,21 +46118,15 @@ class tEnvoy {
 		if(args.rounds == null) {
 			args.rounds = 25000;
 		}
-		let seed;
 		if(args.size == null) {
-			seed = this.pbkdf2({
-				password: args.password,
-				salt: args.salt,
-				rounds: args.rounds
-			});
-		} else {
-			seed = this.pbkdf2({
-				password: args.password,
-				salt: args.salt,
-				rounds: args.rounds,
-				size: args.size
-			});
+			args.size = 32 * 8;
 		}
+		let seed = this.pbkdf2({
+			password: args.password,
+			salt: args.salt,
+			rounds: args.rounds,
+			size: args.size
+		});
 		let stringSeed = "";
 		for(let i = 0; i < seed.length - 1; i++) {
 			stringSeed += seed[i].toString() + ",";
@@ -46161,15 +46158,17 @@ class tEnvoy {
 		let shaSeed = await this.pbkdf2hex({
 			salt: args.username,
 			password: args.password,
-			rounds: args.rounds
+			rounds: args.rounds,
+			size: 32 * 8
 		})
 		while(shaSeed.length < args.size) {
 			shaSeed += await this.sha512({
 				string: shaSeed
 			});
 		}
-		let encoded = this.utf8encode(shaSeed);
-		resolve(encoded.slice(0, args.size));
+		let encoded = this.hexToBytes(shaSeed);
+		let sliced = encoded.slice(0, args.size);
+		resolve(sliced);
 	});
   }
   utf8encode(args) {
@@ -46281,6 +46280,55 @@ class tEnvoy {
 	  string += String.fromCharCode(parseInt(args.hex.substring(i, i + 2), 16));
     }
     return string;
+  }
+  hexToBytes(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(typeof args == "string") {
+	  args = {
+		hex: args
+	  };
+	}
+	if(args.hex == null) {
+      throw "tEnvoy Fatal Error: property hex of object args of method hexToBytes is required and does not have a default value.";
+    }
+    let bytes = new Uint8Array(args.hex.length / 2);
+    for(let i = 0; i < args.hex.length; i += 2) {	  
+	  bytes[i / 2] = parseInt(args.hex.substring(i, i + 2), 16);
+    }
+    return bytes;
+  }
+  bytesToHex(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(args instanceof Uint8Array || args instanceof Array) {
+	  args = {
+		bytes: args
+	  };
+	}
+	if(!(args.bytes instanceof Uint8Array)) {
+		let bytes = new Uint8Array(args.bytes.length);
+		for(let i = 0; i < args.bytes.length; i++) {
+			bytes[i] = args.bytes[i];
+		}
+		args.bytes = bytes;
+	}
+	if(args.bytes == null) {
+      throw "tEnvoy Fatal Error: property bytes of object args of method bytesToHex is required and does not have a default value.";
+    }
+    let hex = "";
+    for(let i = 0; i < args.bytes.length; i++) {
+    	if(args.bytes[i].toString(16).length == 0) {  
+			hex += "00";
+		} else if(args.bytes[i].toString(16).length == 1) {
+			hex += "0" + args.bytes[i].toString(16);
+		} else {
+			hex += args.bytes[i].toString(16);
+		}
+    }
+    return hex;
   }
   randomWords(args) {
 	if(args == null) {
@@ -46927,6 +46975,8 @@ class tEnvoyNaClKey {
 		}
 	}
 }
+
+
 
 window.TogaTech.tEnvoy = new tEnvoy(window.openpgp, window.nacl, window.sjcl);
 console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf someone told you to enter any text here, perhaps to enable some hidden feature or hack, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, please visit togatech.org/selfxss.", "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;");
