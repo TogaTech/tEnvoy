@@ -46853,10 +46853,10 @@ class tEnvoyNaClKey {
 			this.#type = type;
 			this.#passwordProtected = [];
 			let protectable = [];
-			if(t == "private") {
-				protectable = ["getPublic", "encrypt", "decrypt", "sign", "verify"];
-			} else if(t == "public") {
-				protectable = ["encrypt", "verify"];
+			if(type == "private") {
+				protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey"];
+			} else if(type == "public") {
+				protectable = ["encrypt"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -46952,6 +46952,130 @@ class tEnvoyNaClKey {
 	}
 	decrypt(message, password = null) {
 		let assertion = this.#assertPassword("decrypt", password);
+		if(assertion.proceed) {
+			
+		} else {
+			throw assertion.error;
+		}
+	}
+	genSigningKey(password = null) {
+		let assertion = this.#assertPassword("getSigningKey", password);
+		if(assertion.proceed) {
+		
+		} else {
+			throw assertion.error;
+		}
+	}
+}
+
+class tEnvoyNaClSigningKey {
+	#key;
+	#locked;
+	#password;
+	#passwordProtected;
+	#type;
+	#assertPassword;
+	#tEnvoy;
+	#nacl;
+	constructor(key, locked = false, password, type, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+		this.#tEnvoy = tEnvoy;
+		this.#nacl = tEnvoy.nacl;
+		if(!["public", "private"].includes(type)) {
+			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
+		} else {
+			if(locked) {
+				this.#locked = true;
+			} else {
+				this.#locked = false;
+			}
+			this.#password = password;
+			this.#key = key;
+			this.#type = type;
+			this.#passwordProtected = [];
+			let protectable = [];
+			if(type == "private") {
+				protectable = ["getPublic", "sign", "verify"];
+			} else if(type == "public") {
+				protectable = ["verify"];
+			}
+			if(passwordProtected == null) {
+				passwordProtected = [];
+			}
+			for(let i = 0; i < passwordProtected.length; i++) {
+				if(protectable.includes(passwordProtected[i])) {
+					this.#passwordProtected.push(passwordProtected[i]);
+				}
+			}
+			this.#assertPassword = function(methodName, password) {
+				if(this.#password == null) {
+					return {
+						proceed: true
+					};
+				} else {
+					let alwaysProtected;
+					if(this.#type == "private") {
+						alwaysProtected = ["getPrivate", "setPrivate"];
+					} else if(this.#type == "public") {
+						alwaysProtected = ["getPublic", "setPublic"];
+					}
+					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
+						if(password == null) {
+							return {
+								proceed: false,
+								error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and no password was specified."
+							};
+						} else if(password != this.#password) {
+							return {
+								proceed: false,
+								error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+							};
+						} else {
+							return {
+								proceed: true
+							};
+						}
+					} else {
+						return {
+							proceed: true
+						};
+					}
+				}
+			}
+			this.getPublic(this.#password);
+		}
+	}
+	lock() {
+		this.#locked = true;
+	}
+	getType() {
+		return this.#type;
+	}
+	getPrivate(password) {
+		let assertion = this.#assertPassword("getPrivate", password);
+		if(assertion.proceed) {
+			
+		} else {
+			throw assertion.error;
+		}
+	}
+	setPrivate(privateKey, password) {
+		let assertion = this.#assertPassword("setPrivate", password);
+		if(assertion.proceed) {
+			
+		} else {
+			throw assertion.error;
+		}
+	}
+	getPublic(password = null) {
+		let assertion = this.#assertPassword("getPublic", password);
+		if(assertion.proceed) {
+			
+		} else {
+			throw assertion.error;
+		}
+	}
+	setPublic(publicKey, password = null) {
+		let assertion = this.#assertPassword("setPublic", password);
 		if(assertion.proceed) {
 			
 		} else {
