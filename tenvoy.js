@@ -45647,7 +45647,7 @@ b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return 
 
 // End sjcl.js Import
 
-// Begin tEnvoy code
+// Begin tEnvoy.js
 
 if(window.TogaTech == null) {
   window.TogaTech = {};
@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v4.1.2";
+    return "v4.2.0";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46082,6 +46082,42 @@ class tEnvoy {
 		});
 	});
   }
+  genNaClKeys(args) {
+	if(args == null) {
+	  args = {};
+	}
+	if(args.locked == null) {
+		args.locked = false;
+	}
+	if(args.passwordProtected == null) {
+		args.passwordProtected = [];
+	}
+	let privateKey;
+	let publicKey;
+	let privateSigningKey;
+	let publicSigningKey;
+	let naclKeyPair;
+	if(args.seed == null) {
+		naclKeyPair = nacl.box.keyPair();
+	} else {
+		naclKeyPair = nacl.box.keyPair.fromSecretKey(args.seed);
+	}
+	if(args.password == null) {
+		privateKey = new tEnvoyNaClKey(naclKeyPair.secretKey, args.locked, null, "private", args.passwordProtected, this);
+		publicKey = new tEnvoyNaClKey(naclKeyPair.publicKey, args.locked, null, "public", args.passwordProtected, this);
+		let signingKeys = privateKey.genSigningKeys();
+		privateSigningKey = signingKeys.privateKey;
+		publicSigningKey = signingKeys.publicKey;
+	} else {
+		
+	}
+	return {
+		privateKey: privateKey,
+		publicKey: publicKey,
+		privateSigningKey: privateSigningKey,
+		publicSigningKey: publicSigningKey
+	}
+  }
   pbkdf2(args) {
   	if(args == null) {
       args = {};
@@ -46127,11 +46163,7 @@ class tEnvoy {
 			rounds: args.rounds,
 			size: args.size
 		});
-		let stringSeed = "";
-		for(let i = 0; i < seed.length - 1; i++) {
-			stringSeed += seed[i].toString() + ",";
-		}
-		stringSeed += seed[seed.length - 1].toString();
+		let stringSeed = seed.join(",");
 		let shaSeed = await this.sha512({
 			string: stringSeed
 		});
@@ -46195,11 +46227,7 @@ class tEnvoy {
 	  };
 	}
 	if(!(args.bytes instanceof Uint8Array)) {
-		let bytes = new Uint8Array(args.bytes.length);
-		for(let i = 0; i < args.bytes.length; i++) {
-			bytes[i] = args.bytes[i];
-		}
-		args.bytes = bytes;
+		args.bytes = this.mixedToUint8Array(args.bytes, false);
 	}
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method utf8decode is required and does not have a default value.";
@@ -46230,11 +46258,7 @@ class tEnvoy {
 	  };
 	}
 	if(!(args.bytes instanceof Uint8Array)) {
-		let bytes = new Uint8Array(args.bytes.length);
-		for(let i = 0; i < args.bytes.length; i++) {
-			bytes[i] = args.bytes[i];
-		}
-		args.bytes = bytes;
+		args.bytes = this.mixedToUint8Array(args.bytes, false);
 	}
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is required and does not have a default value.";
@@ -46309,11 +46333,7 @@ class tEnvoy {
 	  };
 	}
 	if(!(args.bytes instanceof Uint8Array)) {
-		let bytes = new Uint8Array(args.bytes.length);
-		for(let i = 0; i < args.bytes.length; i++) {
-			bytes[i] = args.bytes[i];
-		}
-		args.bytes = bytes;
+		args.bytes = this.mixedToUint8Array(args.bytes, false);
 	}
 	if(args.bytes == null) {
       throw "tEnvoy Fatal Error: property bytes of object args of method bytesToHex is required and does not have a default value.";
@@ -46358,49 +46378,202 @@ class tEnvoy {
 		resolve(words);
 	});
   }
-  wordsToNumbers(args) {
-	if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method wordsToNumbers is required and does not have a default value.";
-    }
-	let numbers = "";
-	let words = args.string.split(" ");
-	for(let i = 0; i < words.length; i++) {
-		numbers += this.wordsList.indexOf(words[i]).toString();
-		if(i + 1 != words.length) {
-			numbers += ",";
+  mixedToUint8Array(mixed, includeType = false, length = null) {
+  	function arrayOnlyContainsNumbers(array) {
+  		for(let i = 0; i < array.length; i++) {
+  			if(typeof array[i] != "number") {
+  				return false;
+  			}
+  		}
+  		return true;
+  	}
+  	function pad(array, length) {
+  		if(array.length == length || length == null) {
+  			return array;
+  		} else if(array.length > length) {
+  			let returnArray = new Uint8Array(length);
+  			for(let i = 0; i < returnArray.length; i++) {
+  				returnArray[i] = array[i];
+  			}
+  			return returnArray;
+  		} else {
+  			let returnArray = new Uint8Array(length);
+  			for(let i = 0; i < returnArray.length; i++) {
+  				returnArray[i] = 255;
+  			}
+  			for(let i = 0; i < array.length; i++) {
+  				returnArray[returnArray.length - array.length + i] = array[i];
+  			}
+  			return returnArray;
+  		}
+  	}
+  	if(mixed == null) {
+  		throw "tEnvoy Fatal Error: argument mixed of method mixedToUint8Array is required and does not have a default value.";
+  	}
+  	if(mixed instanceof Uint8Array) {
+  		if(includeType) {
+  			let returnUint8Array = new Uint8Array(mixed.length + 1);
+  			returnUint8Array[0] = 0;
+  			for(let i = 0; i < mixed.length; i++) {
+  				returnUint8Array[i + 1] = mixed[i];
+  			}
+  			return pad(returnUint8Array, length);
+  		} else {
+  			return mixed;
+  		}
+  	} else if(mixed instanceof Array && arrayOnlyContainsNumbers(mixed)) {
+		if(includeType) {
+  			let returnUint8Array = new Uint8Array(mixed.length + 1);
+  			returnUint8Array[0] = 1;
+  			for(let i = 0; i < mixed.length; i++) {
+  				returnUint8Array[i + 1] = mixed[i];
+  			}
+  			return pad(returnUint8Array, length);
+  		} else {
+  			let returnUint8Array = new Uint8Array(mixed.length);
+  			for(let i = 0; i < mixed.length; i++) {
+  				returnUint8Array[i] = mixed[i];
+  			}
+  			return returnUint8Array;
+  		}
+	} else if(typeof mixed == "number") {
+		if(mixed > 0) {
+			let hex = mixed.toString(16);
+			if(hex.length % 2 != 0) {
+				hex = "0" + hex;
+			}
+			if(hex.length == 0) {
+				hex = "00";
+			}
+			let hexAsArray = this.hexToBytes(hex);
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+				returnUint8Array[0] = 2;
+				for(let i = 0; i < hexAsArray.length; i++) {
+					returnUint8Array[i + 1] = hexAsArray[i];
+				}
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(hexAsArray.length);
+				for(let i = 0; i < hexAsArray.length; i++) {
+					returnUint8Array[i] = hexAsArray[i];
+				}
+				return returnUint8Array;
+			}
+		} else if(mixed < 0) {
+			mixed = -mixed;
+			let hex = mixed.toString(16);
+			if(hex.length % 2 != 0) {
+				hex = "0" + hex;
+			}
+			if(hex.length == 0) {
+				hex = "00";
+			}
+			let hexAsArray = this.hexToBytes(hex);
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+				returnUint8Array[0] = 3;
+				for(let i = 0; i < hexAsArray.length; i++) {
+					returnUint8Array[i + 1] = hexAsArray[i];
+				}
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(hexAsArray.length);
+				for(let i = 0; i < hexAsArray.length; i++) {
+					returnUint8Array[i] = hexAsArray[i];
+				}
+				return returnUint8Array;
+			}
+		} else {
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(2);
+				returnUint8Array[0] = 4;
+				returnUint8Array[1] = 0;
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(1);
+				returnUint8Array[0] = 0;
+				return returnUint8Array;
+			}
+		}
+	} else if(mixed.constructor == Object) {
+		let mixedAsUint8Array = this.utf8encode(JSON.stringify(mixed));
+		if(includeType) {
+			let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
+			returnUint8Array[0] = 5;
+			for(let i = 0; i < mixedAsUint8Array.length; i++) {
+				returnUint8Array[i + 1] = mixedAsUint8Array[i];
+			}
+			return pad(returnUint8Array, length);
+		} else {
+			return mixedAsUint8Array;
+		}
+	} else {
+		let mixedAsUint8Array = this.utf8encode(mixed.toString());
+		if(includeType) {
+			let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
+			returnUint8Array[0] = 254;
+			for(let i = 0; i < mixedAsUint8Array.length; i++) {
+				returnUint8Array[i + 1] = mixedAsUint8Array[i];
+			}
+			return pad(returnUint8Array, length);
+		} else {
+			return mixedAsUint8Array;
 		}
 	}
-	return numbers;
   }
-  numbersToWords(args) {
-	if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method numbersToWords is required and does not have a default value.";
-    }
-	let words = "";
-	let numbers = args.string.split(",");
-	for(let i = 0; i < numbers.length; i++) {
-		words += this.wordsList[parseInt(numbers[i])];
-		if(i + 1 != numbers.length) {
-			words += " ";
+  uint8ArrayToMixed(uint8Array, includeType = false) {
+  	if(includeType) {
+  		let paddingOver = false;
+  		let startIndex = 0;
+  		for(let i = 0; i < uint8Array.length && !paddingOver; i++) {
+  			if(uint8Array[i] != 255) {
+  				paddingOver = true;
+  				startIndex = i;
+  			}
+  		}
+  		let unpaddedUint8Array;
+  		if(paddingOver) {
+  			unpaddedUint8Array = new Uint8Array(uint8Array.length - startIndex);
+  			for(let i = startIndex; i < uint8Array.length; i++) {
+  				unpaddedUint8Array[i - startIndex] = uint8Array[i];
+  			}
+  		} else {
+  			unpaddedUint8Array = uint8Array;
+  		}
+  		uint8Array = unpaddedUint8Array;
+  		let returnUint8Array = new Uint8Array(uint8Array.length - 1);
+		for(let i = 0; i < returnUint8Array.length; i++) {
+			returnUint8Array[i] = uint8Array[i + 1];
 		}
-	}
-	return words;
+  		if(uint8Array[0] == 1) {
+  			let returnArray = [];
+			for(let i = 0; i < returnUint8Array.length; i++) {
+				returnArray[i] = returnUint8Array[i];
+			}
+			return returnArray;
+  		} else if(uint8Array[0] == 2) {
+  			let hex = this.bytesToHex(returnUint8Array);
+  			return parseInt(hex, 16);
+  		} else if(uint8Array[0] == 3) {
+  			let hex = this.bytesToHex(returnUint8Array);
+  			return -1 * parseInt(hex, 16);
+  		} else if(uint8Array[0] == 4) {
+  			return uint8Array[1];
+  		} else if(uint8Array[0] == 5) {
+  			return JSON.parse(this.utf8decode(returnUint8Array));
+  		} else if(uint8Array[0] == 254) {
+  			return this.utf8decode(returnUint8Array);
+  		} else {
+  			return returnUint8Array;
+  		}
+  	} else {
+  		let returnArray = [];
+  		for(let i = 0; i < uint8Array.length; i++) {
+  			returnArray[i] = uint8Array[i];
+  		}
+  		return returnArray;
+  	}
   }
 }
 
@@ -46417,13 +46590,15 @@ class tEnvoyPGPKey {
 		this.#tEnvoy = tEnvoy;
 		this.#openpgp = tEnvoy.openpgp;
 		let t;
-		keyArmored = tEnvoy.fixArmor(keyArmored);
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
 			t = "private";
+			keyArmored = tEnvoy.fixArmor(keyArmored);
 		} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
 			t = "public";
+			keyArmored = tEnvoy.fixArmor(keyArmored);
 		} else if(keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") == 0) {
 			t = type || "aes";
+			keyArmored = tEnvoy.fixArmor(keyArmored);
 		} else {
 			t = "aes";
 		}
@@ -46585,7 +46760,7 @@ class tEnvoyPGPKey {
 			throw "tEnvoyPGPKey Fatal Error: Key does not have a private component.";
 		}
 	}
-	setPrivateArmored(keyArmored, password) {
+	setPrivateArmored(keyArmored, password = null) {
 		if(this.#type == "private") {
 			if(keyArmored == null) {
 				throw "tEnvoyPGPKey Fatal Error: property keyArmored of method setPrivateArmored is required and does not have a default value.";
@@ -46840,7 +47015,7 @@ class tEnvoyNaClKey {
 	constructor(key, locked = false, password, type, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
 		this.#nacl = tEnvoy.nacl;
-		if(!["public", "private"].includes(type)) {
+		if(!["public", "private", "secret", "shared"].includes(type)) {
 			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
 		} else {
 			if(locked) {
@@ -46866,7 +47041,7 @@ class tEnvoyNaClKey {
 					this.#passwordProtected.push(passwordProtected[i]);
 				}
 			}
-			this.#assertPassword = function(methodName, password) {
+			this.#assertPassword = function(methodName, password = null) {
 				if(this.#password == null) {
 					return {
 						proceed: true
@@ -46901,7 +47076,6 @@ class tEnvoyNaClKey {
 					}
 				}
 			}
-			this.getPublic(this.#password);
 		}
 	}
 	lock() {
@@ -46910,18 +47084,26 @@ class tEnvoyNaClKey {
 	getType() {
 		return this.#type;
 	}
-	getPrivate(password) {
+	getPrivate(password = null) {
 		let assertion = this.#assertPassword("getPrivate", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
+				return this.#key;
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key does not have a private, secret, or shared component.";
+			}
 		} else {
 			throw assertion.error;
 		}
 	}
-	setPrivate(privateKey, password) {
+	setPrivate(privateKey, password = null) {
 		let assertion = this.#assertPassword("setPrivate", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
+				this.#key = privateKey;
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key does not have a private, secret, or shared component.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -46929,7 +47111,13 @@ class tEnvoyNaClKey {
 	getPublic(password = null) {
 		let assertion = this.#assertPassword("getPublic", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				return this.#nacl.box.keyPair.fromSecretKey(this.getPrivate(this.#password)).publicKey
+			} else if(this.#type == "public") {
+				return this.#key;
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key does not have a public component.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -46937,15 +47125,40 @@ class tEnvoyNaClKey {
 	setPublic(publicKey, password = null) {
 		let assertion = this.#assertPassword("setPublic", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component";
+			} else if(this.#type == "public") {
+				this.#key = publicKey;
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key does not have a public component.";
+			}
 		} else {
 			throw assertion.error;
 		}
 	}
-	encrypt(message, password = null) {
+	encrypt(message, nonce, password = null) {
 		let assertion = this.#assertPassword("encrypt", password);
 		if(assertion.proceed) {
-			
+			message = this.#tEnvoy.mixedToUint8Array(message, true);
+			let nonceCheck = this.#tEnvoy.mixedToUint8Array(nonce, true);
+			if(this.#type == "shared") {
+				if(nonceCheck.length > this.#nacl.box.nonceLength) {
+					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + this.#nacl.box.nonceLength + " (was " + nonceCheck.length + ").";
+				}
+				nonce = this.#tEnvoy.mixedToUint8Array(nonce, true, this.#nacl.box.nonceLength);
+			} else if(this.#type == "secret") {
+				if(nonceCheck.length > this.#nacl.secretbox.nonceLength) {
+					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + this.#nacl.secretbox.nonceLength + " (was " + nonceCheck.length + ").";
+				}
+				nonce = this.#tEnvoy.mixedToUint8Array(nonce, true, this.#nacl.secretbox.nonceLength);
+			}
+			if(this.#type == "shared") {
+				return nonce.join(",") + "::" + this.#tEnvoy.bytesToHex(this.#nacl.box.after(message, nonce, this.getPrivate(this.#password)));
+			} else if(this.#type == "secret") {
+				return nonce.join(",") + "::" + this.#tEnvoy.bytesToHex(this.#nacl.secretbox(message. nonce, this.getPrivate(this.#password)));
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for encryption, only secret or shared keys can be used to encrypt.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -46953,15 +47166,52 @@ class tEnvoyNaClKey {
 	decrypt(message, password = null) {
 		let assertion = this.#assertPassword("decrypt", password);
 		if(assertion.proceed) {
-			
+			if(message.split("::").length != 2) {
+				throw "tEnvoyNaClKey Fatal Error: Invalid message.";
+			}
+			let nonce = this.#tEnvoy.mixedToUint8Array(message.split("::")[0].split(",").map((element) => {return parseInt(element);}), false);
+			let encryptedContent = this.#tEnvoy.hexToBytes(message.split("::")[1]);
+			if(this.#type == "shared") {
+				return this.#tEnvoy.uint8ArrayToMixed(this.#nacl.box.open.after(encryptedContent, nonce, this.getPrivate(this.#password)), true);
+			} else if(this.#type == "secret") {
+				return this.#tEnvoy.uint8ArrayToMixed(this.#nacl.secretbox.open(encryptedContent, nonce, this.getPrivate(this.#password)), true);
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for decryption, only secret or shared keys can be used to decrypt.";
+			}
 		} else {
 			throw assertion.error;
 		}
 	}
-	genSigningKey(password = null) {
+	genSigningKeys(password = null) {
 		let assertion = this.#assertPassword("getSigningKey", password);
 		if(assertion.proceed) {
-		
+			let signingKeys = nacl.sign.keyPair.fromSeed(this.getPrivate(this.#password));
+			let privateKey = new tEnvoyNaClSigningKey(signingKeys.secretKey, this.#locked, this.#password, "private", this.#passwordProtected, this.#tEnvoy);
+			let publicKey = new tEnvoyNaClSigningKey(signingKeys.publicKey, this.#locked, this.#password, "public", this.#passwordProtected, this.#tEnvoy);
+			return {
+				privateKey: privateKey,
+				publicKey: publicKey
+			};
+		} else {
+			throw assertion.error;
+		}
+	}
+	genSharedKey(otherKey, otherKeyPassword = null, password = null) {
+		let assertion = this.#assertPassword("getSigningKey", password);
+		if(assertion.proceed) {
+			if(otherKey instanceof tEnvoyNaClKey) {
+				if(this.#type == "public" && otherKey.getType() == "private") {
+					let sharedKey = nacl.box.before(this.getPublic(this.#password), otherKey.getPrivate(otherKeyPassword));
+					return new tEnvoyNaClKey(sharedKey, this.#locked, this.#password, "shared", this.#passwordProtected, this.#tEnvoy);
+				} else if(this.#type == "private" && otherKey.getType() == "public") {
+					let sharedKey = nacl.box.before(this.getPrivate(this.#password), otherKey.getPublic(otherKeyPassword));
+					return new tEnvoyNaClKey(sharedKey, this.#locked, this.#password, "shared", this.#passwordProtected, this.#tEnvoy);
+				} else {
+					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public and the other should be private.";
+				}
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Incompatible key types, both keys should be of type tEnvoyNaClKey.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -47050,7 +47300,7 @@ class tEnvoyNaClSigningKey {
 	getType() {
 		return this.#type;
 	}
-	getPrivate(password) {
+	getPrivate(password = null) {
 		let assertion = this.#assertPassword("getPrivate", password);
 		if(assertion.proceed) {
 			
@@ -47058,7 +47308,7 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	setPrivate(privateKey, password) {
+	setPrivate(privateKey, password = null) {
 		let assertion = this.#assertPassword("setPrivate", password);
 		if(assertion.proceed) {
 			
@@ -47105,3 +47355,4 @@ class tEnvoyNaClSigningKey {
 window.TogaTech.tEnvoy = new tEnvoy(window.openpgp, window.nacl, window.sjcl);
 console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf someone told you to enter any text here, perhaps to enable some hidden feature or hack, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, please visit togatech.org/selfxss.", "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;");
 
+// End tEnvoy.js
