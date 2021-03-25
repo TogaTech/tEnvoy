@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v4.4.0";
+    return "v4.5.0";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -47051,17 +47051,6 @@ class tEnvoyNaClKey {
 		return this.#type;
 	}
 	getPrivate(password = null) {
-		function equals(array1, array2) {
-			if(array1.length != array2.length) {
-				return false;
-			}
-			for(let i = 0; i < array1.length; i++) {
-				if(array1[i] != array2[i]) {
-					return false;
-				}
-			}
-			return true;
-		}
 		let assertion = this.#assertPassword("getPrivate", password);
 		if(assertion.proceed) {
 			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
@@ -47069,7 +47058,7 @@ class tEnvoyNaClKey {
 					return this.#key;
 				} else {
 					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(equals(decrypted.nonce, this.#nonce)) {
+					if(this.#tEnvoy.bytesToHex(decrypted.nonce) == this.#tEnvoy.bytesToHex(this.#nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47100,17 +47089,6 @@ class tEnvoyNaClKey {
 		}
 	}
 	getPublic(password = null) {
-		function equals(array1, array2) {
-			if(array1.length != array2.length) {
-				return false;
-			}
-			for(let i = 0; i < array1.length; i++) {
-				if(array1[i] != array2[i]) {
-					return false;
-				}
-			}
-			return true;
-		}
 		let assertion = this.#assertPassword("getPublic", password);
 		if(assertion.proceed) {
 			if(this.#type == "private") {
@@ -47120,7 +47098,7 @@ class tEnvoyNaClKey {
 					return this.#key;
 				} else {
 					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(equals(decrypted.nonce, this.#nonce)) {
+					if(this.#tEnvoy.bytesToHex(decrypted.nonce) == this.#tEnvoy.bytesToHex(this.#nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47179,23 +47157,23 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	decrypt(message, password = null) {
+	decrypt(encrypted, password = null) {
 		let assertion = this.#assertPassword("decrypt", password);
 		if(assertion.proceed) {
-			if(message.split("::").length != 2) {
-				throw "tEnvoyNaClKey Fatal Error: Invalid message.";
+			if(encrypted.split("::").length != 2) {
+				throw "tEnvoyNaClKey Fatal Error: Invalid encrypted message.";
 			}
-			let nonce = this.#tEnvoy.mixedToUint8Array(this.#tEnvoy.hexToBytes(message.split("::")[0]), false);
-			let encryptedContent = this.#tEnvoy.hexToBytes(message.split("::")[1]);
+			let nonce = this.#tEnvoy.mixedToUint8Array(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), false);
+			let encryptedContent = this.#tEnvoy.hexToBytes(encrypted.split("::")[1]);
 			if(this.#type == "shared") {
 				return {
 					message: this.#tEnvoy.uint8ArrayToMixed(this.#nacl.box.open.after(encryptedContent, nonce, this.getPrivate(this.#password)), true),
-					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(message.split("::")[0]), true)
+					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), true)
 				};
 			} else if(this.#type == "secret") {
 				return {
 					message: this.#tEnvoy.uint8ArrayToMixed(this.#nacl.secretbox.open(encryptedContent, nonce, this.getPrivate(this.#password)), true),
-					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(message.split("::")[0]), true)
+					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), true)
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for decryption, only secret or shared keys can be used to decrypt.";
@@ -47270,9 +47248,9 @@ class tEnvoyNaClSigningKey {
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(type == "private") {
-				protectable = ["getPublic", "sign"];
+				protectable = ["getPublic", "sign", "verify", "verifyWithMessage"];
 			} else if(type == "public") {
-				protectable = ["verify"];
+				protectable = ["verify", "verifyWithMessage"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -47427,15 +47405,45 @@ class tEnvoyNaClSigningKey {
 	sign(message, password = null) {
 		let assertion = this.#assertPassword("sign", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				message = this.#tEnvoy.mixedToUint8Array(message, true);
+				let hashed = TogaTech.tEnvoy.bytesToHex(this.#nacl.hash(message)); // sha512 hash
+				return {
+					signature: hashed + "::" + this.#tEnvoy.bytesToHex(this.#nacl.sign.detached(this.#nacl.hash(message), this.getPrivate(this.#password))),
+					hash: hashed
+				};
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a private component.";
+			}
 		} else {
 			throw assertion.error;
 		}
 	}
-	verify(message, password = null) {
+	verify(signed, password = null) {
 		let assertion = this.#assertPassword("verify", password);
 		if(assertion.proceed) {
-			
+			if(signed.split("::").length != 2) {
+				throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
+			}
+			let hash = this.#tEnvoy.hexToBytes(signed.split("::")[0]);
+			let signature = this.#tEnvoy.hexToBytes(signed.split("::")[1]);
+			return {
+				verified: this.#nacl.sign.detached.verify(hash, signature, this.getPublic(this.#password)),
+				hash: signed.split("::")[0]
+			};
+		} else {
+			throw assertion.error;
+		}
+	}
+	verifyWithMessage(signed, message, password = null) {
+		let assertion = this.#assertPassword("verifyWithMessage", password);
+		if(assertion.proceed) {
+			if(signed.split("::").length != 2) {
+				throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
+			}
+			let hash = this.#tEnvoy.hexToBytes(signed.split("::")[0]);
+			let signature = this.#tEnvoy.hexToBytes(signed.split("::")[1]);
+			return this.#nacl.sign.detached.verify(hash, signature, this.getPublic(this.#password)) && this.#tEnvoy.bytesToHex(this.#nacl.hash(this.#tEnvoy.mixedToUint8Array(message, true))) == this.#tEnvoy.bytesToHex(hash);
 		} else {
 			throw assertion.error;
 		}
