@@ -46139,9 +46139,6 @@ class tEnvoy {
 	if(args.passwordProtected == null) {
 		args.passwordProtected = [];
 	}
-	if(args.passwordProtected == null) {
-		args.passwordProtected = [];
-	}
 	if(args.key == null) {
 		throw "tEnvoy Fatal Error: property key of object args of method genNaClSymmetricKey is required and does not have a default value.";
 	}
