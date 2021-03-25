@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v5.0.0";
+    return "v5.0.1";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46078,6 +46078,48 @@ class tEnvoy {
 			publicKey: publicKey
 		});
 	});
+  }
+  genPGPSymmetricKey(args) {
+  	return new Promise(async (resolve, reject) => {
+		if(args == null) {
+		  args = {};
+		}
+		if(args.passwordProtected == null) {
+			args.passwordProtected = [];
+		}
+		if(args.passwordProtected == null) {
+			args.passwordProtected = [];
+		}
+		if(args.key == null) {
+			reject("tEnvoy Fatal Error: property key of object args of method genPGPSymmetricKey is required and does not have a default value.");
+		}
+		if(args.password == null) {
+			resolve(new tEnvoyPGPKey(args.key, "aes", null, args.passwordProtected, this));
+		} else {
+			let encryptedKey = await this.#openpgp.encrypt({
+				message: await this.#openpgp.message.fromText(args.key),
+				passwords: [args.password]
+			}).catch((err) => {
+				reject(err);
+			});
+			resolve(new tEnvoyPGPKey(this.fixArmor(encryptedKey.data), "aes", args.password, args.passwordProtected, this));
+		}
+	});
+  }
+  genNaClSymmetricKey(args) {
+  	if(args == null) {
+	  args = {};
+	}
+	if(args.passwordProtected == null) {
+		args.passwordProtected = [];
+	}
+	if(args.passwordProtected == null) {
+		args.passwordProtected = [];
+	}
+	if(args.key == null) {
+		throw "tEnvoy Fatal Error: property key of object args of method genNaClSymmetricKey is required and does not have a default value.";
+	}
+	return new tEnvoyNaClKey(args.key, "secret", args.password, args.passwordProtected, this);
   }
   genNaClKeys(args) {
 	if(args == null) {
@@ -46991,7 +47033,7 @@ class tEnvoyNaClKey {
 			if(password == null) {
 				this.#key = key;
 			} else {
-				this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+				this.#nonce = this.#nacl.randomBytes(12);
 				this.#key = new tEnvoyNaClKey(password, "secret", null, [], tEnvoy).encrypt(key, this.#nonce);
 			}
 			this.#type = type;
@@ -47078,7 +47120,7 @@ class tEnvoyNaClKey {
 				if(this.#password == null) {
 					this.#key = privateKey;
 				} else {
-					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#nonce = this.#nacl.randomBytes(12);
 					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(privateKey, this.#nonce);
 				}
 			} else {
@@ -47120,7 +47162,7 @@ class tEnvoyNaClKey {
 				if(this.#password == null) {
 					this.#key = publicKey;
 				} else {
-					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#nonce = this.#nacl.randomBytes(12);
 					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(publicKey, this.#nonce);
 				}
 			} else {
@@ -47241,7 +47283,7 @@ class tEnvoyNaClSigningKey {
 			if(password == null) {
 				this.#key = key;
 			} else {
-				this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+				this.#nonce = this.#nacl.randomBytes(12);
 				this.#key = new tEnvoyNaClKey(password, "secret", null, [], tEnvoy).encrypt(key, this.#nonce);
 			}
 			this.#type = type;
@@ -47339,7 +47381,7 @@ class tEnvoyNaClSigningKey {
 				if(this.#password == null) {
 					this.#key = privateKey;
 				} else {
-					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#nonce = this.#nacl.randomBytes(12);
 					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(privateKey, this.#nonce);
 				}
 			} else {
@@ -47392,7 +47434,7 @@ class tEnvoyNaClSigningKey {
 				if(this.#password == null) {
 					this.#key = publicKey;
 				} else {
-					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#nonce = this.#nacl.randomBytes(12);
 					this.#key = new tEnvoyNaClSigningKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(publicKey, this.#nonce);
 				}
 			} else {
