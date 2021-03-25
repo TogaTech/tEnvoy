@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v4.3.0";
+    return "v4.4.0";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46098,7 +46098,7 @@ class tEnvoy {
 	}
 	privateKey = new tEnvoyNaClKey(naclKeyPair.secretKey, "private", args.password, args.passwordProtected, this);
 	publicKey = new tEnvoyNaClKey(naclKeyPair.publicKey, "public", args.password, args.passwordProtected, this);
-	let signingKeys = privateKey.genSigningKeys();
+	let signingKeys = privateKey.genSigningKeys(args.password);
 	privateSigningKey = signingKeys.privateKey;
 	publicSigningKey = signingKeys.publicKey;
 	return {
@@ -46998,9 +46998,9 @@ class tEnvoyNaClKey {
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(type == "private" || type == "shared" || type == "secret") {
-				protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey"];
+				protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey", "genSharedKey"];
 			} else if(type == "public") {
-				protectable = ["encrypt"];
+				protectable = ["encrypt", "genSharedKey"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -47065,7 +47065,7 @@ class tEnvoyNaClKey {
 		let assertion = this.#assertPassword("getPrivate", password);
 		if(assertion.proceed) {
 			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
-				if(password == null) {
+				if(this.#password == null) {
 					return this.#key;
 				} else {
 					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
@@ -47086,7 +47086,7 @@ class tEnvoyNaClKey {
 		let assertion = this.#assertPassword("setPrivate", password);
 		if(assertion.proceed) {
 			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
-				if(password == null) {
+				if(this.#password == null) {
 					this.#key = privateKey;
 				} else {
 					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
@@ -47116,7 +47116,7 @@ class tEnvoyNaClKey {
 			if(this.#type == "private") {
 				return this.#nacl.box.keyPair.fromSecretKey(this.getPrivate(this.#password)).publicKey
 			} else if(this.#type == "public") {
-				if(password == null) {
+				if(this.#password == null) {
 					return this.#key;
 				} else {
 					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
@@ -47139,7 +47139,7 @@ class tEnvoyNaClKey {
 			if(this.#type == "private") {
 				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component";
 			} else if(this.#type == "public") {
-				if(password == null) {
+				if(this.#password == null) {
 					this.#key = publicKey;
 				} else {
 					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
@@ -47205,7 +47205,7 @@ class tEnvoyNaClKey {
 		}
 	}
 	genSigningKeys(password = null) {
-		let assertion = this.#assertPassword("getSigningKey", password);
+		let assertion = this.#assertPassword("genSigningKey", password);
 		if(assertion.proceed) {
 			if(this.#type != "secret") {
 				let signingKeys = nacl.sign.keyPair.fromSeed(this.getPrivate(this.#password));
@@ -47223,7 +47223,7 @@ class tEnvoyNaClKey {
 		}
 	}
 	genSharedKey(otherKey, otherKeyPassword = null, password = null) {
-		let assertion = this.#assertPassword("getSigningKey", password);
+		let assertion = this.#assertPassword("genSharedKey", password);
 		if(assertion.proceed) {
 			if(otherKey instanceof tEnvoyNaClKey) {
 				if(this.#type == "public" && otherKey.getType() == "private") {
@@ -47246,25 +47246,31 @@ class tEnvoyNaClKey {
 
 class tEnvoyNaClSigningKey {
 	#key;
+	#nonce;
 	#password;
 	#passwordProtected;
 	#type;
 	#assertPassword;
 	#tEnvoy;
 	#nacl;
-	constructor(key, type, password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+	constructor(key, type = "secret", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
 		this.#nacl = tEnvoy.nacl;
 		if(!["public", "private"].includes(type)) {
 			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
 		} else {
 			this.#password = password;
-			this.#key = key;
+			if(password == null) {
+				this.#key = key;
+			} else {
+				this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+				this.#key = new tEnvoyNaClKey(password, "secret", null, [], tEnvoy).encrypt(key, this.#nonce);
+			}
 			this.#type = type;
 			this.#passwordProtected = [];
 			let protectable = [];
 			if(type == "private") {
-				protectable = ["getPublic", "sign", "verify"];
+				protectable = ["getPublic", "sign"];
 			} else if(type == "public") {
 				protectable = ["verify"];
 			}
@@ -47276,7 +47282,7 @@ class tEnvoyNaClSigningKey {
 					this.#passwordProtected.push(passwordProtected[i]);
 				}
 			}
-			this.#assertPassword = function(methodName, password) {
+			this.#assertPassword = function(methodName, password = null) {
 				if(this.#password == null) {
 					return {
 						proceed: true
@@ -47292,12 +47298,12 @@ class tEnvoyNaClSigningKey {
 						if(password == null) {
 							return {
 								proceed: false,
-								error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and no password was specified."
+								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and no password was specified."
 							};
 						} else if(password != this.#password) {
 							return {
 								proceed: false,
-								error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
 							};
 						} else {
 							return {
@@ -47311,16 +47317,39 @@ class tEnvoyNaClSigningKey {
 					}
 				}
 			}
-			this.getPublic(this.#password);
 		}
 	}
 	getType() {
 		return this.#type;
 	}
 	getPrivate(password = null) {
+		function equals(array1, array2) {
+			if(array1.length != array2.length) {
+				return false;
+			}
+			for(let i = 0; i < array1.length; i++) {
+				if(array1[i] != array2[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
 		let assertion = this.#assertPassword("getPrivate", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				if(this.#password == null) {
+					return this.#key;
+				} else {
+					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
+					if(equals(decrypted.nonce, this.#nonce)) {
+						return decrypted.message;
+					} else {
+						throw "tEnvoyNaClSigningKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
+					}
+				}
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a private component.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -47328,15 +47357,50 @@ class tEnvoyNaClSigningKey {
 	setPrivate(privateKey, password = null) {
 		let assertion = this.#assertPassword("setPrivate", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				if(this.#password == null) {
+					this.#key = privateKey;
+				} else {
+					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(privateKey, this.#nonce);
+				}
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a private component.";
+			}
 		} else {
 			throw assertion.error;
 		}
 	}
 	getPublic(password = null) {
+		function equals(array1, array2) {
+			if(array1.length != array2.length) {
+				return false;
+			}
+			for(let i = 0; i < array1.length; i++) {
+				if(array1[i] != array2[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
 		let assertion = this.#assertPassword("getPublic", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				return this.#nacl.sign.keyPair.fromSecretKey(this.getPrivate(this.#password)).publicKey
+			} else if(this.#type == "public") {
+				if(this.#password == null) {
+					return this.#key;
+				} else {
+					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
+					if(equals(decrypted.nonce, this.#nonce)) {
+						return decrypted.message;
+					} else {
+						throw "tEnvoyNaClSigningKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
+					}
+				}
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a public component.";
+			}
 		} else {
 			throw assertion.error;
 		}
@@ -47344,7 +47408,18 @@ class tEnvoyNaClSigningKey {
 	setPublic(publicKey, password = null) {
 		let assertion = this.#assertPassword("setPublic", password);
 		if(assertion.proceed) {
-			
+			if(this.#type == "private") {
+				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component";
+			} else if(this.#type == "public") {
+				if(this.#password == null) {
+					this.#key = publicKey;
+				} else {
+					this.#nonce = this.#nacl.box.keyPair().secretKey.subarray(0, 12);
+					this.#key = new tEnvoyNaClSigningKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(publicKey, this.#nonce);
+				}
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a public component.";
+			}
 		} else {
 			throw assertion.error;
 		}
