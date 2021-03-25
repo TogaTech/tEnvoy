@@ -46087,9 +46087,6 @@ class tEnvoy {
 		if(args.passwordProtected == null) {
 			args.passwordProtected = [];
 		}
-		if(args.passwordProtected == null) {
-			args.passwordProtected = [];
-		}
 		if(args.key == null) {
 			reject("tEnvoy Fatal Error: property key of object args of method genPGPSymmetricKey is required and does not have a default value.");
 		}
@@ -46105,21 +46102,6 @@ class tEnvoy {
 			resolve(new tEnvoyPGPKey(this.fixArmor(encryptedKey.data), "aes", args.password, args.passwordProtected, this));
 		}
 	});
-  }
-  genNaClSymmetricKey(args) {
-  	if(args == null) {
-	  args = {};
-	}
-	if(args.passwordProtected == null) {
-		args.passwordProtected = [];
-	}
-	if(args.passwordProtected == null) {
-		args.passwordProtected = [];
-	}
-	if(args.key == null) {
-		throw "tEnvoy Fatal Error: property key of object args of method genNaClSymmetricKey is required and does not have a default value.";
-	}
-	return new tEnvoyNaClKey(args.key, "secret", args.password, args.passwordProtected, this);
   }
   genNaClKeys(args) {
 	if(args == null) {
@@ -46149,6 +46131,21 @@ class tEnvoy {
 		privateSigningKey: privateSigningKey,
 		publicSigningKey: publicSigningKey
 	}
+  }
+  genNaClSymmetricKey(args) {
+  	if(args == null) {
+	  args = {};
+	}
+	if(args.passwordProtected == null) {
+		args.passwordProtected = [];
+	}
+	if(args.passwordProtected == null) {
+		args.passwordProtected = [];
+	}
+	if(args.key == null) {
+		throw "tEnvoy Fatal Error: property key of object args of method genNaClSymmetricKey is required and does not have a default value.";
+	}
+	return new tEnvoyNaClKey(args.key, "secret", args.password, args.passwordProtected, this);
   }
   pbkdf2(args) {
   	if(args == null) {
