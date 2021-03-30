@@ -47169,7 +47169,11 @@ class tEnvoyNaClKey {
 	encrypt(message, nonce, password = null) {
 		let assertion = this.#assertPassword("encrypt", password);
 		if(assertion.proceed) {
-			message = this.#tEnvoy.mixedToUint8Array(message, true);
+			let paddingLength = this.#tEnvoy.mixedToUint8Array(message, true).length;
+			let randomPadding = nacl.randomBytes(1)[0] % 16;
+			paddingLength = 32 + 32 * parseInt(paddingLength / 32);
+			paddingLength += randomPadding;
+			message = this.#tEnvoy.mixedToUint8Array(message, true, paddingLength);
 			let nonceCheck = this.#tEnvoy.mixedToUint8Array(nonce, true);
 			if(this.#type == "shared") {
 				if(nonceCheck.length > this.#nacl.box.nonceLength) {
