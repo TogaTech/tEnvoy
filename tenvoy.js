@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v5.0.2";
+    return "v5.0.3";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46463,58 +46463,70 @@ class tEnvoy {
   			return returnUint8Array;
   		}
 	} else if(typeof mixed == "number") {
-		mixed = parseInt(mixed);
-		if(mixed > 0) {
-			let hex = mixed.toString(16);
-			if(hex.length % 2 != 0) {
-				hex = "0" + hex;
-			}
-			if(hex.length == 0) {
-				hex = "00";
-			}
-			let hexAsArray = this.hexToBytes(hex);
-			if(includeType) {
-				let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
-				returnUint8Array[0] = 2;
-				for(let i = 0; i < hexAsArray.length; i++) {
-					returnUint8Array[i + 1] = hexAsArray[i];
+		if(Number.isInteger(mixed)) {
+			if(mixed > 0) {
+				let hex = mixed.toString(16);
+				if(hex.length % 2 != 0) {
+					hex = "0" + hex;
 				}
-				return pad(returnUint8Array, length);
+				if(hex.length == 0) {
+					hex = "00";
+				}
+				let hexAsArray = this.hexToBytes(hex);
+				if(includeType) {
+					let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+					returnUint8Array[0] = 2;
+					for(let i = 0; i < hexAsArray.length; i++) {
+						returnUint8Array[i + 1] = hexAsArray[i];
+					}
+					return pad(returnUint8Array, length);
+				} else {
+					let returnUint8Array = new Uint8Array(hexAsArray.length);
+					for(let i = 0; i < hexAsArray.length; i++) {
+						returnUint8Array[i] = hexAsArray[i];
+					}
+					return returnUint8Array;
+				}
+			} else if(mixed < 0) {
+				mixed = -mixed;
+				let hex = mixed.toString(16);
+				if(hex.length % 2 != 0) {
+					hex = "0" + hex;
+				}
+				if(hex.length == 0) {
+					hex = "00";
+				}
+				let hexAsArray = this.hexToBytes(hex);
+				if(includeType) {
+					let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+					returnUint8Array[0] = 3;
+					for(let i = 0; i < hexAsArray.length; i++) {
+						returnUint8Array[i + 1] = hexAsArray[i];
+					}
+					return pad(returnUint8Array, length);
+				} else {
+					let returnUint8Array = new Uint8Array(hexAsArray.length);
+					for(let i = 0; i < hexAsArray.length; i++) {
+						returnUint8Array[i] = hexAsArray[i];
+					}
+					return returnUint8Array;
+				}
 			} else {
-				let returnUint8Array = new Uint8Array(hexAsArray.length);
-				for(let i = 0; i < hexAsArray.length; i++) {
-					returnUint8Array[i] = hexAsArray[i];
+				if(includeType) {
+					let returnUint8Array = new Uint8Array(2);
+					returnUint8Array[0] = 4;
+					returnUint8Array[1] = 0;
+					return pad(returnUint8Array, length);
+				} else {
+					let returnUint8Array = new Uint8Array(1);
+					returnUint8Array[0] = 0;
+					return returnUint8Array;
 				}
-				return returnUint8Array;
 			}
-		} else if(mixed < 0) {
-			mixed = -mixed;
-			let hex = mixed.toString(16);
-			if(hex.length % 2 != 0) {
-				hex = "0" + hex;
-			}
-			if(hex.length == 0) {
-				hex = "00";
-			}
-			let hexAsArray = this.hexToBytes(hex);
-			if(includeType) {
-				let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
-				returnUint8Array[0] = 3;
-				for(let i = 0; i < hexAsArray.length; i++) {
-					returnUint8Array[i + 1] = hexAsArray[i];
-				}
-				return pad(returnUint8Array, length);
-			} else {
-				let returnUint8Array = new Uint8Array(hexAsArray.length);
-				for(let i = 0; i < hexAsArray.length; i++) {
-					returnUint8Array[i] = hexAsArray[i];
-				}
-				return returnUint8Array;
-			}
-		} else {
+		} else if(Number.isNaN(mixed)) {
 			if(includeType) {
 				let returnUint8Array = new Uint8Array(2);
-				returnUint8Array[0] = 4;
+				returnUint8Array[0] = 7;
 				returnUint8Array[1] = 0;
 				return pad(returnUint8Array, length);
 			} else {
@@ -46522,8 +46534,27 @@ class tEnvoy {
 				returnUint8Array[0] = 0;
 				return returnUint8Array;
 			}
+		} else if(Number.isFinite(mixed)) {
+			if(includeType) {
+				let returnUint8Array = this.mixedToUint8Array((mixed + ""), true);
+				returnUint8Array[0] = 8;
+				return pad(returnUint8Array, length);
+			} else {
+				return this.mixedToUint8Array((mixed + ""), false);
+			}
+		} else {
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(2);
+				returnUint8Array[0] = 9;
+				returnUint8Array[1] = 255;
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(1);
+				returnUint8Array[0] = 255;
+				return returnUint8Array;
+			}
 		}
-	} else if(mixed.constructor == Object) {
+	} else if(mixed.constructor == Object || typeof mixed.toJSON == "function") {
 		let mixedAsUint8Array = this.utf8encode(JSON.stringify(mixed));
 		if(includeType) {
 			let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
@@ -46534,6 +46565,17 @@ class tEnvoy {
 			return pad(returnUint8Array, length);
 		} else {
 			return mixedAsUint8Array;
+		}
+	} else if(typeof mixed == "boolean") {
+		if(includeType) {
+			let returnUint8Array = new Uint8Array(2);
+			returnUint8Array[0] = 6;
+			returnUint8Array[1] = mixed ? 1 : 0;
+			return pad(returnUint8Array, length);
+		} else {
+			let returnUint8Array = new Uint8Array(1);
+			returnUint8Array[0] = mixed ? 1 : 0;
+			return returnUint8Array;
 		}
 	} else {
 		let mixedAsUint8Array = this.utf8encode(mixed.toString());
@@ -46600,6 +46642,15 @@ class tEnvoy {
   			let fakeRes = this.utf8decode(fakeUint8Array);
   			let fakeJSON = JSON.parse("{}");
   			return JSON.parse(this.utf8decode(returnUint8Array));
+  		} else if(uint8Array[0] == 6) {
+  			return returnUint8Array[0] != 0;
+  		} else if(uint8Array[0] == 7) {
+  			return NaN;
+  		} else if(uint8Array[0] == 8) {
+  			let fakeDecoded = this.utf8decode(fakeUint8Array);
+  			return parseFloat(this.utf8decode(returnUint8Array));
+  		} else if(uint8Array[0] == 9) {
+  			return Infinity;
   		} else if(uint8Array[0] == 254) {
   			let fakeDecoded = this.utf8decode(fakeUint8Array);
   			return this.utf8decode(returnUint8Array);
@@ -46613,6 +46664,12 @@ class tEnvoy {
   		}
   		return returnArray;
   	}
+  }
+  pack(mixed, length) {
+  	return this.mixedToUint8Array(mixed, true, length);
+  }
+  unpack(packed) {
+  	return this.uint8ArrayToMixed(packed, true);
   }
 }
 
