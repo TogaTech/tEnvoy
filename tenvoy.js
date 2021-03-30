@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v5.0.3";
+    return "v5.1.0";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -47562,6 +47562,23 @@ class tEnvoyNaClSigningKey {
 
 
 window.TogaTech.tEnvoy = new tEnvoy(window.openpgp, window.nacl, window.sjcl);
-console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf someone told you to enter any text here, perhaps to enable some hidden feature or hack, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, please visit togatech.org/selfxss.", "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;");
-
+let message = () => {
+	console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf you were told to enter any text here, maybe to enable a hidden feature, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, visit togatech.org/selfxss.\n\n%ctEnvoy " + window.TogaTech.tEnvoy.version, "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;", "font-size: 12px;");
+}
+message();
+setTimeout(() => {
+	message();
+}, 1000);
+setTimeout(() => {
+	message();
+}, 2000);
+setTimeout(() => {
+	message();
+}, 3000);
+setTimeout(() => {
+	message();
+}, 4000);
+setTimeout(() => {
+	message();
+}, 5000);
 // End tEnvoy.js
