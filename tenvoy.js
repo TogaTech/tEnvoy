@@ -46553,20 +46553,26 @@ class tEnvoy {
   	if(includeType) {
   		let paddingOver = false;
   		let startIndex = 0;
-  		for(let i = 0; i < uint8Array.length && !paddingOver; i++) {
-  			if(uint8Array[i] != 255) {
+  		for(let i = 0; i < uint8Array.length; i++) {
+  			if(uint8Array[i] != 255 && !paddingOver) {
   				paddingOver = true;
   				startIndex = i;
   			}
   		}
   		let unpaddedUint8Array;
+  		let fakeUint8Array;
   		if(paddingOver) {
   			unpaddedUint8Array = new Uint8Array(uint8Array.length - startIndex);
   			for(let i = startIndex; i < uint8Array.length; i++) {
   				unpaddedUint8Array[i - startIndex] = uint8Array[i];
   			}
+  			fakeUint8Array = new Uint8Array(startIndex);
+  			for(let i = 0; i < startIndex; i++) {
+  				fakeUint8Array[i] = uint8Array[i];
+  			}
   		} else {
   			unpaddedUint8Array = uint8Array;
+  			fakeUint8Array = new Uint8Array(0);
   		}
   		uint8Array = unpaddedUint8Array;
   		let returnUint8Array = new Uint8Array(uint8Array.length - 1);
@@ -46578,18 +46584,27 @@ class tEnvoy {
 			for(let i = 0; i < returnUint8Array.length; i++) {
 				returnArray[i] = returnUint8Array[i];
 			}
+  			let fakeReturnArray = [];
+			for(let i = 0; i < fakeUint8Array.length; i++) {
+				fakeReturnArray[i] = fakeUint8Array[i];
+			}
 			return returnArray;
   		} else if(uint8Array[0] == 2) {
   			let hex = this.bytesToHex(returnUint8Array);
+  			let fakeHex = this.bytesToHex(fakeUint8Array);
   			return parseInt(hex, 16);
   		} else if(uint8Array[0] == 3) {
   			let hex = this.bytesToHex(returnUint8Array);
+  			let fakeHex = -1 * parseInt(this.bytesToHex(fakeUint8Array), 16);
   			return -1 * parseInt(hex, 16);
   		} else if(uint8Array[0] == 4) {
   			return uint8Array[1];
   		} else if(uint8Array[0] == 5) {
+  			let fakeRes = this.utf8decode(fakeUint8Array);
+  			let fakeJSON = JSON.parse("{}");
   			return JSON.parse(this.utf8decode(returnUint8Array));
   		} else if(uint8Array[0] == 254) {
+  			let fakeDecoded = this.utf8decode(fakeUint8Array);
   			return this.utf8decode(returnUint8Array);
   		} else {
   			return returnUint8Array;
