@@ -45647,7 +45647,7 @@ b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return 
 
 // End sjcl.js Import
 
-// Begin tEnvoy.js
+// Start tEnvoy.js
 
 if(window.TogaTech == null) {
   window.TogaTech = {};
@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v5.0.1";
+    return "v5.0.2";
   }
   get openpgp() {
 	  return this.#openpgp;
