@@ -46566,13 +46566,10 @@ class tEnvoy {
   			for(let i = startIndex; i < uint8Array.length; i++) {
   				unpaddedUint8Array[i - startIndex] = uint8Array[i];
   			}
-  			fakeUint8Array = new Uint8Array(startIndex);
-  			for(let i = 0; i < startIndex; i++) {
-  				fakeUint8Array[i] = uint8Array[i];
-  			}
+  			fakeUint8Array = nacl.randomBytes(startIndex);
   		} else {
   			unpaddedUint8Array = uint8Array;
-  			fakeUint8Array = new Uint8Array(0);
+  			fakeUint8Array = nacl.randomBytes(nacl.randomBytes(1)[0] % 16);
   		}
   		uint8Array = unpaddedUint8Array;
   		let returnUint8Array = new Uint8Array(uint8Array.length - 1);
