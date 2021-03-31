@@ -45664,7 +45664,7 @@ class tEnvoy {
 	this.wordsList = this.dictionary.split(" ");
   }
   get version() {
-    return "v5.1.0";
+    return "v5.1.1";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46056,7 +46056,7 @@ class tEnvoy {
 		let publicArmored = this.fixArmor(openpgpkey.publicKeyArmored);
 		if(args.password == null) {
 			privateKey = new tEnvoyPGPKey(privateArmored, "private", null, args.passwordProtected, this);
-			publicKey = new tEnvoyPGPKey(publicArmored, "public", null, "public", args.passwordProtected, this);
+			publicKey = new tEnvoyPGPKey(publicArmored, "public", null, args.passwordProtected, this);
 		} else {
 			let encryptedPrivateKey = await this.#openpgp.encrypt({
 				message: await this.#openpgp.message.fromText(privateArmored),
@@ -46116,9 +46116,9 @@ class tEnvoy {
 	let publicSigningKey;
 	let naclKeyPair;
 	if(args.seed == null) {
-		naclKeyPair = nacl.box.keyPair();
+		naclKeyPair = this.#nacl.box.keyPair();
 	} else {
-		naclKeyPair = nacl.box.keyPair.fromSecretKey(args.seed);
+		naclKeyPair = this.#nacl.box.keyPair.fromSecretKey(args.seed);
 	}
 	privateKey = new tEnvoyNaClKey(naclKeyPair.secretKey, "private", args.password, args.passwordProtected, this);
 	publicKey = new tEnvoyNaClKey(naclKeyPair.publicKey, "public", args.password, args.passwordProtected, this);
@@ -46602,16 +46602,20 @@ class tEnvoy {
   			}
   		}
   		let unpaddedUint8Array;
-  		let fakeUint8Array;
+  		let fakeUint8Array = new Uint8Array(startIndex);
   		if(paddingOver) {
   			unpaddedUint8Array = new Uint8Array(uint8Array.length - startIndex);
   			for(let i = startIndex; i < uint8Array.length; i++) {
   				unpaddedUint8Array[i - startIndex] = uint8Array[i];
   			}
-  			fakeUint8Array = nacl.randomBytes(startIndex);
+  			if(this.#nacl != null) {
+  				fakeUint8Array = this.#nacl.randomBytes(startIndex);
+  			}
   		} else {
   			unpaddedUint8Array = uint8Array;
-  			fakeUint8Array = nacl.randomBytes(nacl.randomBytes(1)[0] % 16);
+  			if(this.#nacl != null) {
+  				fakeUint8Array = this.#nacl.randomBytes(this.#nacl.randomBytes(1)[0] % 16);
+  			}
   		}
   		uint8Array = unpaddedUint8Array;
   		let returnUint8Array = new Uint8Array(uint8Array.length - 1);
@@ -46683,17 +46687,17 @@ class tEnvoyPGPKey {
 	#openpgp;
 	constructor(keyArmored, type = "aes", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
-		this.#openpgp = tEnvoy.openpgp;
+		this.#openpgp = this.#tEnvoy.openpgp;
 		let t;
 		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
 			t = "private";
-			keyArmored = tEnvoy.fixArmor(keyArmored);
+			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
 		} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
 			t = "public";
-			keyArmored = tEnvoy.fixArmor(keyArmored);
+			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
 		} else if(keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") == 0) {
 			t = type || "aes";
-			keyArmored = tEnvoy.fixArmor(keyArmored);
+			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
 		} else {
 			t = "aes";
 		}
@@ -47085,7 +47089,7 @@ class tEnvoyNaClKey {
 	#nacl;
 	constructor(key, type = "secret", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
-		this.#nacl = tEnvoy.nacl;
+		this.#nacl = this.#tEnvoy.nacl;
 		if(!["public", "private", "secret", "shared"].includes(type)) {
 			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
 		} else {
@@ -47239,7 +47243,7 @@ class tEnvoyNaClKey {
 		let assertion = this.#assertPassword("encrypt", password);
 		if(assertion.proceed) {
 			let paddingLength = this.#tEnvoy.mixedToUint8Array(message, true).length;
-			let randomPadding = nacl.randomBytes(1)[0] % 16;
+			let randomPadding = this.#nacl.randomBytes(1)[0] % 16;
 			paddingLength = 32 + 32 * parseInt(paddingLength / 32);
 			paddingLength += randomPadding;
 			message = this.#tEnvoy.mixedToUint8Array(message, true, paddingLength);
@@ -47295,7 +47299,7 @@ class tEnvoyNaClKey {
 		let assertion = this.#assertPassword("genSigningKey", password);
 		if(assertion.proceed) {
 			if(this.#type != "secret") {
-				let signingKeys = nacl.sign.keyPair.fromSeed(this.getPrivate(this.#password));
+				let signingKeys = this.#nacl.sign.keyPair.fromSeed(this.getPrivate(this.#password));
 				let privateKey = new tEnvoyNaClSigningKey(signingKeys.secretKey, "private", this.#password, this.#passwordProtected, this.#tEnvoy);
 				let publicKey = new tEnvoyNaClSigningKey(signingKeys.publicKey, "public", this.#password, this.#passwordProtected, this.#tEnvoy);
 				return {
@@ -47314,10 +47318,10 @@ class tEnvoyNaClKey {
 		if(assertion.proceed) {
 			if(otherKey instanceof tEnvoyNaClKey) {
 				if(this.#type == "public" && otherKey.getType() == "private") {
-					let sharedKey = nacl.box.before(this.getPublic(this.#password), otherKey.getPrivate(otherKeyPassword));
+					let sharedKey = this.#nacl.box.before(this.getPublic(this.#password), otherKey.getPrivate(otherKeyPassword));
 					return new tEnvoyNaClKey(sharedKey, "shared", this.#password, this.#passwordProtected, this.#tEnvoy);
 				} else if(this.#type == "private" && otherKey.getType() == "public") {
-					let sharedKey = nacl.box.before(this.getPrivate(this.#password), otherKey.getPublic(otherKeyPassword));
+					let sharedKey = this.#nacl.box.before(this.getPrivate(this.#password), otherKey.getPublic(otherKeyPassword));
 					return new tEnvoyNaClKey(sharedKey, "shared", this.#password, this.#passwordProtected, this.#tEnvoy);
 				} else {
 					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public and the other should be private.";
@@ -47342,7 +47346,7 @@ class tEnvoyNaClSigningKey {
 	#nacl;
 	constructor(key, type = "secret", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
 		this.#tEnvoy = tEnvoy;
-		this.#nacl = tEnvoy.nacl;
+		this.#nacl = this.#tEnvoy.nacl;
 		if(!["public", "private"].includes(type)) {
 			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
 		} else {
@@ -47516,7 +47520,7 @@ class tEnvoyNaClSigningKey {
 		if(assertion.proceed) {
 			if(this.#type == "private") {
 				message = this.#tEnvoy.mixedToUint8Array(message, true);
-				let hashed = TogaTech.tEnvoy.bytesToHex(this.#nacl.hash(message)); // sha512 hash
+				let hashed = this.#tEnvoy.bytesToHex(this.#nacl.hash(message)); // sha512 hash
 				return {
 					signature: hashed + "::" + this.#tEnvoy.bytesToHex(this.#nacl.sign.detached(this.#nacl.hash(message), this.getPrivate(this.#password))),
 					hash: hashed
