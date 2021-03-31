@@ -45657,6 +45657,9 @@ class tEnvoy {
   #nacl;
   #sjcl;
   #tEnvoyUtil;
+  #tEnvoyHash;
+  #tEnvoyRandom;
+  #tEnvoyKeyFactory;
   constructor(openpgp = window.openpgp, nacl = window.nacl, sjcl = window.sjcl) {
 	this.#openpgp = openpgp;
 	this.#nacl = nacl;
@@ -46058,6 +46061,30 @@ class tEnvoy {
 		  }
   	}
   	this.#tEnvoyUtil = new tEnvoyUtil(this);
+  	
+  	class tEnvoyHash {
+  		#parent;
+  		constructor(parent) {
+  			this.#parent = parent;
+  		}
+  	}
+  	this.#tEnvoyHash = new tEnvoyHash(this);
+  	
+  	class tEnvoyRandom {
+  		#parent;
+  		constructor(parent) {
+  			this.#parent = parent;
+  		}
+  	}
+  	this.#tEnvoyRandom = new tEnvoyRandom(this);
+  	
+  	class tEnvoyKeyFactory {
+  		#parent;
+  		constructor(parent) {
+  			this.#parent = parent;
+  		}
+  	}
+  	this.#tEnvoyKeyFactory = new tEnvoyKeyFactory(this);
   }
   get version() {
     return "v5.1.1";
@@ -46070,6 +46097,15 @@ class tEnvoy {
   }
   get util() {
   	return this.#tEnvoyUtil;
+  }
+  get hash() {
+  	return this.#tEnvoyHash;
+  }
+  get random() {
+  	return this.#tEnvoyRandom;
+  }
+  get keyFactory() {
+  	return this.#tEnvoyKeyFactory;
   }
   fixArmor(armored) {
 	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: tEnvoy " + this.version).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
