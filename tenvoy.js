@@ -45701,7 +45701,7 @@ class tEnvoy {
 				}
 			}
 			if(mixed == null) {
-				throw "tEnvoy Fatal Error: argument mixed of method mixedToUint8Array is required and does not have a default value.";
+				throw "tEnvoy Fatal Error: argument mixed of method util.mixedToUint8Array is required and does not have a default value.";
 			}
 			if(mixed instanceof Uint8Array) {
 				if(includeType) {
@@ -46067,6 +46067,168 @@ class tEnvoy {
   		constructor(parent) {
   			this.#parent = parent;
   		}
+  		sha256(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha256 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.sha256(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		sha1(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha1 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.sha1(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		sha224(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha224 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.sha224(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		sha384(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha384 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.sha384(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		sha512(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha512 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.sha512(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		md5(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.md5 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.md5(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		ripemd160(mixed) {
+			return new Promise(async (resolve, reject) => {
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.ripemd160 is required and does not have a default value.");
+				}
+				resolve(
+					this.#parent.stringToHex(
+						this.#parent.bytesToString(
+							await this.#parent.openpgp.crypto.hash.ripemd(
+								this.#parent.mixedToUint8Array(mixed, false)
+							).catch((err) => {
+								reject(err);
+							})
+						)
+					)
+				);
+			});
+		}
+		sha256Compound(mixed, count) {
+			return new Promise(async (resolve, reject) => {
+				if(count == null) {
+				  count = 16;
+				}
+				if(isNaN(parseInt(count))) {
+				  count = 16;
+				} else {
+				  count = parseInt(count);
+				}
+				if(mixed == null) {
+				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha256Compound is required and does not have a default value.");
+				}
+				let hash = mixed;
+				for(let i = 0; i < count; i++) {
+				  hash = await this.sha256(hash);
+				}
+				resolve(hash);
+			});
+		}
+		sha256CompoundFromCredentials(username, password, count) {
+			return new Promise(async (resolve, reject) => {
+				if(count == null) {
+				  count = 16;
+				}
+				if(isNaN(parseInt(count))) {
+				  count = 16;
+				} else {
+				  count = parseInt(count);
+				}
+				resolve(await this.sha256Compound(await this.#parent.genSeedFromCredentials({
+					username: username,
+					password: password
+				}), count));
+			});
+		}
   	}
   	this.#tEnvoyHash = new tEnvoyHash(this);
   	
@@ -46087,7 +46249,7 @@ class tEnvoy {
   	this.#tEnvoyKeyFactory = new tEnvoyKeyFactory(this);
   }
   get version() {
-    return "v5.1.1";
+    return "v6.0.0-alpha";
   }
   get openpgp() {
 	  return this.#openpgp;
@@ -46183,274 +46345,32 @@ class tEnvoy {
 	  resolve((random[0] / 255) * (args.max - args.min) + args.min);
     });
   }
-  sha256(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha256 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.sha256(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  sha256(mixed) {
+    return this.hash.sha256(mixed);
   }
-  sha1(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha1 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.sha1(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  sha1(mixed) {
+    return this.hash.sha1(mixed);
   }
-  sha224(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha224 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.sha224(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  sha224(mixed) {
+    return this.hash.sha224(mixed);
   }
-  sha384(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha384 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.sha384(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  sha384(mixed) {
+    return this.hash.sha384(mixed);
   }
-  sha512(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha512 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.sha512(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  sha512(mixed) {
+    return this.hash.sha512(mixed);
   }
-  md5(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method md5 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.md5(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  md5(mixed) {
+    return this.hash.md5(mixed);
   }
-  ripemd160(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method ripemd160 is required and does not have a default value.";
-    }
-    return new Promise(async (resolve, reject) => {
-	    resolve(
-			this.stringToHex({
-				string: this.bytesToString({
-					bytes: await this.#openpgp.crypto.hash.ripemd(this.utf8encode({
-						string: args.string
-					})).catch((err) => {
-						reject(err);
-					})
-				})
-			})
-	    );
-    });
-    return null;
+  ripemd160(mixed) {
+    return this.hash.ripemd160(mixed);
   }
-  hash(args) {
-	  if(args == null) {
-		  args = {};
-	  }
-	  if(args.algorithm == null) {
-		  args.algorithm = "sha256";
-	  }
-	  if(args.string == null) {
-		  throw "tEnvoy Fatal Error: property string of object args of method hash is required and does not have a default value.";
-	  }
-	  let algorithms = {
-		  sha256: this.sha256,
-		  sha1: this.sha1,
-		  sha224: this.sha224,
-		  sha384: this.sha384,
-		  sha512: this.sha512,
-		  md5: this.md5,
-		  ripemd160: this.ripemd160
-	  };
-	  if(algorithms[args.algorithm] == null) {
-		  throw "tEnvoy Fatal Error: property algorithm of object args of method hash is invalid.";
-	  }
-	  return new Promise(async (resolve, reject) => {
-		  resolve(await algorithms[args.algorithm].bind(this, args.string)());
-	  });
+  sha256Compound(mixed, count) {
+    return this.hash.sha256Compound(mixed, count);
   }
-  sha256Compound(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string") {
-      args = {
-        string: args
-      };
-    }
-    if(args.count == null) {
-      args.count = 16;
-    }
-    if(isNaN(parseInt(args.count))) {
-      args.count = 16;
-    } else {
-      args.count = parseInt(args.count);
-    }
-    if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method sha256Compound is required and does not have a default value.";
-    }
-    let hash = args.string;
-    for(let i = 0; i < args.count; i++) {
-      hash = this.sha256({
-        string: hash
-      });
-    }
-    return hash;
-  }
-  sha256CompoundFromCredentials(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(args.username == null) {
-      args.username = "";
-    }
-    if(args.password == null) {
-      args.password = "";
-    }
-    if(args.count == null) {
-      args.count = 16;
-    }
-    if(isNaN(parseInt(args.count))) {
-      args.count = 16;
-    } else {
-      args.count = parseInt(args.count);
-    }
-    return this.sha256Compound({
-      string: this.genSeedFromCredentials({
-        username: args.username,
-        password: args.password
-      }),
-      count: args.count
-    });
+  sha256CompoundFromCredentials(username, password, count) {
+    return this.hash.sha256CompoundFromCredentials(username, password, count);
   }
   genPGPKeys(args) {
 	return new Promise(async (resolve, reject) => {
