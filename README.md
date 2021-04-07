@@ -1,3 +1,6 @@
+# Notice
+This repository is currently being used as a staging repo for `v6.0.0-alpha`, for the stable release, please download [v5.1.1](https://github.com/TogaTech/tEnvoy/releases/tag/v5.1.1).
+
 # tEnvoy
 
 More details coming soon...
