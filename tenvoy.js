@@ -45652,148 +45652,250 @@ b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return 
 if(window.TogaTech == null) {
   window.TogaTech = {};
 }
-class tEnvoy {
-  #openpgp;
-  #nacl;
-  #sjcl;
-  #tEnvoyUtil;
-  #tEnvoyHash;
-  #tEnvoyRandom;
-  #tEnvoyKeyFactory;
-  constructor(openpgp = window.openpgp, nacl = window.nacl, sjcl = window.sjcl) {
-	this.#openpgp = openpgp;
-	this.#nacl = nacl;
-	this.#sjcl = sjcl;
-    this.dictionary = "abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid acoustic acquire across act action actor actress actual adapt add addict address adjust admit adult advance advice aerobic affair afford afraid again age agent agree ahead aim air airport aisle alarm album alcohol alert alien all alley allow almost alone alpha already also alter always amateur amazing among amount amused analyst anchor ancient anger angle angry animal ankle announce annual another answer antenna antique anxiety any apart apology appear apple approve april arch arctic area arena argue arm armed armor army around arrange arrest arrive arrow art artefact artist artwork ask aspect assault asset assist assume asthma athlete atom attack attend attitude attract auction audit august aunt author auto autumn average avocado avoid awake aware away awesome awful awkward axis baby bachelor bacon badge bag balance balcony ball bamboo banana banner bar barely bargain barrel base basic basket battle beach bean beauty because become beef before begin behave behind believe below belt bench benefit best betray better between beyond bicycle bid bike bind biology bird birth bitter black blade blame blanket blast bleak bless blind blood blossom blouse blue blur blush board boat body boil bomb bone bonus book boost border boring borrow boss bottom bounce box boy bracket brain brand brass brave bread breeze brick bridge brief bright bring brisk broccoli broken bronze broom brother brown brush bubble buddy budget buffalo build bulb bulk bullet bundle bunker burden burger burst bus business busy butter buyer buzz cabbage cabin cable cactus cage cake call calm camera camp can canal cancel candy cannon canoe canvas canyon capable capital captain car carbon card cargo carpet carry cart case cash casino castle casual cat catalog catch category cattle caught cause caution cave ceiling celery cement census century cereal certain chair chalk champion change chaos chapter charge chase chat cheap check cheese chef cherry chest chicken chief child chimney choice choose chronic chuckle chunk churn cigar cinnamon circle citizen city civil claim clap clarify claw clay clean clerk clever click client cliff climb clinic clip clock clog close cloth cloud clown club clump cluster clutch coach coast coconut code coffee coil coin collect color column combine come comfort comic common company concert conduct confirm congress connect consider control convince cook cool copper copy coral core corn correct cost cotton couch country couple course cousin cover coyote crack cradle craft cram crane crash crater crawl crazy cream credit creek crew cricket crime crisp critic crop cross crouch crowd crucial cruel cruise crumble crunch crush cry crystal cube culture cup cupboard curious current curtain curve cushion custom cute cycle dad damage damp dance danger daring dash daughter dawn day deal debate debris decade december decide decline decorate decrease deer defense define defy degree delay deliver demand demise denial dentist deny depart depend deposit depth deputy derive describe desert design desk despair destroy detail detect develop device devote diagram dial diamond diary dice diesel diet differ digital dignity dilemma dinner dinosaur direct dirt disagree discover disease dish dismiss disorder display distance divert divide divorce dizzy doctor document dog doll dolphin domain donate donkey donor door dose double dove draft dragon drama drastic draw dream dress drift drill drink drip drive drop drum dry duck dumb dune during dust dutch duty dwarf dynamic eager eagle early earn earth easily east easy echo ecology economy edge edit educate effort egg eight either elbow elder electric elegant element elephant elevator elite else embark embody embrace emerge emotion employ empower empty enable enact end endless endorse enemy energy enforce engage engine enhance enjoy enlist enough enrich enroll ensure enter entire entry envelope episode equal equip era erase erode erosion error erupt escape essay essence estate eternal ethics evidence evil evoke evolve exact example excess exchange excite exclude excuse execute exercise exhaust exhibit exile exist exit exotic expand expect expire explain expose express extend extra eye eyebrow fabric face faculty fade faint faith fall false fame family famous fan fancy fantasy farm fashion fat fatal father fatigue fault favorite feature february federal fee feed feel female fence festival fetch fever few fiber fiction field figure file film filter final find fine finger finish fire firm first fiscal fish fit fitness fix flag flame flash flat flavor flee flight flip float flock floor flower fluid flush fly foam focus fog foil fold follow food foot force forest forget fork fortune forum forward fossil foster found fox fragile frame frequent fresh friend fringe frog front frost frown frozen fruit fuel fun funny furnace fury future gadget gain galaxy gallery game gap garage garbage garden garlic garment gas gasp gate gather gauge gaze general genius genre gentle genuine gesture ghost giant gift giggle ginger giraffe girl give glad glance glare glass glide glimpse globe gloom glory glove glow glue goat goddess gold good goose gorilla gospel gossip govern gown grab grace grain grant grape grass gravity great green grid grief grit grocery group grow grunt guard guess guide guilt guitar gun gym habit hair half hammer hamster hand happy harbor hard harsh harvest hat have hawk hazard head health heart heavy hedgehog height hello helmet help hen hero hidden high hill hint hip hire history hobby hockey hold hole holiday hollow home honey hood hope horn horror horse hospital host hotel hour hover hub huge human humble humor hundred hungry hunt hurdle hurry hurt husband hybrid ice icon idea identify idle ignore ill illegal illness image imitate immense immune impact impose improve impulse inch include income increase index indicate indoor industry infant inflict inform inhale inherit initial inject injury inmate inner innocent input inquiry insane insect inside inspire install intact interest into invest invite involve iron island isolate issue item ivory jacket jaguar jar jazz jealous jeans jelly jewel job join joke journey joy judge juice jump jungle junior junk just kangaroo keen keep ketchup key kick kid kidney kind kingdom kiss kit kitchen kite kitten kiwi knee knife knock know lab label labor ladder lady lake lamp language laptop large later latin laugh laundry lava law lawn lawsuit layer lazy leader leaf learn leave lecture left leg legal legend leisure lemon lend length lens leopard lesson letter level liar liberty library license life lift light like limb limit link lion liquid list little live lizard load loan lobster local lock logic lonely long loop lottery loud lounge love loyal lucky luggage lumber lunar lunch luxury lyrics machine mad magic magnet maid mail main major make mammal man manage mandate mango mansion manual maple marble march margin marine market marriage mask mass master match material math matrix matter maximum maze meadow mean measure meat mechanic medal media melody melt member memory mention menu mercy merge merit merry mesh message metal method middle midnight milk million mimic mind minimum minor minute miracle mirror misery miss mistake mix mixed mixture mobile model modify mom moment monitor monkey monster month moon moral more morning mosquito mother motion motor mountain mouse move movie much muffin mule multiply muscle museum mushroom music must mutual myself mystery myth naive name napkin narrow nasty nation nature near neck need negative neglect neither nephew nerve nest net network neutral never news next nice night noble noise nominee noodle normal north nose notable note nothing notice novel now nuclear number nurse nut oak obey object oblige obscure observe obtain obvious occur ocean october odor off offer office often oil okay old olive olympic omit once one onion online only open opera opinion oppose option orange orbit orchard order ordinary organ orient original orphan ostrich other outdoor outer output outside oval oven over own owner oxygen oyster ozone pact paddle page pair palace palm panda panel panic panther paper parade parent park parrot party pass patch path patient patrol pattern pause pave payment peace peanut pear peasant pelican pen penalty pencil people pepper perfect permit person pet phone photo phrase physical piano picnic picture piece pig pigeon pill pilot pink pioneer pipe pistol pitch pizza place planet plastic plate play please pledge pluck plug plunge poem poet point polar pole police pond pony pool popular portion position possible post potato pottery poverty powder power practice praise predict prefer prepare present pretty prevent price pride primary print priority prison private prize problem process produce profit program project promote proof property prosper protect proud provide public pudding pull pulp pulse pumpkin punch pupil puppy purchase purity purpose purse push put puzzle pyramid quality quantum quarter question quick quit quiz quote rabbit raccoon race rack radar radio rail rain raise rally ramp ranch random range rapid rare rate rather raven raw razor ready real reason rebel rebuild recall receive recipe record recycle reduce reflect reform refuse region regret regular reject relax release relief rely remain remember remind remove render renew rent reopen repair repeat replace report require rescue resemble resist resource response result retire retreat return reunion reveal review reward rhythm rib ribbon rice rich ride ridge rifle right rigid ring riot ripple risk ritual rival river road roast robot robust rocket romance roof rookie room rose rotate rough round route royal rubber rude rug rule run runway rural sad saddle sadness safe sail salad salmon salon salt salute same sample sand satisfy satoshi sauce sausage save say scale scan scare scatter scene scheme school science scissors scorpion scout scrap screen script scrub sea search season seat second secret section security seed seek segment select sell seminar senior sense sentence series service session settle setup seven shadow shaft shallow share shed shell sheriff shield shift shine ship shiver shock shoe shoot shop short shoulder shove shrimp shrug shuffle shy sibling sick side siege sight sign silent silk silly silver similar simple since sing siren sister situate six size skate sketch ski skill skin skirt skull slab slam sleep slender slice slide slight slim slogan slot slow slush small smart smile smoke smooth snack snake snap sniff snow soap soccer social sock soda soft solar soldier solid solution solve someone song soon sorry sort soul sound soup source south space spare spatial spawn speak special speed spell spend sphere spice spider spike spin spirit split spoil sponsor spoon sport spot spray spread spring spy square squeeze squirrel stable stadium staff stage stairs stamp stand start state stay steak steel stem step stereo stick still sting stock stomach stone stool story stove strategy street strike strong struggle student stuff stumble style subject submit subway success such sudden suffer sugar suggest suit summer sun sunny sunset super supply supreme sure surface surge surprise surround survey suspect sustain swallow swamp swap swarm swear sweet swift swim swing switch sword symbol symptom syrup system table tackle tag tail talent talk tank tape target task taste tattoo taxi teach team tell ten tenant tennis tent term test text thank that theme then theory there they thing this thought three thrive throw thumb thunder ticket tide tiger tilt timber time tiny tip tired tissue title toast tobacco today toddler toe together toilet token tomato tomorrow tone tongue tonight tool tooth top topic topple torch tornado tortoise toss total tourist toward tower town toy track trade traffic tragic train transfer trap trash travel tray treat tree trend trial tribe trick trigger trim trip trophy trouble truck true truly trumpet trust truth try tube tuition tumble tuna tunnel turkey turn turtle twelve twenty twice twin twist two type typical ugly umbrella unable unaware uncle uncover under undo unfair unfold unhappy uniform unique unit universe unknown unlock until unusual unveil update upgrade uphold upon upper upset urban urge usage use used useful useless usual utility vacant vacuum vague valid valley valve van vanish vapor various vast vault vehicle velvet vendor venture venue verb verify version very vessel veteran viable vibrant vicious victory video view village vintage violin virtual virus visa visit visual vital vivid vocal voice void volcano volume vote voyage wage wagon wait walk wall walnut want warfare warm warrior wash wasp waste water wave way wealth weapon wear weasel weather web wedding weekend weird welcome west wet whale what wheat wheel when where whip whisper wide width wife wild will win window wine wing wink winner winter wire wisdom wise wish witness wolf woman wonder wood wool word work world worry worth wrap wreck wrestle wrist write wrong yard year yellow you young youth zebra zero zone zoo";
+
+function tEnvoy(openpgpRef = window.openpgp, naclRef = window.nacl, sjclRef = window.sjcl) {
+	let _openpgp = openpgpRef;
+	let _nacl = naclRef;
+	let _sjcl = sjclRef;
+	
+	
+	this.dictionary = "abandon ability able about above absent absorb abstract absurd abuse access accident account accuse achieve acid acoustic acquire across act action actor actress actual adapt add addict address adjust admit adult advance advice aerobic affair afford afraid again age agent agree ahead aim air airport aisle alarm album alcohol alert alien all alley allow almost alone alpha already also alter always amateur amazing among amount amused analyst anchor ancient anger angle angry animal ankle announce annual another answer antenna antique anxiety any apart apology appear apple approve april arch arctic area arena argue arm armed armor army around arrange arrest arrive arrow art artefact artist artwork ask aspect assault asset assist assume asthma athlete atom attack attend attitude attract auction audit august aunt author auto autumn average avocado avoid awake aware away awesome awful awkward axis baby bachelor bacon badge bag balance balcony ball bamboo banana banner bar barely bargain barrel base basic basket battle beach bean beauty because become beef before begin behave behind believe below belt bench benefit best betray better between beyond bicycle bid bike bind biology bird birth bitter black blade blame blanket blast bleak bless blind blood blossom blouse blue blur blush board boat body boil bomb bone bonus book boost border boring borrow boss bottom bounce box boy bracket brain brand brass brave bread breeze brick bridge brief bright bring brisk broccoli broken bronze broom brother brown brush bubble buddy budget buffalo build bulb bulk bullet bundle bunker burden burger burst bus business busy butter buyer buzz cabbage cabin cable cactus cage cake call calm camera camp can canal cancel candy cannon canoe canvas canyon capable capital captain car carbon card cargo carpet carry cart case cash casino castle casual cat catalog catch category cattle caught cause caution cave ceiling celery cement census century cereal certain chair chalk champion change chaos chapter charge chase chat cheap check cheese chef cherry chest chicken chief child chimney choice choose chronic chuckle chunk churn cigar cinnamon circle citizen city civil claim clap clarify claw clay clean clerk clever click client cliff climb clinic clip clock clog close cloth cloud clown club clump cluster clutch coach coast coconut code coffee coil coin collect color column combine come comfort comic common company concert conduct confirm congress connect consider control convince cook cool copper copy coral core corn correct cost cotton couch country couple course cousin cover coyote crack cradle craft cram crane crash crater crawl crazy cream credit creek crew cricket crime crisp critic crop cross crouch crowd crucial cruel cruise crumble crunch crush cry crystal cube culture cup cupboard curious current curtain curve cushion custom cute cycle dad damage damp dance danger daring dash daughter dawn day deal debate debris decade december decide decline decorate decrease deer defense define defy degree delay deliver demand demise denial dentist deny depart depend deposit depth deputy derive describe desert design desk despair destroy detail detect develop device devote diagram dial diamond diary dice diesel diet differ digital dignity dilemma dinner dinosaur direct dirt disagree discover disease dish dismiss disorder display distance divert divide divorce dizzy doctor document dog doll dolphin domain donate donkey donor door dose double dove draft dragon drama drastic draw dream dress drift drill drink drip drive drop drum dry duck dumb dune during dust dutch duty dwarf dynamic eager eagle early earn earth easily east easy echo ecology economy edge edit educate effort egg eight either elbow elder electric elegant element elephant elevator elite else embark embody embrace emerge emotion employ empower empty enable enact end endless endorse enemy energy enforce engage engine enhance enjoy enlist enough enrich enroll ensure enter entire entry envelope episode equal equip era erase erode erosion error erupt escape essay essence estate eternal ethics evidence evil evoke evolve exact example excess exchange excite exclude excuse execute exercise exhaust exhibit exile exist exit exotic expand expect expire explain expose express extend extra eye eyebrow fabric face faculty fade faint faith fall false fame family famous fan fancy fantasy farm fashion fat fatal father fatigue fault favorite feature february federal fee feed feel female fence festival fetch fever few fiber fiction field figure file film filter final find fine finger finish fire firm first fiscal fish fit fitness fix flag flame flash flat flavor flee flight flip float flock floor flower fluid flush fly foam focus fog foil fold follow food foot force forest forget fork fortune forum forward fossil foster found fox fragile frame frequent fresh friend fringe frog front frost frown frozen fruit fuel fun funny furnace fury future gadget gain galaxy gallery game gap garage garbage garden garlic garment gas gasp gate gather gauge gaze general genius genre gentle genuine gesture ghost giant gift giggle ginger giraffe girl give glad glance glare glass glide glimpse globe gloom glory glove glow glue goat goddess gold good goose gorilla gospel gossip govern gown grab grace grain grant grape grass gravity great green grid grief grit grocery group grow grunt guard guess guide guilt guitar gun gym habit hair half hammer hamster hand happy harbor hard harsh harvest hat have hawk hazard head health heart heavy hedgehog height hello helmet help hen hero hidden high hill hint hip hire history hobby hockey hold hole holiday hollow home honey hood hope horn horror horse hospital host hotel hour hover hub huge human humble humor hundred hungry hunt hurdle hurry hurt husband hybrid ice icon idea identify idle ignore ill illegal illness image imitate immense immune impact impose improve impulse inch include income increase index indicate indoor industry infant inflict inform inhale inherit initial inject injury inmate inner innocent input inquiry insane insect inside inspire install intact interest into invest invite involve iron island isolate issue item ivory jacket jaguar jar jazz jealous jeans jelly jewel job join joke journey joy judge juice jump jungle junior junk just kangaroo keen keep ketchup key kick kid kidney kind kingdom kiss kit kitchen kite kitten kiwi knee knife knock know lab label labor ladder lady lake lamp language laptop large later latin laugh laundry lava law lawn lawsuit layer lazy leader leaf learn leave lecture left leg legal legend leisure lemon lend length lens leopard lesson letter level liar liberty library license life lift light like limb limit link lion liquid list little live lizard load loan lobster local lock logic lonely long loop lottery loud lounge love loyal lucky luggage lumber lunar lunch luxury lyrics machine mad magic magnet maid mail main major make mammal man manage mandate mango mansion manual maple marble march margin marine market marriage mask mass master match material math matrix matter maximum maze meadow mean measure meat mechanic medal media melody melt member memory mention menu mercy merge merit merry mesh message metal method middle midnight milk million mimic mind minimum minor minute miracle mirror misery miss mistake mix mixed mixture mobile model modify mom moment monitor monkey monster month moon moral more morning mosquito mother motion motor mountain mouse move movie much muffin mule multiply muscle museum mushroom music must mutual myself mystery myth naive name napkin narrow nasty nation nature near neck need negative neglect neither nephew nerve nest net network neutral never news next nice night noble noise nominee noodle normal north nose notable note nothing notice novel now nuclear number nurse nut oak obey object oblige obscure observe obtain obvious occur ocean october odor off offer office often oil okay old olive olympic omit once one onion online only open opera opinion oppose option orange orbit orchard order ordinary organ orient original orphan ostrich other outdoor outer output outside oval oven over own owner oxygen oyster ozone pact paddle page pair palace palm panda panel panic panther paper parade parent park parrot party pass patch path patient patrol pattern pause pave payment peace peanut pear peasant pelican pen penalty pencil people pepper perfect permit person pet phone photo phrase physical piano picnic picture piece pig pigeon pill pilot pink pioneer pipe pistol pitch pizza place planet plastic plate play please pledge pluck plug plunge poem poet point polar pole police pond pony pool popular portion position possible post potato pottery poverty powder power practice praise predict prefer prepare present pretty prevent price pride primary print priority prison private prize problem process produce profit program project promote proof property prosper protect proud provide public pudding pull pulp pulse pumpkin punch pupil puppy purchase purity purpose purse push put puzzle pyramid quality quantum quarter question quick quit quiz quote rabbit raccoon race rack radar radio rail rain raise rally ramp ranch random range rapid rare rate rather raven raw razor ready real reason rebel rebuild recall receive recipe record recycle reduce reflect reform refuse region regret regular reject relax release relief rely remain remember remind remove render renew rent reopen repair repeat replace report require rescue resemble resist resource response result retire retreat return reunion reveal review reward rhythm rib ribbon rice rich ride ridge rifle right rigid ring riot ripple risk ritual rival river road roast robot robust rocket romance roof rookie room rose rotate rough round route royal rubber rude rug rule run runway rural sad saddle sadness safe sail salad salmon salon salt salute same sample sand satisfy satoshi sauce sausage save say scale scan scare scatter scene scheme school science scissors scorpion scout scrap screen script scrub sea search season seat second secret section security seed seek segment select sell seminar senior sense sentence series service session settle setup seven shadow shaft shallow share shed shell sheriff shield shift shine ship shiver shock shoe shoot shop short shoulder shove shrimp shrug shuffle shy sibling sick side siege sight sign silent silk silly silver similar simple since sing siren sister situate six size skate sketch ski skill skin skirt skull slab slam sleep slender slice slide slight slim slogan slot slow slush small smart smile smoke smooth snack snake snap sniff snow soap soccer social sock soda soft solar soldier solid solution solve someone song soon sorry sort soul sound soup source south space spare spatial spawn speak special speed spell spend sphere spice spider spike spin spirit split spoil sponsor spoon sport spot spray spread spring spy square squeeze squirrel stable stadium staff stage stairs stamp stand start state stay steak steel stem step stereo stick still sting stock stomach stone stool story stove strategy street strike strong struggle student stuff stumble style subject submit subway success such sudden suffer sugar suggest suit summer sun sunny sunset super supply supreme sure surface surge surprise surround survey suspect sustain swallow swamp swap swarm swear sweet swift swim swing switch sword symbol symptom syrup system table tackle tag tail talent talk tank tape target task taste tattoo taxi teach team tell ten tenant tennis tent term test text thank that theme then theory there they thing this thought three thrive throw thumb thunder ticket tide tiger tilt timber time tiny tip tired tissue title toast tobacco today toddler toe together toilet token tomato tomorrow tone tongue tonight tool tooth top topic topple torch tornado tortoise toss total tourist toward tower town toy track trade traffic tragic train transfer trap trash travel tray treat tree trend trial tribe trick trigger trim trip trophy trouble truck true truly trumpet trust truth try tube tuition tumble tuna tunnel turkey turn turtle twelve twenty twice twin twist two type typical ugly umbrella unable unaware uncle uncover under undo unfair unfold unhappy uniform unique unit universe unknown unlock until unusual unveil update upgrade uphold upon upper upset urban urge usage use used useful useless usual utility vacant vacuum vague valid valley valve van vanish vapor various vast vault vehicle velvet vendor venture venue verb verify version very vessel veteran viable vibrant vicious victory video view village vintage violin virtual virus visa visit visual vital vivid vocal voice void volcano volume vote voyage wage wagon wait walk wall walnut want warfare warm warrior wash wasp waste water wave way wealth weapon wear weasel weather web wedding weekend weird welcome west wet whale what wheat wheel when where whip whisper wide width wife wild will win window wine wing wink winner winter wire wisdom wise wish witness wolf woman wonder wood wool word work world worry worth wrap wreck wrestle wrist write wrong yard year yellow you young youth zebra zero zone zoo";
 	this.wordsList = this.dictionary.split(" ");
-	class tEnvoyUtil {
-		#parent;
-  		constructor(parent) {
-  			this.#parent = parent;
-  		}
-  		mixedToUint8Array(mixed, includeType = false, length = null) {
-			function arrayOnlyContainsNumbers(array) {
+	
+	
+	Object.defineProperty(this, "version", {
+		get: () => {
+			return "v6.0.0";
+		}
+	});
+	
+	this.core = {};
+	
+	Object.defineProperty(this.core, "openpgp", {
+		get: () => {
+			return _openpgp;
+		}
+	});
+	Object.defineProperty(this.core, "nacl", {
+		get: () => {
+			return _nacl;
+		}
+	});
+	Object.defineProperty(this.core, "sjcl", {
+		get: () => {
+			return _sjcl;
+		}
+	});
+	
+	
+	this.util = {};
+	
+	this.util.utf8encode = (string) => {
+		if(string == null) {
+			throw "tEnvoy Fatal Error: argument string of method util.utf8encode is required and does not have a default value.";
+		}
+		return _openpgp.util.encode_utf8(string);
+	}
+	
+	this.util.utf8decode = (bytes) => {
+		if(bytes == null) {
+			throw "tEnvoy Fatal Error: argument bytes of method util.utf8decode is required and does not have a default value.";
+		}
+		if(!(bytes instanceof Uint8Array)) {
+			bytes = this.util.mixedToUint8Array(bytes, false);
+		}
+		return _openpgp.util.decode_utf8(bytes);
+	}
+	
+	this.util.stringToBytes = (string) => {
+		if(string == null) {
+			throw "tEnvoy Fatal Error: argument string of method util.stringToBytes is required and does not have a default value.";
+		}
+		return _openpgp.util.str_to_Uint8Array(string);
+	}
+	
+	this.util.bytesToString = (bytes) => {
+		if(bytes == null) {
+			throw "tEnvoy Fatal Error: argument bytes of method util.bytesToString is required and does not have a default value.";
+		}
+		if(!(bytes instanceof Uint8Array)) {
+			bytes = this.util.mixedToUint8Array(bytes, false);
+		}
+		return _openpgp.util.Uint8Array_to_str(bytes);
+	}
+	
+	this.util.stringToHex = (string) => {
+		if(string == null) {
+			throw "tEnvoy Fatal Error: argument string of method util.stringToHex is required and does not have a default value.";
+		}
+		let hex = "";
+		for(let i = 0; i < string.length; i++) {
+			let c = string.charCodeAt(i).toString(16);
+			while(c.length < 2) {
+				c = "0" + c;
+			}
+			hex += c;
+		}
+		return hex;
+	}
+	
+	this.util.hexToString = (hex) => {
+		if(hex == null) {
+			throw "tEnvoy Fatal Error: argument hex of method util.hexToString is required and does not have a default value.";
+		}
+		let bytes = new Uint8Array(hex.length / 2);
+		for(let i = 0; i < hex.length; i += 2) {
+			bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+		}
+		return bytes;
+	}
+	
+	this.util.bytesToHex = (bytes) => {
+		if(bytes == null) {
+			throw "tEnvoy Fatal Error: argument bytes of method util.bytesToHex is required and does not have a default value.";
+		}
+		if(!(bytes instanceof Uint8Array)) {
+			bytes = this.util.mixedToUint8Array(bytes, false);
+		}
+		let hex = "";
+		for(let i = 0; i < bytes.length; i++) {
+			if(bytes[i].toString(16).length == 0) {
+				hex += "00";
+			} else if(bytes[i].toString(16).length == 1) {
+				hex += "0" + bytes[i].toString(16);
+			} else {
+				hex += bytes[i].toString(16);
+			}
+		}
+		return hex;
+	}
+	
+	this.util.hexToBytes = (hex) => {
+		if(hex == null) {
+			throw "tEnvoy Fatal Error: argument hex of method util.hexToBytes is required and does not have a default value.";
+		}
+		let bytes = new Uint8Array(hex.length / 2);
+		for(let i = 0; i < hex.length; i += 2) {
+			bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+		}
+		return bytes;
+	}
+	
+	this.util.mixedToUint8Array = (mixed, includeType = false, length = null) => {
+		if(mixed == null) {
+			return mixed;
+		}
+		
+		let arrayOnlyContainsNumbers = (array) => {
+			for(let i = 0; i < array.length; i++) {
+				if(typeof array[i] != "number" || !Number.isInteger(array[i]) || array[i] < 0 || array[i] > 255) {
+					return false;
+				}
+			}
+			return true;
+		}
+		let pad = (array, length) => {
+			if(array.length == length || length == null) {
+				return array;
+			} else if(array.length > length) {
+				let returnArray = new Uint8Array(length);
+				for(let i = 0; i < returnArray.length; i++) {
+					returnArray[i] = array[i];
+				}
+				return returnArray;
+			} else {
+				let returnArray = new Uint8Array(length);
+				for(let i = 0; i < returnArray.length; i++) {
+					returnArray[i] = 255;
+				}
 				for(let i = 0; i < array.length; i++) {
-					if(typeof array[i] != "number") {
-						return false;
-					}
+					returnArray[returnArray.length - array.length + i] = array[i];
 				}
-				return true;
+				return returnArray;
 			}
-			function pad(array, length) {
-				if(array.length == length || length == null) {
-					return array;
-				} else if(array.length > length) {
-					let returnArray = new Uint8Array(length);
-					for(let i = 0; i < returnArray.length; i++) {
-						returnArray[i] = array[i];
-					}
-					return returnArray;
-				} else {
-					let returnArray = new Uint8Array(length);
-					for(let i = 0; i < returnArray.length; i++) {
-						returnArray[i] = 255;
-					}
-					for(let i = 0; i < array.length; i++) {
-						returnArray[returnArray.length - array.length + i] = array[i];
-					}
-					return returnArray;
+		}
+		if(mixed == null) {
+			throw "tEnvoy Fatal Error: argument mixed of method util.mixedToUint8Array is required and does not have a default value.";
+		}
+		if(mixed instanceof Uint8Array) {
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(mixed.length + 1);
+				returnUint8Array[0] = 0;
+				for(let i = 0; i < mixed.length; i++) {
+					returnUint8Array[i + 1] = mixed[i];
 				}
+				return pad(returnUint8Array, length);
+			} else {
+				return mixed;
 			}
-			if(mixed == null) {
-				throw "tEnvoy Fatal Error: argument mixed of method util.mixedToUint8Array is required and does not have a default value.";
+		} else if(mixed instanceof Array && arrayOnlyContainsNumbers(mixed)) {
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(mixed.length + 1);
+				returnUint8Array[0] = 1;
+				for(let i = 0; i < mixed.length; i++) {
+					returnUint8Array[i + 1] = mixed[i];
+				}
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(mixed.length);
+				for(let i = 0; i < mixed.length; i++) {
+					returnUint8Array[i] = mixed[i];
+				}
+				return returnUint8Array;
 			}
-			if(mixed instanceof Uint8Array) {
-				if(includeType) {
-					let returnUint8Array = new Uint8Array(mixed.length + 1);
-					returnUint8Array[0] = 0;
-					for(let i = 0; i < mixed.length; i++) {
-						returnUint8Array[i + 1] = mixed[i];
+		} else if(typeof mixed == "number") {
+			if(Number.isInteger(mixed)) {
+				if(mixed > 0) {
+					let hex = mixed.toString(16);
+					if(hex.length % 2 != 0) {
+						hex = "0" + hex;
 					}
-					return pad(returnUint8Array, length);
-				} else {
-					return mixed;
-				}
-			} else if(mixed instanceof Array && arrayOnlyContainsNumbers(mixed)) {
-				if(includeType) {
-					let returnUint8Array = new Uint8Array(mixed.length + 1);
-					returnUint8Array[0] = 1;
-					for(let i = 0; i < mixed.length; i++) {
-						returnUint8Array[i + 1] = mixed[i];
+					if(hex.length == 0) {
+						hex = "00";
 					}
-					return pad(returnUint8Array, length);
-				} else {
-					let returnUint8Array = new Uint8Array(mixed.length);
-					for(let i = 0; i < mixed.length; i++) {
-						returnUint8Array[i] = mixed[i];
-					}
-					return returnUint8Array;
-				}
-			} else if(typeof mixed == "number") {
-				if(Number.isInteger(mixed)) {
-					if(mixed > 0) {
-						let hex = mixed.toString(16);
-						if(hex.length % 2 != 0) {
-							hex = "0" + hex;
+					let hexAsArray = this.util.hexToBytes(hex);
+					if(includeType) {
+						let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+						returnUint8Array[0] = 2;
+						for(let i = 0; i < hexAsArray.length; i++) {
+							returnUint8Array[i + 1] = hexAsArray[i];
 						}
-						if(hex.length == 0) {
-							hex = "00";
-						}
-						let hexAsArray = this.#parent.hexToBytes(hex);
-						if(includeType) {
-							let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
-							returnUint8Array[0] = 2;
-							for(let i = 0; i < hexAsArray.length; i++) {
-								returnUint8Array[i + 1] = hexAsArray[i];
-							}
-							return pad(returnUint8Array, length);
-						} else {
-							let returnUint8Array = new Uint8Array(hexAsArray.length);
-							for(let i = 0; i < hexAsArray.length; i++) {
-								returnUint8Array[i] = hexAsArray[i];
-							}
-							return returnUint8Array;
-						}
-					} else if(mixed < 0) {
-						mixed = -mixed;
-						let hex = mixed.toString(16);
-						if(hex.length % 2 != 0) {
-							hex = "0" + hex;
-						}
-						if(hex.length == 0) {
-							hex = "00";
-						}
-						let hexAsArray = this.#parent.hexToBytes(hex);
-						if(includeType) {
-							let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
-							returnUint8Array[0] = 3;
-							for(let i = 0; i < hexAsArray.length; i++) {
-								returnUint8Array[i + 1] = hexAsArray[i];
-							}
-							return pad(returnUint8Array, length);
-						} else {
-							let returnUint8Array = new Uint8Array(hexAsArray.length);
-							for(let i = 0; i < hexAsArray.length; i++) {
-								returnUint8Array[i] = hexAsArray[i];
-							}
-							return returnUint8Array;
-						}
+						return pad(returnUint8Array, length);
 					} else {
-						if(includeType) {
-							let returnUint8Array = new Uint8Array(2);
-							returnUint8Array[0] = 4;
-							returnUint8Array[1] = 0;
-							return pad(returnUint8Array, length);
-						} else {
-							let returnUint8Array = new Uint8Array(1);
-							returnUint8Array[0] = 0;
-							return returnUint8Array;
+						let returnUint8Array = new Uint8Array(hexAsArray.length);
+						for(let i = 0; i < hexAsArray.length; i++) {
+							returnUint8Array[i] = hexAsArray[i];
 						}
+						return returnUint8Array;
 					}
-				} else if(Number.isNaN(mixed)) {
+				} else if(mixed < 0) {
+					mixed = -mixed;
+					let hex = mixed.toString(16);
+					if(hex.length % 2 != 0) {
+						hex = "0" + hex;
+					}
+					if(hex.length == 0) {
+						hex = "00";
+					}
+					let hexAsArray = this.util.hexToBytes(hex);
+					if(includeType) {
+						let returnUint8Array = new Uint8Array(hexAsArray.length + 1);
+						returnUint8Array[0] = 3;
+						for(let i = 0; i < hexAsArray.length; i++) {
+							returnUint8Array[i + 1] = hexAsArray[i];
+						}
+						return pad(returnUint8Array, length);
+					} else {
+						let returnUint8Array = new Uint8Array(hexAsArray.length);
+						for(let i = 0; i < hexAsArray.length; i++) {
+							returnUint8Array[i] = hexAsArray[i];
+						}
+						return returnUint8Array;
+					}
+				} else {
 					if(includeType) {
 						let returnUint8Array = new Uint8Array(2);
-						returnUint8Array[0] = 7;
+						returnUint8Array[0] = 4;
 						returnUint8Array[1] = 0;
 						return pad(returnUint8Array, length);
 					} else {
@@ -45801,1099 +45903,785 @@ class tEnvoy {
 						returnUint8Array[0] = 0;
 						return returnUint8Array;
 					}
-				} else if(Number.isFinite(mixed)) {
-					if(includeType) {
-						let returnUint8Array = this.mixedToUint8Array((mixed + ""), true);
-						returnUint8Array[0] = 8;
-						return pad(returnUint8Array, length);
-					} else {
-						return this.mixedToUint8Array((mixed + ""), false);
-					}
-				} else {
-					if(includeType) {
-						let returnUint8Array = new Uint8Array(2);
-						returnUint8Array[0] = 9;
-						returnUint8Array[1] = 255;
-						return pad(returnUint8Array, length);
-					} else {
-						let returnUint8Array = new Uint8Array(1);
-						returnUint8Array[0] = 255;
-						return returnUint8Array;
-					}
 				}
-			} else if(mixed.constructor == Object || typeof mixed.toJSON == "function") {
-				let mixedAsUint8Array = this.#parent.utf8encode(JSON.stringify(mixed));
-				if(includeType) {
-					let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
-					returnUint8Array[0] = 5;
-					for(let i = 0; i < mixedAsUint8Array.length; i++) {
-						returnUint8Array[i + 1] = mixedAsUint8Array[i];
-					}
-					return pad(returnUint8Array, length);
-				} else {
-					return mixedAsUint8Array;
-				}
-			} else if(typeof mixed == "boolean") {
+			} else if(Number.isNaN(mixed)) {
 				if(includeType) {
 					let returnUint8Array = new Uint8Array(2);
-					returnUint8Array[0] = 6;
-					returnUint8Array[1] = mixed ? 1 : 0;
+					returnUint8Array[0] = 7;
+					returnUint8Array[1] = 0;
 					return pad(returnUint8Array, length);
 				} else {
 					let returnUint8Array = new Uint8Array(1);
-					returnUint8Array[0] = mixed ? 1 : 0;
+					returnUint8Array[0] = 0;
 					return returnUint8Array;
 				}
-			} else {
-				let mixedAsUint8Array = this.#parent.utf8encode(mixed.toString());
+			} else if(Number.isFinite(mixed)) {
 				if(includeType) {
-					let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
-					returnUint8Array[0] = 254;
-					for(let i = 0; i < mixedAsUint8Array.length; i++) {
-						returnUint8Array[i + 1] = mixedAsUint8Array[i];
-					}
+					let returnUint8Array = this.util.pack(mixed + "");
+					returnUint8Array[0] = 8;
 					return pad(returnUint8Array, length);
 				} else {
-					return mixedAsUint8Array;
-				}
-			}
-		}
-		uint8ArrayToMixed(uint8Array, includeType = false) {
-			if(includeType) {
-				let paddingOver = false;
-				let startIndex = 0;
-				for(let i = 0; i < uint8Array.length; i++) {
-					if(uint8Array[i] != 255 && !paddingOver) {
-						paddingOver = true;
-						startIndex = i;
-					}
-				}
-				let unpaddedUint8Array;
-				let fakeUint8Array = new Uint8Array(startIndex);
-				if(paddingOver) {
-					unpaddedUint8Array = new Uint8Array(uint8Array.length - startIndex);
-					for(let i = startIndex; i < uint8Array.length; i++) {
-						unpaddedUint8Array[i - startIndex] = uint8Array[i];
-					}
-					if(this.#parent.nacl != null) {
-						fakeUint8Array = this.#parent.nacl.randomBytes(startIndex);
-					}
-				} else {
-					unpaddedUint8Array = uint8Array;
-					if(this.#parent.nacl != null) {
-						fakeUint8Array = this.#parent.nacl.randomBytes(this.#parent.nacl.randomBytes(1)[0] % 16);
-					}
-				}
-				uint8Array = unpaddedUint8Array;
-				let returnUint8Array = new Uint8Array(uint8Array.length - 1);
-				for(let i = 0; i < returnUint8Array.length; i++) {
-					returnUint8Array[i] = uint8Array[i + 1];
-				}
-				if(uint8Array[0] == 1) {
-					let returnArray = [];
-					for(let i = 0; i < returnUint8Array.length; i++) {
-						returnArray[i] = returnUint8Array[i];
-					}
-					let fakeReturnArray = [];
-					for(let i = 0; i < fakeUint8Array.length; i++) {
-						fakeReturnArray[i] = fakeUint8Array[i];
-					}
-					return returnArray;
-				} else if(uint8Array[0] == 2) {
-					let hex = this.#parent.bytesToHex(returnUint8Array);
-					let fakeHex = this.#parent.bytesToHex(fakeUint8Array);
-					return parseInt(hex, 16);
-				} else if(uint8Array[0] == 3) {
-					let hex = this.#parent.bytesToHex(returnUint8Array);
-					let fakeHex = -1 * parseInt(this.#parent.bytesToHex(fakeUint8Array), 16);
-					return -1 * parseInt(hex, 16);
-				} else if(uint8Array[0] == 4) {
-					return uint8Array[1];
-				} else if(uint8Array[0] == 5) {
-					let fakeRes = this.#parent.utf8decode(fakeUint8Array);
-					let fakeJSON = JSON.parse("{}");
-					return JSON.parse(this.#parent.utf8decode(returnUint8Array));
-				} else if(uint8Array[0] == 6) {
-					return returnUint8Array[0] != 0;
-				} else if(uint8Array[0] == 7) {
-					return NaN;
-				} else if(uint8Array[0] == 8) {
-					let fakeDecoded = this.#parent.utf8decode(fakeUint8Array);
-					return parseFloat(this.#parent.utf8decode(returnUint8Array));
-				} else if(uint8Array[0] == 9) {
-					return Infinity;
-				} else if(uint8Array[0] == 254) {
-					let fakeDecoded = this.#parent.utf8decode(fakeUint8Array);
-					return this.#parent.utf8decode(returnUint8Array);
-				} else {
-					return returnUint8Array;
+					return this.util.mixedToUint8Array((mixed + ""), false);
 				}
 			} else {
-				let returnArray = [];
-				for(let i = 0; i < uint8Array.length; i++) {
-					returnArray[i] = uint8Array[i];
+				if(includeType) {
+					let returnUint8Array = new Uint8Array(2);
+					returnUint8Array[0] = 9;
+					returnUint8Array[1] = 255;
+					return pad(returnUint8Array, length);
+				} else {
+					let returnUint8Array = new Uint8Array(1);
+					returnUint8Array[0] = 255;
+					return returnUint8Array;
 				}
-				return returnArray;
+			}
+		} else if(mixed.constructor == Object || mixed.constructor == Array || typeof mixed.toJSON == "function") {
+			let mixedAsUint8Array = this.util.utf8encode(JSON.stringify(mixed));
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
+				returnUint8Array[0] = 5;
+				for(let i = 0; i < mixedAsUint8Array.length; i++) {
+					returnUint8Array[i + 1] = mixedAsUint8Array[i];
+				}
+				return pad(returnUint8Array, length);
+			} else {
+				return mixedAsUint8Array;
+			}
+		} else if(typeof mixed == "boolean") {
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(2);
+				returnUint8Array[0] = 6;
+				returnUint8Array[1] = mixed ? 1 : 0;
+				return pad(returnUint8Array, length);
+			} else {
+				let returnUint8Array = new Uint8Array(1);
+				returnUint8Array[0] = mixed ? 1 : 0;
+				return returnUint8Array;
+			}
+		} else {
+			let mixedAsUint8Array = this.util.utf8encode(mixed.toString());
+			if(includeType) {
+				let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
+				returnUint8Array[0] = 254;
+				for(let i = 0; i < mixedAsUint8Array.length; i++) {
+					returnUint8Array[i + 1] = mixedAsUint8Array[i];
+				}
+				return pad(returnUint8Array, length);
+			} else {
+				return mixedAsUint8Array;
 			}
 		}
-		pack(mixed, length) {
-			return this.mixedToUint8Array(mixed, true, length);
+	}
+	
+	this.util.uint8ArrayToMixed = (uint8Array, includeType = false) => {
+		if(uint8Array == null) {
+			return null;
 		}
-		unpack(packed) {
-			return this.uint8ArrayToMixed(packed, true);
+		if(includeType) {
+			let paddingOver = false;
+			let startIndex = 0;
+			for(let i = 0; i < uint8Array.length; i++) {
+				if(uint8Array[i] != 255 && !paddingOver) {
+					paddingOver = true;
+					startIndex = i;
+				}
+			}
+			let unpaddedUint8Array;
+			let fakeUint8Array = new Uint8Array(startIndex);
+			if(paddingOver) {
+				unpaddedUint8Array = new Uint8Array(uint8Array.length - startIndex);
+				for(let i = startIndex; i < uint8Array.length; i++) {
+					unpaddedUint8Array[i - startIndex] = uint8Array[i];
+				}
+				if(_nacl != null) {
+					fakeUint8Array = _nacl.randomBytes(startIndex);
+				}
+			} else {
+				unpaddedUint8Array = uint8Array;
+				if(_nacl != null) {
+					fakeUint8Array = _nacl.randomBytes(_nacl.randomBytes(1)[0] % 16);
+				}
+			}
+			uint8Array = unpaddedUint8Array;
+			let returnUint8Array = new Uint8Array(uint8Array.length - 1);
+			for(let i = 0; i < returnUint8Array.length; i++) {
+				returnUint8Array[i] = uint8Array[i + 1];
+			}
+			if(uint8Array[0] == 1) {
+				let returnArray = [];
+				for(let i = 0; i < returnUint8Array.length; i++) {
+					returnArray[i] = returnUint8Array[i];
+				}
+				let fakeReturnArray = [];
+				for(let i = 0; i < fakeUint8Array.length; i++) {
+					fakeReturnArray[i] = fakeUint8Array[i];
+				}
+				return returnArray;
+			} else if(uint8Array[0] == 2) {
+				let hex = this.util.bytesToHex(returnUint8Array);
+				let fakeHex = this.util.bytesToHex(fakeUint8Array);
+				return parseInt(hex, 16);
+			} else if(uint8Array[0] == 3) {
+				let hex = this.util.bytesToHex(returnUint8Array);
+				let fakeHex = -1 * parseInt(this.util.bytesToHex(fakeUint8Array), 16);
+				return -1 * parseInt(hex, 16);
+			} else if(uint8Array[0] == 4) {
+				return uint8Array[1];
+			} else if(uint8Array[0] == 5) {
+				let fakeRes = this.util.utf8decode(fakeUint8Array);
+				let fakeJSON = JSON.parse("{}");
+				return JSON.parse(this.util.utf8decode(returnUint8Array));
+			} else if(uint8Array[0] == 6) {
+				return returnUint8Array[0] != 0;
+			} else if(uint8Array[0] == 7) {
+				return NaN;
+			} else if(uint8Array[0] == 8) {
+				let fakeDecoded = this.util.utf8decode(fakeUint8Array);
+				return parseFloat(this.util.utf8decode(returnUint8Array));
+			} else if(uint8Array[0] == 9) {
+				return Infinity;
+			} else if(uint8Array[0] == 254) {
+				let fakeDecoded = this.util.utf8decode(fakeUint8Array);
+				return this.util.utf8decode(returnUint8Array);
+			} else {
+				return returnUint8Array;
+			}
+		} else {
+			let returnArray = [];
+			for(let i = 0; i < uint8Array.length; i++) {
+				returnArray[i] = uint8Array[i];
+			}
+			return returnArray;
 		}
-  		objectEquals(object1, object2) {
-			function deepCompare () {
-			  var i, l, leftChain, rightChain;
-			
-			  function compare2Objects (x, y) {
+	}
+	
+	this.util.pack = (mixed, length) => {
+		return this.util.mixedToUint8Array(mixed, true, length);
+	}
+	
+	this.util.unpack = (packed) => {
+		return this.util.uint8ArrayToMixed(packed, true);
+	}
+	
+	this.util.objectEquals = (object1, object2) => {
+		let deepCompare = () => {
+			var i, l, leftChain, rightChain;
+			let compare2Objects = (x, y) => {
 				var p;
-			
 				// remember that NaN === NaN returns false
 				// and isNaN(undefined) returns true
-				if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
-					 return true;
+				if(isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+					return true;
 				}
-			
+				
 				// Compare primitives and functions.
 				// Check if both arguments link to the same object.
 				// Especially useful on the step where we compare prototypes
-				if (x === y) {
+				if(x === y) {
 					return true;
 				}
-			
+				
 				// Works in case when functions are created in constructor.
 				// Comparing dates is a common scenario. Another built-ins?
 				// We can even handle functions passed across iframes
-				if ((typeof x === 'function' && typeof y === 'function') ||
+				if((typeof x === 'function' && typeof y === 'function') ||
 				   (x instanceof Date && y instanceof Date) ||
 				   (x instanceof RegExp && y instanceof RegExp) ||
 				   (x instanceof String && y instanceof String) ||
 				   (x instanceof Number && y instanceof Number)) {
 					return x.toString() === y.toString();
 				}
-			
+				
 				// At last checking prototypes as good as we can
-				if (!(x instanceof Object && y instanceof Object)) {
+				if(!(x instanceof Object && y instanceof Object)) {
 					return false;
 				}
-			
-				if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+				
+				if(x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
 					return false;
 				}
-			
-				if (x.constructor !== y.constructor) {
+				
+				if(x.constructor !== y.constructor) {
 					return false;
 				}
-			
-				if (x.prototype !== y.prototype) {
+				
+				if(x.prototype !== y.prototype) {
 					return false;
 				}
-			
+				
 				// Check for infinitive linking loops
-				if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
-					 return false;
+				if(leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+					return false;
 				}
-			
+				
 				// Quick checking of one object being a subset of another.
 				// todo: cache the structure of arguments[0] for performance
-				for (p in y) {
-					if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+				for(p in y) {
+					if(y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
 						return false;
-					}
-					else if (typeof y[p] !== typeof x[p]) {
+					} else if(typeof y[p] !== typeof x[p]) {
 						return false;
 					}
 				}
-			
-				for (p in x) {
-					if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+				
+				for(p in x) {
+					if(y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+						return false;
+					} else if(typeof y[p] !== typeof x[p]) {
 						return false;
 					}
-					else if (typeof y[p] !== typeof x[p]) {
-						return false;
-					}
-			
-					switch (typeof (x[p])) {
+					
+					switch(typeof (x[p])) {
 						case 'object':
 						case 'function':
-			
 							leftChain.push(x);
 							rightChain.push(y);
-			
-							if (!compare2Objects (x[p], y[p])) {
+							if(!compare2Objects (x[p], y[p])) {
 								return false;
 							}
-			
 							leftChain.pop();
 							rightChain.pop();
 							break;
-			
 						default:
-							if (x[p] !== y[p]) {
+							if(x[p] !== y[p]) {
 								return false;
 							}
 							break;
 					}
 				}
-			
 				return true;
-			  }
-			
-			  if (arguments.length < 1) {
-				return true; //Die silently? Don't know how to handle such case, please help...
-				// throw "Need two or more arguments to compare";
-			  }
-			
-			  for (i = 1, l = arguments.length; i < l; i++) {
-			
-				  leftChain = []; //Todo: this can be cached
-				  rightChain = [];
-			
-				  if (!compare2Objects(arguments[0], arguments[i])) {
-					  return false;
-				  }
-			  }
-			
-			  return true;
 			}
-			return deepCompare(object1, object2);
-		  }
-  	}
-  	this.#tEnvoyUtil = new tEnvoyUtil(this);
-  	
-  	class tEnvoyHash {
-  		#parent;
-  		constructor(parent) {
-  			this.#parent = parent;
-  		}
-  		sha256(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha256 is required and does not have a default value.");
+			if(arguments.length < 1) {
+				throw "need two or more arguments to compare";
+			}
+			for(i = 1, l = arguments.length; i < l; i++) {
+				leftChain = []; //Todo: this can be cached
+				rightChain = [];
+				if(!compare2Objects(arguments[0], arguments[i])) {
+					return false;
 				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.sha256(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
+			}
+			return true;
 		}
-		sha1(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha1 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.sha1(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		sha224(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha224 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.sha224(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		sha384(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha384 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.sha384(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		sha512(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha512 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.sha512(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		md5(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.md5 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.md5(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		ripemd160(mixed) {
-			return new Promise(async (resolve, reject) => {
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.ripemd160 is required and does not have a default value.");
-				}
-				resolve(
-					this.#parent.stringToHex(
-						this.#parent.bytesToString(
-							await this.#parent.openpgp.crypto.hash.ripemd(
-								this.#parent.mixedToUint8Array(mixed, false)
-							).catch((err) => {
-								reject(err);
-							})
-						)
-					)
-				);
-			});
-		}
-		sha256Compound(mixed, count) {
-			return new Promise(async (resolve, reject) => {
-				if(count == null) {
-				  count = 16;
-				}
-				if(isNaN(parseInt(count))) {
-				  count = 16;
-				} else {
-				  count = parseInt(count);
-				}
-				if(mixed == null) {
-				  reject("tEnvoy Fatal Error: argument mixed of method hash.sha256Compound is required and does not have a default value.");
-				}
-				let hash = mixed;
-				for(let i = 0; i < count; i++) {
-				  hash = await this.sha256(hash);
-				}
-				resolve(hash);
-			});
-		}
-		sha256CompoundFromCredentials(username, password, count) {
-			return new Promise(async (resolve, reject) => {
-				if(count == null) {
-				  count = 16;
-				}
-				if(isNaN(parseInt(count))) {
-				  count = 16;
-				} else {
-				  count = parseInt(count);
-				}
-				resolve(await this.sha256Compound(await this.#parent.genSeedFromCredentials({
-					username: username,
-					password: password
-				}), count));
-			});
-		}
-  	}
-  	this.#tEnvoyHash = new tEnvoyHash(this);
-  	
-  	class tEnvoyRandom {
-  		#parent;
-  		constructor(parent) {
-  			this.#parent = parent;
-  		}
-  	}
-  	this.#tEnvoyRandom = new tEnvoyRandom(this);
-  	
-  	class tEnvoyKeyFactory {
-  		#parent;
-  		constructor(parent) {
-  			this.#parent = parent;
-  		}
-  	}
-  	this.#tEnvoyKeyFactory = new tEnvoyKeyFactory(this);
-  }
-  get version() {
-    return "v6.0.0-alpha";
-  }
-  get openpgp() {
-	  return this.#openpgp;
-  }
-  get nacl() {
-	  return this.#nacl;
-  }
-  get util() {
-  	return this.#tEnvoyUtil;
-  }
-  get hash() {
-  	return this.#tEnvoyHash;
-  }
-  get random() {
-  	return this.#tEnvoyRandom;
-  }
-  get keyFactory() {
-  	return this.#tEnvoyKeyFactory;
-  }
-  fixArmor(armored) {
-	  armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: tEnvoy " + this.version).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
-	  while(armored[0] != "-") {
-		  armored = armored.substring(1);
-	  }
-	  return armored;
-  }
-  randomString(args) {
-    if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string" || typeof args == "number") {
-      args = {
-        length: args
-      };
-    }
-    if(args.length == null) {
-      args.length = 10;
-    }
-    return new Promise(async (resolve, reject) => {
-		var result = "";
-		var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		for (var i = 0; i < args.length; i++) {
-		  result += characters.charAt(Math.floor(await this.randomNumber({
-			min: 0,
-			max: characters.length - 1
-		  }).catch((err) => {
-			  reject(err);
-		  })));
-		}
-		resolve(result);
-	});
-  }
-  randomBytes(args) {
-	if(args == null) {
-	  args = {};
+		
+		return deepCompare(object1, object2);
 	}
-    if(typeof args == "string" || typeof args == "number") {
-      args = {
-        length: args
-      };
-    }
-    if(args.length == null) {
-      args.length = 1;
-    }
-    return new Promise(async (resolve, reject) => {
-		resolve(await this.#openpgp.crypto.random.getRandomBytes(args.length).catch((err) => {
-			reject(err);
-		}));
-	});
-  }
-  randomNumber(args) {
-	if(args == null) {
-	  args = {};
+	
+	this.util.fixArmor = (armored) => {
+		armored = armored.replace("Version: OpenPGP.js v4.10.10", "Version: tEnvoy " + this.version).replace("Comment: https://openpgpjs.org", "Comment: https://togatech.org/ (TogaTech tEnvoy)");
+		while(armored[0] != "-") {
+			armored = armored.substring(1);
+		}
+		return armored;
 	}
-	if(typeof args == "string" || typeof args == "number") {
-	  args = {
-		min: 0,
-		max: args
-	  };
+	
+	this.hash = (mixed, algorithm = "sha256") => {
+		if(algorithm == null) {
+			algorithm = "sha256";
+		}
+		if(typeof this.hash[algorithm] == "function") {
+			return this.hash[algorithm](mixed);
+		} else {
+			throw "tEnvoy Fatal Error: argument mixed of method hash is invalid.";
+		}
 	}
-	if(args.min == null) {
-	  args.min = 0;
+	
+	this.hash.sha256 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha256 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.sha256(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
 	}
-	if(args.max == null) {
-	  args.max = 1;
+	
+	this.hash.sha1 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha1 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.sha1(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
 	}
-    return new Promise(async (resolve, reject) => {
-	  let random = await this.randomBytes({
-		length: 1
-	  }).catch((err) => {
-		  reject(err);
-	  });
-	  resolve((random[0] / 255) * (args.max - args.min) + args.min);
-    });
-  }
-  sha256(mixed) {
-    return this.hash.sha256(mixed);
-  }
-  sha1(mixed) {
-    return this.hash.sha1(mixed);
-  }
-  sha224(mixed) {
-    return this.hash.sha224(mixed);
-  }
-  sha384(mixed) {
-    return this.hash.sha384(mixed);
-  }
-  sha512(mixed) {
-    return this.hash.sha512(mixed);
-  }
-  md5(mixed) {
-    return this.hash.md5(mixed);
-  }
-  ripemd160(mixed) {
-    return this.hash.ripemd160(mixed);
-  }
-  sha256Compound(mixed, count) {
-    return this.hash.sha256Compound(mixed, count);
-  }
-  sha256CompoundFromCredentials(username, password, count) {
-    return this.hash.sha256CompoundFromCredentials(username, password, count);
-  }
-  genPGPKeys(args) {
-	return new Promise(async (resolve, reject) => {
+	
+	this.hash.sha224 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha224 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.sha224(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
+	}
+	
+	this.hash.sha384 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha384 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.sha384(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
+	}
+	
+	this.hash.sha512 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha512 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.sha512(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
+	}
+	
+	this.hash.md5 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.md5 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.md5(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
+	}
+	
+	this.hash.ripemd160 = (mixed) => {
+		return new Promise(async (resolve, reject) => {
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.ripemd160 is required and does not have a default value.");
+			}
+			resolve(
+				this.util.stringToHex(
+					this.util.bytesToString(
+						await _openpgp.crypto.hash.ripemd(
+							this.util.mixedToUint8Array(mixed, false)
+						).catch((err) => {
+							reject(err);
+						})
+					)
+				)
+			);
+		});
+	}
+	
+	this.hash.sha256Compound = (mixed, count = 16) => {
+		return new Promise(async (resolve, reject) => {
+			if(count == null) {
+				count = 16;
+			}
+			if(isNaN(parseInt(count))) {
+				count = 16;
+			} else {
+				count = parseInt(count);
+			}
+			if(mixed == null) {
+				reject("tEnvoy Fatal Error: argument mixed of method hash.sha256Compound is required and does not have a default value.");
+			}
+			let hash = mixed;
+			for(let i = 0; i < count; i++) {
+				hash = await this.hash.sha256(hash);
+			}
+			resolve(hash);
+		});
+	}
+	
+	this.hash.sha256CompoundFromCredentials = (username, password, count = 16) => {
+		return new Promise(async (resolve, reject) => {
+			if(count == null) {
+				count = 16;
+			}
+			if(isNaN(parseInt(count))) {
+				count = 16;
+			} else {
+				count = parseInt(count);
+			}
+			resolve(await this.hash.sha256Compound(await this.keyFactory.genSeedFromCredentials(username, password, count)));
+		});
+	}
+	
+	this.random = {};
+	
+	this.random.bytes = (length = 1) => {
+		return new Promise(async (resolve, reject) => {
+			if(length == null) {
+				length = 1;
+			}
+			if(isNaN(parseInt(length))) {
+				length = 0;
+			} else {
+				length = parseInt(length);
+			}
+			resolve(await _openpgp.crypto.random.getRandomBytes(length).catch((err) => {
+				reject(err);
+			}));
+		});
+	}
+	
+	this.random.number = (min = 0, max = 1) => {
+		return new Promise(async (resolve, reject) => {
+			if(min == null) {
+				min = 0;
+			}
+			if(isNaN(parseFloat(min))) {
+				min = 0;
+			} else {
+				min = parseFloat(min);
+			}
+			if(max == null) {
+				max = 0;
+			}
+			if(isNaN(parseFloat(max))) {
+				max = 0;
+			} else {
+				max = parseFloat(max);
+			}
+			let random = await this.random.bytes(1).catch((err) => {
+				reject(err);
+			});
+			resolve((random[0] / 255) * (max - min) + min);
+		});
+	}
+	
+	this.random.string = (length = 10) => {
+		return new Promise(async (resolve, reject) => {
+			if(length == null) {
+				length = 10;
+			}
+			if(isNaN(parseInt(length))) {
+				length = 10;
+			} else {
+				length = parseInt(length);
+			}
+			let result = "";
+			let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+			for(let i = 0; i < length; i++)
+			{
+				result += characters.charAt(Math.floor(await this.random.number(0, characters.length - 1).catch((err) => {
+					reject(err);
+				})));
+			}
+			resolve(result);
+		});
+	}
+	
+	this.random.words = (length = 12) => {
+		return new Promise(async (resolve, reject) => {
+			if(length == null) {
+				length = 12;
+			}
+			if(isNaN(parseInt(length))) {
+				length = 12;
+			} else {
+				length = parseInt(length);
+			}
+			let words = "";
+			for(let i = 0; i < length; i++) {
+				words += this.wordsList[Math.floor(await this.random.number(0, 2047).catch((err) => {
+					reject(err);
+				}))];
+				if(i + 1 != length) {
+					words += " ";
+				}
+			}
+			resolve(words);
+		});
+	}
+	
+	this.keyFactory = {};
+	
+	this.keyFactory.pbkdf2 = (password, salt, rounds = 25000, size = 32 * 8) => {
+		if(password == null) {
+			throw "tEnvoy Fatal Error: argument password of method keyFactory.pbkdf2 is required and does not have a default value.";
+		}
+		if(salt == null) {
+			throw "tEnvoy Fatal Error: argument salt of method keyFactory.pbkdf2 is required and does not have a default value.";
+		}
+		if(rounds == null) {
+			rounds = 25000;
+		}
+		if(isNaN(parseInt(rounds))) {
+			rounds = 25000;
+		} else {
+			rounds = parseInt(rounds);
+		}
+		if(size == null) {
+			size = 32 * 8;
+		}
+		if(isNaN(parseInt(size))) {
+			size = 32 * 8;
+		} else {
+			size = parseInt(size);
+		}
+		return _sjcl.misc.pbkdf2(password, salt, rounds, size);
+	}
+	
+	this.keyFactory.pbkdf2hex = (password, salt, rounds = 25000, size = 32 * 8) => {
+		return new Promise(async (resolve, reject) => {
+			let seed = this.keyFactory.pbkdf2(password, salt, rounds, size);
+			let stringSeed = seed.join(",");
+			let shaSeed = await this.hash.sha512(stringSeed);
+			resolve(shaSeed);
+		});
+	}
+	
+	this.keyFactory.genSeedFromCredentials = (username, password, rounds = 25000, size = 32) => {
+		return new Promise(async (resolve, reject) => {
+			if(username == null) {
+				reject("tEnvoy Fatal Error: argument username of method keyFactory.genSeedFromCredentials is required and does not have a default value.");
+			}
+			if(password == null) {
+				reject("tEnvoy Fatal Error: argument password of method keyFactory.genSeedFromCredentials is required and does not have a default value.");
+			}
+			if(size == null) {
+				size = 32;
+			}
+			if(isNaN(parseInt(size))) {
+				size = 32;
+			} else {
+				size = parseInt(size);
+			}
+			let shaSeed = await this.keyFactory.pbkdf2hex(password, username, rounds, 32 * 8);
+			while(shaSeed.length < size * 2) {
+				shaSeed += await this.hash.sha512(shaSeed);
+			}
+			let encoded = this.util.hexToBytes(shaSeed);
+			let sliced = encoded.slice(0, size);
+			resolve(sliced);
+		});
+	}
+	
+	this.keyFactory.genPGPKeys = (args) => {
+		return new Promise(async (resolve, reject) => {
+			if(args == null) {
+				args = {};
+			}
+			if(args.passwordProtected == null) {
+				args.passwordProtected = [];
+			}
+			let privateKey;
+			let publicKey;
+			if(args.options == null) {
+				args.options = {
+					curve: "curve25519"
+				}
+			}
+			if(args.users == null && args.options.userIds == null) {
+				args.users = [{}];
+			}
+			if(args.users == null && args.options.userIds != null) {
+				args.users = args.options.userIds;
+			}
+			if(args.users != null && args.options.userIds != null) {
+				args.options.userIds = args.options.userIds.filter(id => args.users.find(i => i.name == id.name && i.email == id.email && i.comment == id.comment) == null);
+				args.users = args.users.concat(args.options.userIds);
+			}
+			for(let i = 0; i < args.users.length; i++) {
+				let name = args.users[i].name || "";
+				let email = args.users[i].email || "";
+				let comment = args.users[i].comment || "";
+				args.users[i] = {name: name, email: email, comment: comment};
+			}
+			args.options.userIds = args.users;
+			
+			let openpgpkey = await _openpgp.generateKey(args.options).catch((err) => {
+				reject(err);
+			});
+			let privateArmored = this.util.fixArmor(openpgpkey.privateKeyArmored)
+			let publicArmored = this.util.fixArmor(openpgpkey.publicKeyArmored);
+			if(args.password == null) {
+				privateKey = new tEnvoyPGPKey(privateArmored, "private", null, args.passwordProtected, this);
+				publicKey = new tEnvoyPGPKey(publicArmored, "public", null, args.passwordProtected, this);
+			} else {
+				let encryptedPrivateKey = await _openpgp.encrypt({
+					message: await _openpgp.message.fromText(privateArmored),
+					passwords: [args.password]
+				}).catch((err) => {
+					reject(err);
+				});
+				let encryptedPublicKey = await _openpgp.encrypt({
+					message: await _openpgp.message.fromText(publicArmored),
+					passwords: [args.password]
+				}).catch((err) => {
+					reject(err);
+				});
+				privateKey = new tEnvoyPGPKey(this.util.fixArmor(encryptedPrivateKey.data), "private", args.password, args.passwordProtected, this);
+				publicKey = new tEnvoyPGPKey(this.util.fixArmor(encryptedPublicKey.data), "public", args.password, args.passwordProtected, this);
+			}
+			resolve({
+				privateKey: privateKey,
+				publicKey: publicKey
+			});
+		});
+	}
+	
+	this.keyFactory.genPGPSymmetricKey = (args) => {
+		return new Promise(async (resolve, reject) => {
+			if(args == null) {
+				args = {};
+			}
+			if(args.passwordProtected == null) {
+				args.passwordProtected = [];
+			}
+			if(args.key == null) {
+				reject("tEnvoy Fatal Error: argument key of object args of method genPGPSymmetricKey is required and does not have a default value.");
+			}
+			if(args.password == null) {
+				resolve(new tEnvoyPGPKey(args.key, "aes", null, args.passwordProtected, this));
+			} else {
+				let encryptedKey = await _openpgp.encrypt({
+					message: await _openpgp.message.fromText(args.key),
+					passwords: [args.password]
+				}).catch((err) => {
+					reject(err);
+				});
+				resolve(new tEnvoyPGPKey(this.util.fixArmor(encryptedKey.data), "aes", args.password, args.passwordProtected, this));
+			}
+		});
+	}
+	
+	this.keyFactory.genNaClKeys = (args) => {
 		if(args == null) {
-		  args = {};
+			args = {};
 		}
 		if(args.passwordProtected == null) {
 			args.passwordProtected = [];
 		}
-		if(args.options == null) {
-			args.options = {
-				curve: "curve25519"
-			}
-		}
-		if(args.users == null && args.options.userIds == null) {
-			args.users = [{}];
-		}
-		if(args.users == null && args.options.userIds != null) {
-			args.users = args.options.userIds;
-		}
-		if(args.users != null && args.options.userIds != null) {
-			args.options.userIds = args.options.userIds.filter(id => args.users.find(i => i.name == id.name && i.email == id.email && i.comment == id.comment) == null);
-			args.users = args.users.concat(args.options.userIds);
-		}
-		for(let i = 0; i < args.users.length; i++) {
-			let name = args.users[i].name || "";
-			let email = args.users[i].email || "";
-			let comment = args.users[i].comment || "";
-			args.users[i] = {name: name, email: email, comment: comment};
-		}
-		args.options.userIds = args.users;
 		let privateKey;
 		let publicKey;
-		let openpgpkey = await this.#openpgp.generateKey(args.options).catch((err) => {
-			reject(err);
-		});
-		let privateArmored = this.fixArmor(openpgpkey.privateKeyArmored)
-		let publicArmored = this.fixArmor(openpgpkey.publicKeyArmored);
-		if(args.password == null) {
-			privateKey = new tEnvoyPGPKey(privateArmored, "private", null, args.passwordProtected, this);
-			publicKey = new tEnvoyPGPKey(publicArmored, "public", null, args.passwordProtected, this);
+		let privateSigningKey;
+		let publicSigningKey;
+		let naclKeyPair;
+		if(args.seed == null) {
+			naclKeyPair = _nacl.box.keyPair();
 		} else {
-			let encryptedPrivateKey = await this.#openpgp.encrypt({
-				message: await this.#openpgp.message.fromText(privateArmored),
-				passwords: [args.password]
-			}).catch((err) => {
-				reject(err);
-			});
-			let encryptedPublicKey = await this.#openpgp.encrypt({
-				message: await this.#openpgp.message.fromText(publicArmored),
-				passwords: [args.password]
-			}).catch((err) => {
-				reject(err);
-			});
-			privateKey = new tEnvoyPGPKey(this.fixArmor(encryptedPrivateKey.data), "private", args.password, args.passwordProtected, this);
-			publicKey = new tEnvoyPGPKey(this.fixArmor(encryptedPublicKey.data), "public", args.password, args.passwordProtected, this);
+			naclKeyPair = _nacl.box.keyPair.fromSecretKey(args.seed);
 		}
-		resolve({
+		privateKey = new tEnvoyNaClKey(naclKeyPair.secretKey, "private", args.password, args.passwordProtected, this);
+		publicKey = new tEnvoyNaClKey(naclKeyPair.publicKey, "public", args.password, args.passwordProtected, this);
+		let signingKeys = privateKey.genSigningKeys(args.password);
+		privateSigningKey = signingKeys.privateKey;
+		publicSigningKey = signingKeys.publicKey;
+		return {
 			privateKey: privateKey,
-			publicKey: publicKey
-		});
-	});
-  }
-  genPGPSymmetricKey(args) {
-  	return new Promise(async (resolve, reject) => {
+			publicKey: publicKey,
+			privateSigningKey: privateSigningKey,
+			publicSigningKey: publicSigningKey
+		};
+	}
+	
+	this.keyFactory.genNaClSymmetricKey = (args) => {
 		if(args == null) {
-		  args = {};
+			args = {};
 		}
 		if(args.passwordProtected == null) {
 			args.passwordProtected = [];
 		}
 		if(args.key == null) {
-			reject("tEnvoy Fatal Error: property key of object args of method genPGPSymmetricKey is required and does not have a default value.");
+			throw "tEnvoy Fatal Error: argument key of object args of method genNaClSymmetricKey is required and does not have a default value.";
 		}
-		if(args.password == null) {
-			resolve(new tEnvoyPGPKey(args.key, "aes", null, args.passwordProtected, this));
-		} else {
-			let encryptedKey = await this.#openpgp.encrypt({
-				message: await this.#openpgp.message.fromText(args.key),
-				passwords: [args.password]
-			}).catch((err) => {
-				reject(err);
-			});
-			resolve(new tEnvoyPGPKey(this.fixArmor(encryptedKey.data), "aes", args.password, args.passwordProtected, this));
-		}
-	});
-  }
-  genNaClKeys(args) {
-	if(args == null) {
-	  args = {};
+		return new tEnvoyNaClKey(args.key, "secret", args.password, args.passwordProtected, this);
 	}
-	if(args.passwordProtected == null) {
-		args.passwordProtected = [];
-	}
-	let privateKey;
-	let publicKey;
-	let privateSigningKey;
-	let publicSigningKey;
-	let naclKeyPair;
-	if(args.seed == null) {
-		naclKeyPair = this.#nacl.box.keyPair();
-	} else {
-		naclKeyPair = this.#nacl.box.keyPair.fromSecretKey(args.seed);
-	}
-	privateKey = new tEnvoyNaClKey(naclKeyPair.secretKey, "private", args.password, args.passwordProtected, this);
-	publicKey = new tEnvoyNaClKey(naclKeyPair.publicKey, "public", args.password, args.passwordProtected, this);
-	let signingKeys = privateKey.genSigningKeys(args.password);
-	privateSigningKey = signingKeys.privateKey;
-	publicSigningKey = signingKeys.publicKey;
-	return {
-		privateKey: privateKey,
-		publicKey: publicKey,
-		privateSigningKey: privateSigningKey,
-		publicSigningKey: publicSigningKey
-	}
-  }
-  genNaClSymmetricKey(args) {
-  	if(args == null) {
-	  args = {};
-	}
-	if(args.passwordProtected == null) {
-		args.passwordProtected = [];
-	}
-	if(args.key == null) {
-		throw "tEnvoy Fatal Error: property key of object args of method genNaClSymmetricKey is required and does not have a default value.";
-	}
-	return new tEnvoyNaClKey(args.key, "secret", args.password, args.passwordProtected, this);
-  }
-  pbkdf2(args) {
-  	if(args == null) {
-      args = {};
-    }
-    if(args.salt == null) {
-      throw "tEnvoy Fatal Error: property salt of object args of method pbkdf2 is required and does not have a default value.";
-    }
-    if(args.password == null) {
-      throw "tEnvoy Fatal Error: property password of object args of method pbkdf2 is required and does not have a default value.";
-    }
-    if(args.rounds == null) {
-    	args.rounds = 25000;
-    }
-    if(args.size == null) {
-    	args.size = 32 * 8;
-    }
-    if(args.size == null) {
-    	return this.#sjcl.misc.pbkdf2(args.password, args.salt, args.rounds);
-    } else {
-    	return this.#sjcl.misc.pbkdf2(args.password, args.salt, args.rounds, args.size);
-    }
-  }
-  pbkdf2hex(args) {
-  	return new Promise(async (resolve, reject) => {
-		if(args == null) {
-		  args = {};
-		}
-		if(args.salt == null) {
-		  reject("tEnvoy Fatal Error: property salt of object args of method pbkdf2hex is required and does not have a default value.");
-		}
-		if(args.password == null) {
-		  reject("tEnvoy Fatal Error: property password of object args of method pbkdf2hex is required and does not have a default value.");
-		}
-		if(args.rounds == null) {
-			args.rounds = 25000;
-		}
-		if(args.size == null) {
-			args.size = 32 * 8;
-		}
-		let seed = this.pbkdf2({
-			password: args.password,
-			salt: args.salt,
-			rounds: args.rounds,
-			size: args.size
-		});
-		let stringSeed = seed.join(",");
-		let shaSeed = await this.sha512({
-			string: stringSeed
-		});
-		resolve(shaSeed);
-	});
-  }
-  genSeedFromCredentials(args) {
-  	return new Promise(async (resolve, reject) => {
-		if(args == null) {
-		  args = {};
-		}
-		if(args.username == null) {
-		  reject("tEnvoy Fatal Error: property username of object args of method genSeedFromCredentials is required and does not have a default value.");
-		}
-		if(args.password == null) {
-		  reject("tEnvoy Fatal Error: property password of object args of method genSeedFromCredentials is required and does not have a default value.");
-		}
-		if(args.rounds == null) {
-			args.rounds = 25000;
-		}
-		if(args.size == null) {
-			args.size = 32;
-		}
-		let shaSeed = await this.pbkdf2hex({
-			salt: args.username,
-			password: args.password,
-			rounds: args.rounds,
-			size: 32 * 8
-		})
-		while(shaSeed.length < args.size) {
-			shaSeed += await this.sha512({
-				string: shaSeed
-			});
-		}
-		let encoded = this.hexToBytes(shaSeed);
-		let sliced = encoded.slice(0, args.size);
-		resolve(sliced);
-	});
-  }
-  utf8encode(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(typeof args == "string") {
-	  args = {
-		string: args
-	  };
-	}
-	if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method utf8encode is required and does not have a default value.";
-    }
-    return this.#openpgp.util.encode_utf8(args.string);
-  }
-  utf8decode(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(args instanceof Uint8Array || args instanceof Array) {
-	  args = {
-		bytes: args
-	  };
-	}
-	if(!(args.bytes instanceof Uint8Array)) {
-		args.bytes = this.mixedToUint8Array(args.bytes, false);
-	}
-	if(args.bytes == null) {
-      throw "tEnvoy Fatal Error: property bytes of object args of method utf8decode is required and does not have a default value.";
-    }
-    return this.#openpgp.util.decode_utf8(args.bytes);
-  }
-  stringToBytes(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(typeof args == "string") {
-	  args = {
-		string: args
-	  };
-	}
-	if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method stringToBytes is required and does not have a default value.";
-    }
-    return this.#openpgp.util.str_to_Uint8Array(args.string);
-  }
-  bytesToString(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(args instanceof Uint8Array || args instanceof Array) {
-	  args = {
-		bytes: args
-	  };
-	}
-	if(!(args.bytes instanceof Uint8Array)) {
-		args.bytes = this.mixedToUint8Array(args.bytes, false);
-	}
-	if(args.bytes == null) {
-      throw "tEnvoy Fatal Error: property bytes of object args of method bytesToString is required and does not have a default value.";
-    }
-    return this.#openpgp.util.Uint8Array_to_str(args.bytes);
-  }
-  stringToHex(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(typeof args == "string") {
-	  args = {
-		string: args
-	  };
-	}
-	if(args.string == null) {
-      throw "tEnvoy Fatal Error: property string of object args of method stringToHex is required and does not have a default value.";
-    }
-	let hex = "";
-	for(let i = 0; i < args.string.length; i++) {
-	  let c = args.string.charCodeAt(i).toString(16);
-	  while(c.length < 2) {
-		  c = "0" + c;
-	  }
-      hex += c;
-	}
-    return hex;
-  }
-  hexToString(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(typeof args == "string") {
-	  args = {
-		hex: args
-	  };
-	}
-	if(args.hex == null) {
-      throw "tEnvoy Fatal Error: property hex of object args of method hexToString is required and does not have a default value.";
-    }
-    let string = "";
-    for(let i = 0; i < args.hex.length; i += 2) {	  
-	  string += String.fromCharCode(parseInt(args.hex.substring(i, i + 2), 16));
-    }
-    return string;
-  }
-  hexToBytes(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(typeof args == "string") {
-	  args = {
-		hex: args
-	  };
-	}
-	if(args.hex == null) {
-      throw "tEnvoy Fatal Error: property hex of object args of method hexToBytes is required and does not have a default value.";
-    }
-    let bytes = new Uint8Array(args.hex.length / 2);
-    for(let i = 0; i < args.hex.length; i += 2) {	  
-	  bytes[i / 2] = parseInt(args.hex.substring(i, i + 2), 16);
-    }
-    return bytes;
-  }
-  bytesToHex(args) {
-	if(args == null) {
-	  args = {};
-	}
-	if(args instanceof Uint8Array || args instanceof Array) {
-	  args = {
-		bytes: args
-	  };
-	}
-	if(!(args.bytes instanceof Uint8Array)) {
-		args.bytes = this.mixedToUint8Array(args.bytes, false);
-	}
-	if(args.bytes == null) {
-      throw "tEnvoy Fatal Error: property bytes of object args of method bytesToHex is required and does not have a default value.";
-    }
-    let hex = "";
-    for(let i = 0; i < args.bytes.length; i++) {
-    	if(args.bytes[i].toString(16).length == 0) {  
-			hex += "00";
-		} else if(args.bytes[i].toString(16).length == 1) {
-			hex += "0" + args.bytes[i].toString(16);
-		} else {
-			hex += args.bytes[i].toString(16);
-		}
-    }
-    return hex;
-  }
-  randomWords(args) {
-	if(args == null) {
-      args = {};
-    }
-    if(typeof args == "string" || typeof args == "number") {
-      args = {
-        length: args
-      };
-    }
-    if(args.length == null) {
-      args.length = 12;
-    }
-	return new Promise(async (resolve, reject) => {
-		let words = "";
-		for(let i = 0; i < args.length; i++) {
-			words += this.wordsList[Math.floor(await this.randomNumber({
-				min: 0,
-				max: 2047
-			}).catch((err) => {
-				reject(err);
-			}))];
-			if(i + 1 != args.length) {
-				words += " ";
-			}
-		}
-		resolve(words);
-	});
-  }
-  mixedToUint8Array(mixed, includeType = false, length = null) {
-  	return this.util.mixedToUint8Array(mixed, includeType, length);
-  }
-  uint8ArrayToMixed(uint8Array, includeType = false) {
-  	return this.util.uint8ArrayToMixed(uint8Array, includeType);
-  }
-  pack(mixed, length) {
-  	return this.util.pack(mixed, length);
-  }
-  unpack(packed) {
-  	return this.util.unpack(packed);
-  }
-  objectEquals(object1, object2) {
-  	return this.util.objectEquals(object1, object2);
-  }
 }
 
-class tEnvoyPGPKey {
-	#keyArmored;
-	#password;
-	#passwordProtected;
-	#type;
-	#assertPassword;
-	#tEnvoy;
-	#openpgp;
-	constructor(keyArmored, type = "aes", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
-		this.#tEnvoy = tEnvoy;
-		this.#openpgp = this.#tEnvoy.openpgp;
-		let t;
-		if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
-			t = "private";
-			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
-		} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
-			t = "public";
-			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
-		} else if(keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") == 0) {
-			t = type || "aes";
-			keyArmored = this.#tEnvoy.fixArmor(keyArmored);
-		} else {
-			t = "aes";
-		}
-		if(!["public", "private", "aes"].includes(t)) {
-			throw "tEnvoyPGPKey Fatal Error: property type of method constructor is invalid.";
-		} else {
-			this.#password = password;
-			this.#keyArmored = keyArmored;
-			this.#type = t;
-			this.#passwordProtected = [];
-			let protectable = [];
-			if(t == "private") {
-				protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
-			} else if(t == "public") {
-				protectable = ["getId", "encrypt", "verify"];
-			} else if(t == "aes") {
-				protectable = ["encrypt", "decrypt"];
-			}
-			if(passwordProtected == null) {
-				passwordProtected = [];
-			}
-			for(let i = 0; i < passwordProtected.length; i++) {
-				if(protectable.includes(passwordProtected[i])) {
-					this.#passwordProtected.push(passwordProtected[i]);
-				}
-			}
-			this.#assertPassword = function(methodName, password) {
-				if(this.#password == null) {
-					return {
-						proceed: true
-					};
-				} else {
-					let alwaysProtected;
-					if(this.#type == "private") {
-						alwaysProtected = ["getPrivate", "setPrivate"];
-					} else if(this.#type == "public") {
-						alwaysProtected = ["getPublic", "setPublic"];
-					} else if(this.#type == "aes") {
-						alwaysProtected = ["getKey"];
-					}
-					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
-						if(password == null) {
-							return {
-								proceed: false,
-								error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and no password was specified."
-							};
-						} else if(password != this.#password) {
-							return {
-								proceed: false,
-								error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and an incorrect password was specified."
-							};
-						} else {
-							return {
-								proceed: true
-							};
-						}
-					} else {
-						return {
-							proceed: true
-						};
-					}
-				}
-			}
-			if(this.#type != "aes") {
-				this.getPublic(this.#password);
-			}
-		}
+function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+	let _keyArmored;
+	let _password;
+	let _passwordProtected;
+	let _type;
+	let _assertPassword;
+	let _tEnvoy = tEnvoy;
+	let _openpgp = _tEnvoy.core.openpgp;
+	
+	this.toString = () => {
+		return `[tEnvoyPGPKey ${_type}]`;
 	}
-	getType() {
-		return this.#type;
+	
+	this.getType = () => {
+		return _type;
 	}
-	getId(password = null) {
-		if(this.#type == "private" || this.#type == "public") {
-			let assertion = this.#assertPassword("getId", password);
-			if(assertion.proceed) {
-				return new Promise(async (resolve, reject) => {
-					let publicKey = await this.getPublic(this.#password);
+	
+	this.getId = (password = null) => {
+		return new Promise(async (resolve, reject) => {
+			if(_type == "private" || _type == "public") {
+				let assertion = _assertPassword("getId", password);
+				if(assertion.proceed) {
+					let publicKey = await this.getPublic(_password);
 					resolve(publicKey.getKeyId().toHex());
-				});
-			} else {
-				throw assertion.error;
-			}
-		} else {
-			throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component.";
-		}
-	}
-	getKey(password) {
-		if(this.#type == "aes") {
-			return new Promise(async (resolve, reject) => {
-				if(this.#password == null) {
-					resolve(this.#keyArmored);
 				} else {
-					let assertion = this.#assertPassword("getKey", password);
+					reject(assertion.error);
+				}
+			} else {
+				reject("tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component.");
+			}
+		});
+	}
+	
+	this.getKey = (password = null) => {
+		return new Promise(async (resolve, reject) => {
+			if(_type == "aes") {
+				if(_password == null) {
+					resolve(_keyArmored);
+				} else {
+					let assertion = _assertPassword("getKey", password);
 					if(assertion.proceed) {
-						let decryptedKey = await this.#openpgp.decrypt({
-							message: await this.#openpgp.message.readArmored(this.#keyArmored),
-							passwords: [this.#password]
+						let decryptedKey = await _openpgp.decrypt({
+							message: await _openpgp.message.readArmored(_keyArmored),
+							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
 						});
@@ -46902,37 +46690,44 @@ class tEnvoyPGPKey {
 						reject(assertion.error);
 					}
 				}
-			});
-		} else {
-			throw "tEnvoyPGPKey Fatal Error: Key does not have a symmetric component.";
-		}
+			} else {
+				reject("tEnvoyPGPKey Fatal Error: Key does not have a symmetric component.");
+			}
+		});
 	}
-	getPrivate(password) {
+	
+	this.getPrivate = (password = null) => {
 		return new Promise(async (resolve, reject) => {
-			let privateKeyArmored = await this.getPrivateArmored(password);
-			let openpgpkey = await this.#openpgp.key.readArmored(privateKeyArmored).catch((err) => {
+			let privateKeyArmored = await this.getPrivateArmored(password).catch((err) => {
+				reject(err);
+			});
+			let openpgpkey = await _openpgp.key.readArmored(privateKeyArmored).catch((err) => {
 				reject(err);
 			});
 			resolve(openpgpkey.keys[0]);
 		});
 	}
-	setPrivate(privateKey, password) {
+	
+	this.setPrivate = (privateKey, password = null) => {
 		return new Promise(async (resolve, reject) => {
-			await this.setPrivateArmored(privateKey.armor(), password);
+			await this.setPrivateArmored(privateKey.armor(), password).catch((err) => {
+				reject(err);
+			});
 			resolve();
 		});
 	}
-	getPrivateArmored(password) {
-		if(this.#type == "private") {
-			return new Promise(async (resolve, reject) => {
-				if(this.#password == null) {
-					resolve(this.#keyArmored);
+	
+	this.getPrivateArmored = (password = null) => {
+		return new Promise(async (resolve, reject) => {
+			if(_type == "private") {
+				if(_password == null) {
+					resolve(_keyArmored);
 				} else {
-					let assertion = this.#assertPassword("getPrivate", password);
+					let assertion = _assertPassword("getPrivate", password);
 					if(assertion.proceed) {
-						let decryptedKey = await this.#openpgp.decrypt({
-							message: await this.#openpgp.message.readArmored(this.#keyArmored),
-							passwords: [this.#password]
+						let decryptedKey = await _openpgp.decrypt({
+							message: await _openpgp.message.readArmored(keyArmored),
+							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
 						});
@@ -46941,62 +46736,64 @@ class tEnvoyPGPKey {
 						reject(assertion.error);
 					}
 				}
-			});
-		} else {
-			throw "tEnvoyPGPKey Fatal Error: Key does not have a private component.";
-		}
-	}
-	setPrivateArmored(keyArmored, password = null) {
-		if(this.#type == "private") {
-			if(keyArmored == null) {
-				throw "tEnvoyPGPKey Fatal Error: property keyArmored of method setPrivateArmored is required and does not have a default value.";
+			} else {
+				reject("tEnvoyPGPKey Fatal Error: Key does not have a private component.");
 			}
-			return new Promise(async (resolve, reject) => {
-				keyArmored = this.#tEnvoy.fixArmor(keyArmored);
-				if(this.#password == null) {
-					this.#keyArmored = keyArmored;
+		});
+	}
+	
+	this.setPrivateArmored = (keyArmored, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			if(_type == "private") {
+				if(keyArmored == null) {
+					reject("tEnvoyPGPKey Fatal Error: argument keyArmored of method setPrivateArmored is required and does not have a default value.");
+				}
+				keyArmored = _tEnvoy.util.fixArmor(keyArmored);
+				if(_password == null) {
+					_keyArmored = keyArmored;
 					resolve();
 				} else {
-					let assertion = this.#assertPassword("setPrivate", password);
+					let assertion = _assertPassword("setPrivate", password);
 					if(assertion.proceed) {
-						let privateKeyEncrypted = await this.#openpgp.encrypt({
-							message: await this.#openpgp.message.fromText(keyArmored),
-							passwords: [this.#password]
+						let privateKeyEncrypted = await _openpgp.encrypt({
+							message: await _openpgp.message.fromText(keyArmored),
+							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
 						});
-						this.#keyArmored = this.#tEnvoy.fixArmor(privateKeyEncrypted.data);
+						_keyArmored = _tEnvoy.util.fixArmor(privateKeyEncrypted.data);
 						resolve();
 					} else {
 						reject(assertion.error);
 					}
 				}
-			});
-		} else {
-			throw "tEnvoyPGPKey Fatal Error: Key does not have a private component.";
-		}
+			} else {
+				reject("tEnvoyPGPKey Fatal Error: Key does not have a private component.");
+			}
+		});
 	}
-	getPublic(password = null) {
+	
+	this.getPublic = (password = null) => {
 		return new Promise(async (resolve, reject) => {
-			let assertion = this.#assertPassword("getPublic", password);
+			let assertion = _assertPassword("getPublic", password);
 			if(assertion.proceed) {
-				if(this.#type == "private") {
-					let key = await this.getPrivate(this.#password);
+				if(_type == "private") {
+					let key = await this.getPrivate(_password);
 					resolve(key.toPublic());
-				} else if(this.#type == "public") {
+				} else if(_type == "public") {
 					let publicKeyArmored;
-					if(this.#password == null) {
-						publicKeyArmored = this.#keyArmored
+					if(_password == null) {
+						publicKeyArmored = _keyArmored;
 					} else {
-						let decryptedKey = await this.#openpgp.decrypt({
-							message: await this.#openpgp.message.readArmored(this.#keyArmored),
-							passwords: [this.#password]
+						let decryptedKey = await _openpgp.decrypt({
+							message: await _openpgp.message.readArmored(_keyArmored),
+							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
 						});
 						publicKeyArmored = decryptedKey.data;
 					}
-					let openpgpkey = await this.#openpgp.key.readArmored(publicKeyArmored).catch((err) => {
+					let openpgpkey = await _openpgp.key.readArmored(publicKeyArmored).catch((err) => {
 						reject(err);
 					});
 					resolve(openpgpkey.keys[0]);
@@ -47008,153 +46805,162 @@ class tEnvoyPGPKey {
 			}
 		});
 	}
-	setPublic(publicKey, password = null) {
-		let assertion = this.#assertPassword("setPublic", password);
-		if(assertion.proceed) {
-			if(this.#type == "public") {
-				return new Promise(async (resolve, reject) => {
-					if(this.#password == null) {
-						this.#keyArmored = publicKey.armor();
+	
+	this.setPublic = (publicKey, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let assertion = _assertPassword("setPublic", password);
+			if(assertion.proceed) {
+				if(_type == "public") {
+					if(_password == null) {
+						_keyArmored = publicKey.armor();
 						resolve();
 					} else {
-						let publicKeyEncrypted = await this.#openpgp.encrypt({
-							message: await this.#openpgp.message.fromText(publicKey.armor()),
-							passwords: [this.#password]
+						let publicKeyEncrypted = await _openpgp.encrypt({
+							message: await _openpgp.message.fromText(publicKey.armor()),
+							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
 						});
-						this.#keyArmored = this.#tEnvoy.fixArmor(publicKeyEncrypted.data);
+						_keyArmored = _tEnvoy.util.fixArmor(publicKeyEncrypted.data);
 						resolve();
 					}
-				});
-			} else if(this.#type == "private") {
-				throw "tEnvoyPGPKey Fatal Error: Key has a public component that depends on the private component.";
+				} else if(_type == "private") {
+					reject("tEnvoyPGPKey Fatal Error: Key has a public component that depends on the private component.");
+				} else {
+					reject("tEnvoyPGPKey Fatal Error: Key does not have a public component.");
+				}
 			} else {
-				throw "tEnvoyPGPKey Fatal Error: Key does not have a public component.";
+				reject(assertion.error);
 			}
-		} else {
-			throw assertion.error;
-		}
-	}
-	getPublicArmored(password = null) {
-		return new Promise(async (resolve, reject) => {
-			let key = await this.getPublic(password);
-			resolve(this.#tEnvoy.fixArmor(key.armor()));
 		});
 	}
-	setPublicArmored(keyArmored, password = null) {
-		if(keyArmored == null) {
-			throw "tEnvoyPGPKey Fatal Error: property keyArmored of method setPublicArmored is required and does not have a default value.";
-		} else {
-			return new Promise(async (resolve, reject) => {
-				keyArmored = this.#tEnvoy.fixArmor(keyArmored);
-				let openpgpkey = await this.#openpgp.key.readArmored(keyArmored).catch((err) => {
+	
+	this.getPublicArmored = (password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let key = await this.getPublic(password).catch((err) => {
+				reject(err);
+			});
+			resolve(_tEnvoy.util.fixArmor(key.armor()));
+		});
+	}
+	
+	this.setPublicArmored = (keyArmored, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			if(keyArmored == null) {
+				reject("tEnvoyPGPKey Fatal Error: argument keyArmored of method setPublicArmored is required and does not have a default value.");
+			} else {
+				keyArmored = _tEnvoy.util.fixArmor(keyArmored).catch((err) => {
+					reject(err);
+				});
+				let openpgpkey = await _openpgp.key.readArmored(keyArmored).catch((err) => {
 					reject(err);
 				});
 				await this.setPublic(openpgpkey.keys[0], password);
 				resolve();
-			});
-		}
+			}
+		});
 	}
-	encrypt(message, password = null) {
-		let assertion = this.#assertPassword("encrypt", password);
-		if(assertion.proceed) {
-			return new Promise(async (resolve, reject) => {
+	
+	this.encrypt = (message, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let assertion = _assertPassword("encrypt", password);
+			if(assertion.proceed) {
 				let encryptKey;
 				let encrypted;
-				if(this.#type == "aes") {
-					encryptKey = await this.getKey(this.#password).catch((err) => {
+				if(_type == "aes") {
+					encryptKey = await this.getKey(_password).catch((err) => {
 						reject(err);
 					});
-					encrypted = await this.#openpgp.encrypt({
-						message: await this.#openpgp.message.fromText(message),
+					encrypted = await _openpgp.encrypt({
+						message: await _openpgp.message.fromText(message),
 						passwords: [encryptKey]
 					}).catch((err) => {
 						reject(err);
 					});
 				} else {
-					encryptKey = await this.getPublic(this.#password).catch((err) => {
+					encryptKey = await this.getPublic(_password).catch((err) => {
 						reject(err);
 					});
-					encrypted = await this.#openpgp.encrypt({
-						message: this.#openpgp.message.fromText(message),
+					encrypted = await _openpgp.encrypt({
+						message: _openpgp.message.fromText(message),
 						publicKeys: encryptKey
 					}).catch((err) => {
 						reject(err);
 					});
 				}
-				resolve(this.#tEnvoy.fixArmor(encrypted.data));
-			});
-		} else {
-			throw assertion.error;
-		}
+				resolve(_tEnvoy.util.fixArmor(encrypted.data));
+			}
+		});
 	}
-	decrypt(message, password = null) {
-		let assertion = this.#assertPassword("decrypt", password);
-		if(assertion.proceed) {
-			return new Promise(async (resolve, reject) => {
-				message = this.#tEnvoy.fixArmor(message);
+	
+	this.decrypt = (message, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let assertion = _assertPassword("decrypt", password);
+			if(assertion.proceed) {
+				message = _tEnvoy.util.fixArmor(message);
 				let decryptKey;
 				let decrypted;
-				if(this.#type == "aes") {
-					decryptKey = await this.getKey(this.#password).catch((err) => {
+				if(_type == "aes") {
+					decryptKey = await this.getKey(_password).catch((err) => {
 						reject(err);
 					});
-					decrypted = await this.#openpgp.decrypt({
-						message: await this.#openpgp.message.readArmored(message),
+					decrypted = await _openpgp.decrypt({
+						message: await _openpgp.message.readArmored(message),
 						passwords: [decryptKey]
 					}).catch((err) => {
 						reject(err);
 					});
 				} else {
-					decryptKey = await this.getPrivate(this.#password).catch((err) => {
+					decryptKey = await this.getPrivate(_password).catch((err) => {
 						reject(err);
 					});
-					decrypted = await this.#openpgp.decrypt({
-						message: await this.#openpgp.message.readArmored(message),
+					decrypted = await _openpgp.decrypt({
+						message: await _openpgp.message.readArmored(message),
 						privateKeys: decryptKey
 					}).catch((err) => {
 						reject(err);
 					});
 				}
 				resolve(decrypted.data);
-			});
-		} else {
-			throw assertion.error;
-		}
+			} else {
+				reject(assertion.error);
+			}
+		});
 	}
-	sign(message, password = null) {
-		let assertion = this.#assertPassword("sign", password);
-		if(assertion.proceed) {
-			return new Promise(async (resolve, reject) => {
+	
+	this.sign = (message, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let assertion = _assertPassword("sign", password);
+			if(assertion.proceed) {
 				let signKey;
-				if(this.#type == "aes") {
-					throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component."
+				if(_type == "aes") {
+					reject("tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component.");
 				} else {
-					signKey = await this.getPrivate(this.#password);
-					let signed = await this.#openpgp.sign({
-						message: await this.#openpgp.cleartext.fromText(message),
+					signKey = await this.getPrivate(_password);
+					let signed = await _openpgp.sign({
+						message: await _openpgp.cleartext.fromText(message),
 						privateKeys: signKey
 					});
-					resolve(this.#tEnvoy.fixArmor(signed.data));
+					resolve(_tEnvoy.util.fixArmor(signed.data));
 				}
-			});
-		} else {
-			throw assertion.error;
-		}
+			} else {
+				reject(assertion.error);
+			}
+		});
 	}
-	verify(message, password = null) {
-		let assertion = this.#assertPassword("verify", password);
-		if(assertion.proceed) {
-			return new Promise(async (resolve, reject) => {
-				message = this.#tEnvoy.fixArmor(message);
+	
+	this.verify = (message, password = null) => {
+		return new Promise(async (resolve, reject) => {
+			let assertion = _assertPassword("verify", password);
+			if(assertion.proceed) {
+				message = _tEnvoy.util.fixArmor(message);
 				let verifyKey;
-				if(this.#type == "aes") {
-					throw "tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component."
+				if(_type == "aes") {
+					reject("tEnvoyPGPKey Fatal Error: Key does not have an asymmetric component.");
 				} else {
-					verifyKey = await this.getPublic(this.#password);
-					let verified = await this.#openpgp.verify({
-						message: await this.#openpgp.cleartext.readArmored(message),
+					verifyKey = await this.getPublic(_password);
+					let verified = await _openpgp.verify({
+						message: await _openpgp.cleartext.readArmored(message),
 						publicKeys: verifyKey
 					});
 					if(verified.signatures[0] && verified.signatures[0].valid) {
@@ -47163,110 +46969,141 @@ class tEnvoyPGPKey {
 							keyid: verified.signatures[0].keyid.toHex(),
 							signatures: verified.signatures,
 							content: message.split("\n")[3]
-						})
+						});
 					} else {
 						resolve({
 							verified: false
 						});
 					}
 				}
-			});
-		} else {
-			throw assertion.error;
-		}
-	}
-}
-
-class tEnvoyNaClKey {
-	#key;
-	#nonce;
-	#password;
-	#passwordProtected;
-	#type;
-	#assertPassword;
-	#tEnvoy;
-	#nacl;
-	constructor(key, type = "secret", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
-		this.#tEnvoy = tEnvoy;
-		this.#nacl = this.#tEnvoy.nacl;
-		if(!["public", "private", "secret", "shared"].includes(type)) {
-			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
-		} else {
-			this.#password = password;
-			if(type == "secret") {
-				key = this.#tEnvoy.mixedToUint8Array(key, true, 32);
-			}
-			if(password == null) {
-				this.#key = key;
 			} else {
-				this.#nonce = this.#nacl.randomBytes(12);
-				this.#key = new tEnvoyNaClKey(password, "secret", null, [], tEnvoy).encrypt(key, this.#nonce);
+				reject(assertion.error);
 			}
-			this.#type = type;
-			this.#passwordProtected = [];
-			let protectable = [];
-			if(type == "private" || type == "shared" || type == "secret") {
-				protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey", "genSharedKey"];
-			} else if(type == "public") {
-				protectable = ["encrypt", "genSharedKey"];
+		});
+	}
+	
+	this.toPublic = (password = null) => {
+		return new Promise(async (resolve, reject) => {
+			resolve(new tEnvoyPGPKey(await this.getPublicArmored(password), "public", _password, _passwordProtected, _tEnvoy));
+		});
+	}
+	
+	if(keyArmored.indexOf("-----BEGIN PGP PRIVATE KEY BLOCK-----") == 0) {
+		_type = "private";
+		keyArmored = _tEnvoy.util.fixArmor(keyArmored);
+	} else if(keyArmored.indexOf("-----BEGIN PGP PUBLIC KEY BLOCK-----") == 0) {
+		_type = "public";
+		keyArmored = _tEnvoy.util.fixArmor(keyArmored);
+	} else if(keyArmored.indexOf("-----BEGIN PGP MESSAGE-----") == 0) {
+		_type = type || "aes";
+		keyArmored = _tEnvoy.util.fixArmor(keyArmored);
+	} else {
+		_type = "aes";
+	}
+	if(!["public", "private", "aes"].includes(_type)) {
+		throw "tEnvoyPGPKey Fatal Error: argument type of method constructor is invalid.";
+	} else {
+		_password = password;
+		_keyArmored = keyArmored;
+		_passwordProtected = [];
+		let protectable = [];
+		if(_type == "private") {
+			protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
+		} else if(_type == "public") {
+			protectable = ["getId", "encrypt", "verify"];
+		} else if(_type == "aes") {
+			protectable = ["encrypt", "decrypt"];
+		}
+		if(passwordProtected == null) {
+			passwordProtected = [];
+		}
+		for(let i = 0; i < passwordProtected.length; i++) {
+			if(protectable.includes(passwordProtected[i])) {
+				_passwordProtected.push(passwordProtected[i]);
 			}
-			if(passwordProtected == null) {
-				passwordProtected = [];
-			}
-			for(let i = 0; i < passwordProtected.length; i++) {
-				if(protectable.includes(passwordProtected[i])) {
-					this.#passwordProtected.push(passwordProtected[i]);
-				}
-			}
-			this.#assertPassword = function(methodName, password = null) {
-				if(this.#password == null) {
-					return {
-						proceed: true
-					};
-				} else {
-					let alwaysProtected;
-					if(this.#type == "private" || type == "shared" || type == "secret") {
-						alwaysProtected = ["getPrivate", "setPrivate"];
-					} else if(this.#type == "public") {
-						alwaysProtected = ["getPublic", "setPublic"];
+		}
+		_assertPassword = (methodName, password) => {
+			let compareConstant = (inputted, original) => {
+				let result = true;
+				for(let i = 0; i < inputted.length; i++) {
+					if(i >= original.length || inputted[i] != original[i]) {
+						result = false;
 					}
-					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
-						if(password == null) {
-							return {
-								proceed: false,
-								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and no password was specified."
-							};
-						} else if(password != this.#password) {
-							return {
-								proceed: false,
-								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
-							};
-						} else {
-							return {
-								proceed: true
-							};
-						}
+				}
+				if(inputted.length != original.length) {
+					result = false;
+				}
+				return result;
+			}
+			if(_password == null) {
+				return {
+					proceed: true
+				};
+			} else {
+				let alwaysProtected;
+				if(_type == "private") {
+					alwaysProtected = ["getPrivate", "setPrivate"];
+				} else if(_type == "public") {
+					alwaysProtected = ["getPublic", "setPublic"];
+				} else if(_type == "aes") {
+					alwaysProtected = ["getKey"];
+				}
+				if(alwaysProtected.includes(methodName) || _passwordProtected.includes(methodName)) {
+					if(password == null) {
+						return {
+							proceed: false,
+							error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and no password was specified."
+						};
+					} else if(!compareConstant(password, _password)) {
+						return {
+							proceed: false,
+							error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+						};
 					} else {
 						return {
 							proceed: true
 						};
 					}
+				} else {
+					return {
+						proceed: true
+					};
 				}
 			}
 		}
+		if(_type != "aes") {
+			this.getPublic(_password);
+		}
 	}
-	getType() {
-		return this.#type;
+}
+
+function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+	let _key;
+	let _nonce;
+	let _password;
+	let _passwordProtected;
+	let _type;
+	let _assertPassword;
+	let _tEnvoy = tEnvoy;
+	let _nacl = _tEnvoy.core.nacl;
+	
+	this.toString = () => {
+		return `[tEnvoyNaClKey ${_type}]`;
 	}
-	getPrivate(password = null) {
-		let assertion = this.#assertPassword("getPrivate", password);
+	
+	this.getType = () => {
+		return _type;
+	}
+	
+	this.getPrivate = (password = null) => {
+		let assertion = _assertPassword("getPrivate", password);
 		if(assertion.proceed) {
-			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
-				if(this.#password == null) {
-					return this.#key;
+			if(_type == "private" || _type == "secret" || _type == "shared") {
+				if(_password == null) {
+					return _key;
 				} else {
-					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(this.#tEnvoy.bytesToHex(decrypted.nonce) == this.#tEnvoy.bytesToHex(this.#nonce)) {
+					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47279,15 +47116,23 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	setPrivate(privateKey, password = null) {
-		let assertion = this.#assertPassword("setPrivate", password);
+	
+	this.setPrivate = (privateKey, password = null) => {
+		let assertion = _assertPassword("setPrivate", password);
 		if(assertion.proceed) {
-			if(this.#type == "private" || this.#type == "secret" || this.#type == "shared") {
-				if(this.#password == null) {
-					this.#key = privateKey;
+			if(privateKey == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument privateKey of method setPrivate is required and does not have a default value.";
+			}
+			privateKey = _tEnvoy.util.mixedToUint8Array(privateKey, false);
+			if(privateKey.length != 32) {
+				throw "tEnvoyNaClKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be 32 (was " + privateKey.length + ").";
+			}
+			if(_type == "private" || _type == "secret" || _type == "shared") {
+				if(_password == null) {
+					_key = privateKey;
 				} else {
-					this.#nonce = this.#nacl.randomBytes(12);
-					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(privateKey, this.#nonce);
+					_nonce = _nacl.randomBytes(12);
+					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(privateKey, _nonce);
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key does not have a private, secret, or shared component.";
@@ -47296,17 +47141,18 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	getPublic(password = null) {
-		let assertion = this.#assertPassword("getPublic", password);
+	
+	this.getPublic = (password = null) => {
+		let assertion = _assertPassword("getPublic", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				return this.#nacl.box.keyPair.fromSecretKey(this.getPrivate(this.#password)).publicKey
-			} else if(this.#type == "public") {
-				if(this.#password == null) {
-					return this.#key;
+			if(_type == "private") {
+				return _nacl.box.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
+			} else if(_type == "public") {
+				if(_password == null) {
+					return _key;
 				} else {
-					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(this.#tEnvoy.bytesToHex(decrypted.nonce) == this.#tEnvoy.bytesToHex(this.#nonce)) {
+					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47319,17 +47165,25 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	setPublic(publicKey, password = null) {
-		let assertion = this.#assertPassword("setPublic", password);
+	
+	this.setPublic = (publicKey, password = null) => {
+		let assertion = _assertPassword("setPublic", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component";
-			} else if(this.#type == "public") {
-				if(this.#password == null) {
-					this.#key = publicKey;
+			if(publicKey == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument publicKey of method setPublic is required and does not have a default value.";
+			}
+			publicKey = _tEnvoy.util.mixedToUint8Array(publicKey, false);
+			if(publicKey.length != 32) {
+				throw "tEnvoyNaClKey Fatal Error: argument publicKey of method setPublic is invalid, length should be 32 (was " + publicKey.length + ").";
+			}
+			if(_type == "private") {
+				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component.";
+			} else if(_type == "public") {
+				if(_password == null) {
+					_key = publicKey;
 				} else {
-					this.#nonce = this.#nacl.randomBytes(12);
-					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(publicKey, this.#nonce);
+					_nonce = _nacl.randomBytes(12);
+					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(publicKey, _nonce);
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key does not have a public component.";
@@ -47338,30 +47192,37 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	encrypt(message, nonce, password = null) {
-		let assertion = this.#assertPassword("encrypt", password);
+	
+	this.encrypt = (message, nonce, password = null) => {
+		let assertion = _assertPassword("encrypt", password);
 		if(assertion.proceed) {
-			let paddingLength = this.#tEnvoy.mixedToUint8Array(message, true).length;
-			let randomPadding = this.#nacl.randomBytes(1)[0] % 16;
+			if(message == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument message of method encrypt is required and does not have a default value.";
+			}
+			if(nonce == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument nonce of method encrypt is required and does not have a default value.";
+			}
+			let paddingLength = _tEnvoy.util.pack(message).length;
+			let randomPadding = _nacl.randomBytes(1)[0] % 16;
 			paddingLength = 32 + 32 * parseInt(paddingLength / 32);
 			paddingLength += randomPadding;
-			message = this.#tEnvoy.mixedToUint8Array(message, true, paddingLength);
-			let nonceCheck = this.#tEnvoy.mixedToUint8Array(nonce, true);
-			if(this.#type == "shared") {
-				if(nonceCheck.length > this.#nacl.box.nonceLength) {
-					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + this.#nacl.box.nonceLength + " (was " + nonceCheck.length + ").";
+			message = _tEnvoy.util.pack(message, paddingLength);
+			let nonceCheck = _tEnvoy.util.pack(nonce);
+			if(_type == "shared") {
+				if(nonceCheck.length > _nacl.box.nonceLength) {
+					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + _nacl.box.nonceLength + " (was " + nonceCheck.length + ").";
 				}
-				nonce = this.#tEnvoy.mixedToUint8Array(nonce, true, this.#nacl.box.nonceLength);
-			} else if(this.#type == "secret") {
-				if(nonceCheck.length > this.#nacl.secretbox.nonceLength) {
-					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + this.#nacl.secretbox.nonceLength + " (was " + nonceCheck.length + ").";
+				nonce = _tEnvoy.util.pack(nonce, _nacl.box.nonceLength);
+			} else if(_type == "secret") {
+				if(nonceCheck.length > _nacl.secretbox.nonceLength) {
+					throw "tEnvoyNaClKey Fatal Error: Nonce is too long, ensure that nonce length is under " + _nacl.secretbox.nonceLength + " (was " + nonceCheck.length + ").";
 				}
-				nonce = this.#tEnvoy.mixedToUint8Array(nonce, true, this.#nacl.secretbox.nonceLength);
+				nonce = _tEnvoy.util.pack(nonce, _nacl.secretbox.nonceLength);
 			}
-			if(this.#type == "shared") {
-				return this.#tEnvoy.bytesToHex(nonce) + "::" + this.#tEnvoy.bytesToHex(this.#nacl.box.after(message, nonce, this.getPrivate(this.#password)));
-			} else if(this.#type == "secret") {
-				return this.#tEnvoy.bytesToHex(nonce) + "::" + this.#tEnvoy.bytesToHex(this.#nacl.secretbox(message, nonce, this.getPrivate(this.#password)));
+			if(_type == "shared") {
+				return _tEnvoy.util.bytesToHex(nonce) + "::" + _tEnvoy.util.bytesToHex(_nacl.box.after(message, nonce, this.getPrivate(_password)));
+			} else if(_type == "secret") {
+				return _tEnvoy.util.bytesToHex(nonce) + "::" + _tEnvoy.util.bytesToHex(_nacl.secretbox(message, nonce, _tEnvoy.util.pack(this.getPrivate(_password), 32)));
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for encryption, only secret or shared keys can be used to encrypt.";
 			}
@@ -47369,24 +47230,28 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	decrypt(encrypted, password = null) {
-		let assertion = this.#assertPassword("decrypt", password);
+	
+	this.decrypt = (encrypted, password = null) => {
+		let assertion = _assertPassword("decrypt", password);
 		if(assertion.proceed) {
+			if(encrypted == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument encrypted of method decrypt is required and does not have a default value.";
+			}
 			if(encrypted.split("::").length != 2) {
 				throw "tEnvoyNaClKey Fatal Error: Invalid encrypted message.";
 			}
-			let nonce = this.#tEnvoy.mixedToUint8Array(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), false);
-			let encryptedContent = this.#tEnvoy.hexToBytes(encrypted.split("::")[1]);
-			if(this.#type == "shared") {
+			let nonce = _tEnvoy.util.mixedToUint8Array(_tEnvoy.util.hexToBytes(encrypted.split("::")[0]), false);
+			let encryptedContent = _tEnvoy.util.hexToBytes(encrypted.split("::")[1]);
+			if(_type == "shared") {
 				return {
-					message: this.#tEnvoy.uint8ArrayToMixed(this.#nacl.box.open.after(encryptedContent, nonce, this.getPrivate(this.#password)), true),
-					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), true)
+					message: _tEnvoy.util.unpack(_nacl.box.open.after(encryptedContent, nonce, this.getPrivate(_password))),
+					nonce: _tEnvoy.util.unpack(_tEnvoy.util.hexToBytes(encrypted.split("::")[0]))
 				};
-			} else if(this.#type == "secret") {
+			} else if(_type == "secret") {
 				return {
-					message: this.#tEnvoy.uint8ArrayToMixed(this.#nacl.secretbox.open(encryptedContent, nonce, this.getPrivate(this.#password)), true),
-					nonce: this.#tEnvoy.uint8ArrayToMixed(this.#tEnvoy.hexToBytes(encrypted.split("::")[0]), true)
-				}
+					message: _tEnvoy.util.unpack(_nacl.secretbox.open(encryptedContent, nonce, _tEnvoy.util.pack(this.getPrivate(_password), 32))),
+					nonce: _tEnvoy.util.unpack(_tEnvoy.util.hexToBytes(encrypted.split("::")[0]))
+				};
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for decryption, only secret or shared keys can be used to decrypt.";
 			}
@@ -47394,13 +47259,14 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	genSigningKeys(password = null) {
-		let assertion = this.#assertPassword("genSigningKey", password);
+	
+	this.genSigningKeys = (password = null) => {
+		let assertion = _assertPassword("genSigningKey", password);
 		if(assertion.proceed) {
-			if(this.#type != "secret") {
-				let signingKeys = this.#nacl.sign.keyPair.fromSeed(this.getPrivate(this.#password));
-				let privateKey = new tEnvoyNaClSigningKey(signingKeys.secretKey, "private", this.#password, this.#passwordProtected, this.#tEnvoy);
-				let publicKey = new tEnvoyNaClSigningKey(signingKeys.publicKey, "public", this.#password, this.#passwordProtected, this.#tEnvoy);
+			if(_type != "secret") {
+				let signingKeys = _nacl.sign.keyPair.fromSeed(this.getPrivate(_password));
+				let privateKey = new tEnvoyNaClSigningKey(signingKeys.secretKey, "private", _password, _passwordProtected, _tEnvoy);
+				let publicKey = new tEnvoyNaClSigningKey(signingKeys.publicKey, "public", _password, _passwordProtected, _tEnvoy);
 				return {
 					privateKey: privateKey,
 					publicKey: publicKey
@@ -47412,126 +47278,141 @@ class tEnvoyNaClKey {
 			throw assertion.error;
 		}
 	}
-	genSharedKey(otherKey, otherKeyPassword = null, password = null) {
-		let assertion = this.#assertPassword("genSharedKey", password);
+	
+	this.genSharedKey = (otherKey, otherKeyPassword = null, password = null) => {
+		let assertion = _assertPassword("genSharedKey", password);
 		if(assertion.proceed) {
+			if(otherKey == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument otherKey of method genSharedKey is required and does not have a default value.";
+			}
 			if(otherKey instanceof tEnvoyNaClKey) {
-				if(this.#type == "public" && otherKey.getType() == "private") {
-					let sharedKey = this.#nacl.box.before(this.getPublic(this.#password), otherKey.getPrivate(otherKeyPassword));
-					return new tEnvoyNaClKey(sharedKey, "shared", this.#password, this.#passwordProtected, this.#tEnvoy);
-				} else if(this.#type == "private" && otherKey.getType() == "public") {
-					let sharedKey = this.#nacl.box.before(this.getPrivate(this.#password), otherKey.getPublic(otherKeyPassword));
-					return new tEnvoyNaClKey(sharedKey, "shared", this.#password, this.#passwordProtected, this.#tEnvoy);
+				if(_type == "public" && otherKey.getType() == "private") {
+					let sharedKey = _nacl.box.before(this.getPublic(_password), otherKey.getPrivate(otherKeyPassword));
+					return new tEnvoyNaClKey(sharedKey, "shared", _password, _passwordProtected, _tEnvoy);
+				} else if(_type == "private" && otherKey.getType() == "public") {
+					let sharedKey = _nacl.box.before(this.getPrivate(_password), other.getPublic(otherKeyPassword));
+					return new tEnvoyNaClKey(sharedKey, "shared", _password, _passwordProtected, _tEnvoy);
 				} else {
-					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public and the other should be private.";
+					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public, and the other should be private.";
 				}
 			} else {
-				throw "tEnvoyNaClKey Fatal Error: Incompatible key types, both keys should be of type tEnvoyNaClKey.";
+				throw "tEnvoyNaClKey Fatal Error: Incompatible key types, both keys shoulkd be of type tEnvoyNaClKey.";
 			}
 		} else {
 			throw assertion.error;
 		}
 	}
-}
-
-class tEnvoyNaClSigningKey {
-	#key;
-	#nonce;
-	#password;
-	#passwordProtected;
-	#type;
-	#assertPassword;
-	#tEnvoy;
-	#nacl;
-	constructor(key, type = "secret", password, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
-		this.#tEnvoy = tEnvoy;
-		this.#nacl = this.#tEnvoy.nacl;
-		if(!["public", "private"].includes(type)) {
-			throw "tEnvoyNaClKey Fatal Error: property type of method constructor is invalid.";
+	
+	this.toPublic = (password = null) => {
+		return new tEnvoyNaClKey(this.getPublic(password), "public", _password, _passwordProtected, _tEnvoy);
+	}
+	
+	if(!["public", "private", "secret", "shared"].includes(type)) {
+		throw "tEnvoyNaClKey Fatal Error: argument type of method constructor is invalid.";
+	} else {
+		_password = password;
+		if(_type == "secret") {
+			key = _tEnvoy.util.pack(key, 32);
+		}
+		if(password == null) {
+			_key = key;
 		} else {
-			this.#password = password;
-			if(password == null) {
-				this.#key = key;
-			} else {
-				this.#nonce = this.#nacl.randomBytes(12);
-				this.#key = new tEnvoyNaClKey(password, "secret", null, [], tEnvoy).encrypt(key, this.#nonce);
+			_nonce = _nacl.randomBytes(12);
+			_key = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy).encrypt(key, _nonce);
+		}
+		_type = type;
+		_passwordProtected = [];
+		let protectable = [];
+		if(_type == "private" || _type == "shared" || _type == "secret") {
+			protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey", "genSharedKey", "sign", "verify"];
+		} else if(_type == "public") {
+			protectable = ["encrypt", "genSharedKey", "verify"];
+		}
+		if(passwordProtected == null) {
+			passwordProtected = [];
+		}
+		for(let i = 0; i < passwordProtected.length; i++) {
+			if(protectable.includes(passwordProtected[i])) {
+				_passwordProtected.push(passwordProtected[i]);
 			}
-			this.#type = type;
-			this.#passwordProtected = [];
-			let protectable = [];
-			if(type == "private") {
-				protectable = ["getPublic", "sign", "verify", "verifyWithMessage"];
-			} else if(type == "public") {
-				protectable = ["verify", "verifyWithMessage"];
-			}
-			if(passwordProtected == null) {
-				passwordProtected = [];
-			}
-			for(let i = 0; i < passwordProtected.length; i++) {
-				if(protectable.includes(passwordProtected[i])) {
-					this.#passwordProtected.push(passwordProtected[i]);
-				}
-			}
-			this.#assertPassword = function(methodName, password = null) {
-				if(this.#password == null) {
-					return {
-						proceed: true
-					};
-				} else {
-					let alwaysProtected;
-					if(this.#type == "private") {
-						alwaysProtected = ["getPrivate", "setPrivate"];
-					} else if(this.#type == "public") {
-						alwaysProtected = ["getPublic", "setPublic"];
+		}
+		_assertPassword = (methodName, password = null) => {
+			let compareConstant = (inputted, original) => {
+				let result = true;
+				for(let i = 0; i < inputted.length; i++) {
+					if(i >= original.length || inputted[i] != original[i]) {
+						result = false;
 					}
-					if(alwaysProtected.includes(methodName) || this.#passwordProtected.includes(methodName)) {
-						if(password == null) {
-							return {
-								proceed: false,
-								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and no password was specified."
-							};
-						} else if(password != this.#password) {
-							return {
-								proceed: false,
-								error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
-							};
-						} else {
-							return {
-								proceed: true
-							};
-						}
+				}
+				if(inputted.length != original.length) {
+					result = false;
+				}
+				return result;
+			}
+			if(_password == null) {
+				return {
+					proceed: true
+				};
+			} else {
+				let alwaysProtected;
+				if(_type == "private" || _type == "shared" || _type == "secret") {
+					alwaysProtected = ["getPrivate", "setPrivate"];
+				} else if(_type == "public") {
+					alwaysProtected = ["getPublic", "setPublic"];
+				}
+				if(alwaysProtected.includes(methodName) || _passwordProtected.includes(methodName)) {
+					if(password == null) {
+						return {
+							proceed: false,
+							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and no password was specified"
+						};
+					} else if(!compareConstant(password, _password)) {
+						return {
+							proceed: false,
+							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+						};
 					} else {
 						return {
 							proceed: true
 						};
 					}
-				}
-			}
-		}
-	}
-	getType() {
-		return this.#type;
-	}
-	getPrivate(password = null) {
-		function equals(array1, array2) {
-			if(array1.length != array2.length) {
-				return false;
-			}
-			for(let i = 0; i < array1.length; i++) {
-				if(array1[i] != array2[i]) {
-					return false;
-				}
-			}
-			return true;
-		}
-		let assertion = this.#assertPassword("getPrivate", password);
-		if(assertion.proceed) {
-			if(this.#type == "private") {
-				if(this.#password == null) {
-					return this.#key;
 				} else {
-					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(equals(decrypted.nonce, this.#nonce)) {
+					return {
+						proceed: true
+					};
+				}
+			}
+		}
+	}
+}
+
+function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+	let _key;
+	let _nonce;
+	let _password;
+	let _passwordProtected;
+	let _type;
+	let _assertPassword;
+	let _tEnvoy = tEnvoy;
+	let _nacl = _tEnvoy.core.nacl;
+	
+	this.toString = () => {
+		return `[tEnvoyNaClSigningKey ${_type}]`;
+	}
+	
+	this.getType = () => {
+		return _type;
+	}
+	
+	this.getPrivate = (password = null) => {
+		let assertion = _assertPassword("getPrivate", password);
+		if(assertion.proceed) {
+			if(_type == "private") {
+				if(_password == null) {
+					return _key;
+				} else {
+					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClSigningKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47544,15 +47425,23 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	setPrivate(privateKey, password = null) {
-		let assertion = this.#assertPassword("setPrivate", password);
+	
+	this.setPrivate = (privateKey, password = null) => {
+		let assertion = _assertPassword("setPrivate", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				if(this.#password == null) {
-					this.#key = privateKey;
+			if(privateKey == null) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument privateKey of method setPrivate is required and does not have a default value.";
+			}
+			privateKey = _tEnvoy.util.mixedToUint8Array(privateKey, false);
+			if(privateKey.length != 32) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be 32 (was " + privateKey.length + ").";
+			}
+			if(_type == "private") {
+				if(_password == null) {
+					_key = privateKey;
 				} else {
-					this.#nonce = this.#nacl.randomBytes(12);
-					this.#key = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(privateKey, this.#nonce);
+					_nonce = _nacl.randomBytes(12);
+					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(privateKey, _nonce);
 				}
 			} else {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a private component.";
@@ -47561,28 +47450,18 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	getPublic(password = null) {
-		function equals(array1, array2) {
-			if(array1.length != array2.length) {
-				return false;
-			}
-			for(let i = 0; i < array1.length; i++) {
-				if(array1[i] != array2[i]) {
-					return false;
-				}
-			}
-			return true;
-		}
-		let assertion = this.#assertPassword("getPublic", password);
+	
+	this.getPublic = (password = null) => {
+		let assertion = _assertPassword("getPublic", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				return this.#nacl.sign.keyPair.fromSecretKey(this.getPrivate(this.#password)).publicKey
-			} else if(this.#type == "public") {
-				if(this.#password == null) {
-					return this.#key;
+			if(_type == "private") {
+				return _nacl.sign.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
+			} else if(_type == "public") {
+				if(_password == null) {
+					return _key;
 				} else {
-					let decrypted = new tEnvoyNaClKey(this.#password, "secret", null, [], this.#tEnvoy).decrypt(this.#key);
-					if(equals(decrypted.nonce, this.#nonce)) {
+					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
 						throw "tEnvoyNaClSigningKey Fatal Error: The encrypted key was tampered with, and the nonce is invalid.";
@@ -47595,17 +47474,25 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	setPublic(publicKey, password = null) {
-		let assertion = this.#assertPassword("setPublic", password);
+	
+	this.setPublic = (publicKey, password = null) => {
+		let assertion = _assertPassword("setPublic", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component";
-			} else if(this.#type == "public") {
-				if(this.#password == null) {
-					this.#key = publicKey;
+			if(publicKey == null) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument publicKey of method setPublic is required and does not have a default value.";
+			}
+			publicKey = _tEnvoy.util.mixedToUint8Array(publicKey, false);
+			if(publicKey.length != 32) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument publicKey of method setPublic is invalid, length should be 32 (was " + publicKey.length + ").";
+			}
+			if(_type == "private") {
+				throw "tEnvoyNaClSigningKey Fatal Error: Key has a public component that depends on the private component.";
+			} else if(_type == "public") {
+				if(_password == null) {
+					_key = publicKey;
 				} else {
-					this.#nonce = this.#nacl.randomBytes(12);
-					this.#key = new tEnvoyNaClSigningKey(this.#password, "secret", null, [], this.#tEnvoy).encrypt(publicKey, this.#nonce);
+					_nonce = _nacl.randomBytes(12);
+					_key = new tEnvoyNaClSigningKey(_password, "secret", null, [], _tEnvoy).encrypt(publicKey, _nonce);
 				}
 			} else {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a public component.";
@@ -47614,14 +47501,18 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	sign(message, password = null) {
-		let assertion = this.#assertPassword("sign", password);
+	
+	this.sign = (message, password = null) => {
+		let assertion = _assertPassword("sign", password);
 		if(assertion.proceed) {
-			if(this.#type == "private") {
-				message = this.#tEnvoy.mixedToUint8Array(message, true);
-				let hashed = this.#tEnvoy.bytesToHex(this.#nacl.hash(message)); // sha512 hash
+			if(message == null) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument message of method sign is required and does not have a default value.";
+			}
+			if(_type == "private") {
+				message = _tEnvoy.util.pack(message);
+				let hashed = _tEnvoy.util.bytesToHex(_nacl.hash(message)); // sha512 hash
 				return {
-					signature: hashed + "::" + this.#tEnvoy.bytesToHex(this.#nacl.sign.detached(this.#nacl.hash(message), this.getPrivate(this.#password))),
+					signature: hashed + "::" + _tEnvoy.util.bytesToHex(_nacl.sign.detached(_nacl.hash(message), this.getPrivate(_password))),
 					hash: hashed
 				};
 			} else {
@@ -47631,37 +47522,120 @@ class tEnvoyNaClSigningKey {
 			throw assertion.error;
 		}
 	}
-	verify(signed, password = null) {
-		let assertion = this.#assertPassword("verify", password);
+	
+	this.verify = (signed, password = null) => {
+		let assertion = _assertPassword("verify", password);
 		if(assertion.proceed) {
+			if(signed == null) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument signed of method verify is required and does not have a default value.";
+			}
 			if(signed.split("::").length != 2) {
 				throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
 			}
-			let hash = this.#tEnvoy.hexToBytes(signed.split("::")[0]);
-			let signature = this.#tEnvoy.hexToBytes(signed.split("::")[1]);
+			let hash = _tEnvoy.util.hexToBytes(signed.split("::")[0]);
+			let signature = _tEnvoy.util.hexToBytes(signed.split("::")[1]);
 			return {
-				verified: this.#nacl.sign.detached.verify(hash, signature, this.getPublic(this.#password)),
+				verified: _nacl.sign.detached.verify(hash, signature, this.getPublic(_password)),
 				hash: signed.split("::")[0]
 			};
 		} else {
 			throw assertion.error;
 		}
 	}
-	verifyWithMessage(signed, message, password = null) {
-		let assertion = this.#assertPassword("verifyWithMessage", password);
-		if(assertion.proceed) {
-			if(signed.split("::").length != 2) {
-				throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
-			}
-			let hash = this.#tEnvoy.hexToBytes(signed.split("::")[0]);
-			let signature = this.#tEnvoy.hexToBytes(signed.split("::")[1]);
-			return this.#nacl.sign.detached.verify(hash, signature, this.getPublic(this.#password)) && this.#tEnvoy.bytesToHex(this.#nacl.hash(this.#tEnvoy.mixedToUint8Array(message, true))) == this.#tEnvoy.bytesToHex(hash);
+	
+	this.verifyWithMessage = (signed, message, password = null) => {
+		if(signed == null) {
+			throw "tEnvoyNaClSigningKey Fatal Error: argument signed of method verifyWithMessage is required and does not have a default value.";
+		}
+		if(message == null) {
+			throw "tEnvoyNaClSigningKey Fatal Error: argument message of method verifyWithMessage is required and does not have a default value.";
+		}
+		if(signed.split("::").length != 2) {
+			throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
+		}
+		let hash = _tEnvoy.util.hexToBytes(signed.split("::")[0]);
+		return this.verify(signed, password) && _tEnvoy.util.bytesToHex(_nacl.hash(_tEnvoy.util.pack(message))) == _tEnvoy.util.bytesToHex(hash);
+	}
+	
+	this.toPublic = (password = null) => {
+		return new tEnvoyNaClSigningKey(this.getPublic(password), "public", _password, _passwordProtected, _tEnvoy);
+	}
+	
+	if(!["public", "private"].includes(type)) {
+		throw "tEnvoyNaClSigningKey Fatal Error: argument type of method constructor is invalid.";
+	} else {
+		_password = password;
+		if(password == null) {
+			_key = key;
 		} else {
-			throw assertion.error;
+			_nonce = _nacl.randomBytes(12);
+			_key = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy).encrypt(key, _nonce);
+		}
+		_type = type;
+		_passwordProtected = [];
+		let protectable = [];
+		if(_type == "private") {
+			protectable = ["getPublic", "sign", "verify"];
+		} else if(_type == "public") {
+			protectable = ["verify"];
+		}
+		if(passwordProtected == null) {
+			passwordProtected = [];
+		}
+		for(let i = 0; i < passwordProtected.length; i++) {
+			if(protectable.includes(passwordProtected[i])) {
+				_passwordProtected.push(passwordProtected[i]);
+			}
+		}
+		_assertPassword = (methodName, password = null) => {
+			let compareConstant = (inputted, original) => {
+				let result = true;
+				for(let i = 0; i < inputted.length; i++) {
+					if(i >= original.length || inputted[i] != original[i]) {
+						result = false;
+					}
+				}
+				if(inputted.length != original.length) {
+					result = false;
+				}
+				return result;
+			}
+			if(_password == null) {
+				return {
+					proceed: true
+				};
+			} else {
+				let alwaysProtected;
+				if(_type == "private") {
+					alwaysProtected = ["getPrivate", "setPrivate"];
+				} else if(_type == "public") {
+					alwaysProtected = ["getPublic", "setPublic"];
+				}
+				if(alwaysProtected.includes(methodName) || _passwordProtected.includes(methodName)) {
+					if(password == null) {
+						return {
+							proceed: false,
+							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and no password was specified."
+						};
+					} else if(!compareConstant(password, _password)) {
+						return {
+							proceed: false,
+							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+						}
+					} else {
+						return {
+							proceed: true
+						};
+					}
+				} else {
+					return {
+						proceed: true
+					};
+				}
+			}
 		}
 	}
 }
-
 
 
 window.TogaTech.tEnvoy = new tEnvoy(window.openpgp, window.nacl, window.sjcl);
