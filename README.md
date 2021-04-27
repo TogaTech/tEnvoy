@@ -1,12 +1,3 @@
-# Notice
-This repository is currently being used as a staging repo for `v6.0.0-alpha`, for the stable release, please download [v5.1.1](https://github.com/TogaTech/tEnvoy/releases/tag/v5.1.1).
-
-## Known Issues
-There are some known issues that will not be resolved until `v6.0.0` is released:
-- For converting between mixed to Uint8Array, arrays with values over 255 will not work as intended.
-- There does not yet exist a method to generate a public version of a `tEnvoyPGPKey`, `tEnvoyNaClKey`, or `tEnvoyNaClSigningKey` from the private version.
-- Browser compatibility is spotty since we use `#` for private instance fields
-
 # tEnvoy
 
 More details coming soon...
