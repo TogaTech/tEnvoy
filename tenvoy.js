@@ -45665,7 +45665,7 @@ function tEnvoy(openpgpRef = window.openpgp, naclRef = window.nacl, sjclRef = wi
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.0.0";
+			return "v6.0.1";
 		}
 	});
 	
@@ -47290,7 +47290,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 					let sharedKey = _nacl.box.before(this.getPublic(_password), otherKey.getPrivate(otherKeyPassword));
 					return new tEnvoyNaClKey(sharedKey, "shared", _password, _passwordProtected, _tEnvoy);
 				} else if(_type == "private" && otherKey.getType() == "public") {
-					let sharedKey = _nacl.box.before(this.getPrivate(_password), other.getPublic(otherKeyPassword));
+					let sharedKey = _nacl.box.before(otherKey.getPublic(otherKeyPassword), this.getPrivate(_password));
 					return new tEnvoyNaClKey(sharedKey, "shared", _password, _passwordProtected, _tEnvoy);
 				} else {
 					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public, and the other should be private.";
