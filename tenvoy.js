@@ -45650,10 +45650,10 @@ b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return 
 // Start tEnvoy.js
 
 if(window.TogaTech == null) {
-  window.TogaTech = {};
+	window.TogaTech = {};
 }
 
-function tEnvoy(openpgpRef = window.openpgp, naclRef = window.nacl, sjclRef = window.sjcl) {
+function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl) {
 	let _openpgp = openpgpRef;
 	let _nacl = naclRef;
 	let _sjcl = sjclRef;
@@ -45665,7 +45665,23 @@ function tEnvoy(openpgpRef = window.openpgp, naclRef = window.nacl, sjclRef = wi
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.0.1";
+			return "v6.0.2";
+		}
+	});
+	
+	Object.defineProperty(this, "tEnvoyPGPKey", {
+		get: () => {
+			return tEnvoyPGPKey;
+		}
+	});
+	Object.defineProperty(this, "tEnvoyNaClKey", {
+		get: () => {
+			return tEnvoyNaClKey;
+		}
+	});
+	Object.defineProperty(this, "tEnvoyNaClSigningKey", {
+		get: () => {
+			return tEnvoyNaClSigningKey;
 		}
 	});
 	
@@ -46638,7 +46654,7 @@ function tEnvoy(openpgpRef = window.openpgp, naclRef = window.nacl, sjclRef = wi
 	}
 }
 
-function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtected = [], tEnvoy = TogaTech.tEnvoy) {
 	let _keyArmored;
 	let _password;
 	let _passwordProtected;
@@ -47077,7 +47093,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 	}
 }
 
-function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = TogaTech.tEnvoy) {
 	let _key;
 	let _nonce;
 	let _password;
@@ -47386,7 +47402,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 	}
 }
 
-function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = window.TogaTech.tEnvoy) {
+function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordProtected = [], tEnvoy = TogaTech.tEnvoy) {
 	let _key;
 	let _nonce;
 	let _password;
@@ -47638,9 +47654,9 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 }
 
 
-window.TogaTech.tEnvoy = new tEnvoy(window.openpgp, window.nacl, window.sjcl);
+TogaTech.tEnvoy = new tEnvoy(openpgp, nacl, sjcl);
 let message = () => {
-	console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf you were told to enter any text here, maybe to enable a hidden feature, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, visit togatech.org/selfxss.\n\n%ctEnvoy " + window.TogaTech.tEnvoy.version, "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;", "font-size: 12px;");
+	console.log("%cPowered by TogaTech (TogaTech.org)\n%cSTOP!%c\nTHE CONSOLE IS INTENDED FOR DEVELOPERS ONLY. USE AT YOUR OWN RISK.\n\nIF SOMEONE TOLD YOU TO TYPE ANYTHING HERE, YOU ARE BEING SCAMMED.%c\nIf you were told to enter any text here, maybe to enable a hidden feature, DO NOT TYPE IT HERE. Doing so could send your password and sensitive data to hackers.\n\nTo learn more, visit togatech.org/selfxss.\n\n%ctEnvoy " + TogaTech.tEnvoy.version, "font-size: 15px;", "color: red; font-size: 50px;", "font-size: 27px;", "font-size: 17px;", "font-size: 12px;");
 }
 message();
 setTimeout(() => {
