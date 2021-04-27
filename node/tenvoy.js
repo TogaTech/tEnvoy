@@ -2003,5 +2003,5 @@ const sjcl = require('../sjcl/sjcl.js');
 		}
 	}
 	
-	module.exports = tEnvoy;
+	module.exports = {tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey};
 })(module);
