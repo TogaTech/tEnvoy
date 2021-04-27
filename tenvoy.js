@@ -45665,21 +45665,21 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl) {
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.0.2";
+			return "v6.0.3";
 		}
 	});
 	
-	Object.defineProperty(this, "tEnvoyPGPKey", {
+	Object.defineProperty(this, "PGPKey", {
 		get: () => {
 			return tEnvoyPGPKey;
 		}
 	});
-	Object.defineProperty(this, "tEnvoyNaClKey", {
+	Object.defineProperty(this, "NaClKey", {
 		get: () => {
 			return tEnvoyNaClKey;
 		}
 	});
-	Object.defineProperty(this, "tEnvoyNaClSigningKey", {
+	Object.defineProperty(this, "NaClSigningKey", {
 		get: () => {
 			return tEnvoyNaClSigningKey;
 		}
