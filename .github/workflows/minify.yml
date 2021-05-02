@@ -25,3 +25,7 @@ jobs:
     - run: npm install uglify-js -g
     - run: uglifyjs ./tenvoy.js -o ./tenvoy.min.js -c -m --source-map "filename='./tenvoy.min.js.map',url='tenvoy.min.js.map'"
     - run: uglifyjs ./node/tenvoy.js -o ./node/tenvoy.min.js -c -m --source-map "filename='./node/tenvoy.min.js.map',url='tenvoy.min.js.map'"
+    - uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Minify
+
