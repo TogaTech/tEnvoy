@@ -15,7 +15,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl) {
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.0.3";
+			return "v6.0.4";
 		}
 	});
 	
