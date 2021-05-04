@@ -2,6 +2,18 @@
 
 More details coming soon...
 
+## Browser Import
+For the browser, only `/tenvoy.js` or `tenvoy.min.js` is required and has all dependencies bundled inside the single file.
+
+```html
+<script type="text/javascript" src="tenvoy.min.js"></script>
+<script>
+  const envoy = new tEnvoy();
+</script>
+```
+
+## Node.js Import
+
 ## Minify
 If you would like to minify the code yourself instead of using the provided `tenvoy.min.js` (and optional `tenvoy.min.js.map`), you can use [UglifyJS 3](https://github.com/mishoo/UglifyJS) to minifiy the code yourself.
 
