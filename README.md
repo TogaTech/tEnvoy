@@ -13,6 +13,19 @@ For the browser, only `./tenvoy.js` or `./tenvoy.min.js` is required and has all
 ```
 
 ## Node.js NPM Import
+tEnvoy is available through the NPM registry. To install tEnvoy, use the following command in the terminal:
+```bash
+npm install tenvoy
+```
+To install tEnvoy into an NPM project, use this command instead:
+```bash
+npm install tenvoy --save
+```
+To include tEnvoy in your code:
+```javascript
+const { tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey } = require("tenvoy");
+const envoy = new tEnvoy();
+```
 
 ## Node.js File Import
 For node.js file import, the filetree must be kept as-is without modifications. The entire repository must be cloned and placed within a directory, and `./node/tenvoy.js` or `./node/tenvoy.min.js` must be used to import the program.
