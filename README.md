@@ -3,16 +3,24 @@
 More details coming soon...
 
 ## Browser Import
-For the browser, only `/tenvoy.js` or `tenvoy.min.js` is required and has all dependencies bundled inside the single file.
+For the browser, only `./tenvoy.js` or `./tenvoy.min.js` is required and has all dependencies bundled inside the single file.
 
 ```html
-<script type="text/javascript" src="tenvoy.min.js"></script>
+<script type="text/javascript" src="./tenvoy.min.js"></script>
 <script>
   const envoy = new tEnvoy();
 </script>
 ```
 
-## Node.js Import
+## Node.js NPM Import
+
+## Node.js File Import
+For node.js file import, the filetree must be kept as-is without modifications. The entire repository must be cloned and placed within a directory, and `./node/tenvoy.js` or `./node/tenvoy.min.js` must be used to import the program.
+
+```javascript
+const { tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey } = require("./node/tenvoy.min.js");
+const envoy = new tEnvoy();
+```
 
 ## Minify
 If you would like to minify the code yourself instead of using the provided `tenvoy.min.js` (and optional `tenvoy.min.js.map`), you can use [UglifyJS 3](https://github.com/mishoo/UglifyJS) to minifiy the code yourself.
