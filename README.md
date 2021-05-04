@@ -3,7 +3,7 @@
 More details coming soon...
 
 ## Browser Import
-For the browser, only `./tenvoy.js` or `./tenvoy.min.js` is required and has all dependencies bundled inside the single file.
+For the browser, only `./tenvoy.js` or `./tenvoy.min.js` is required and has all dependencies bundled inside the single file. We recommend including `./tenvoy.min.js.map` in the same directory as `./tenvoy.min.js`, which allows a browser to reconstruct the original unminified file in the debugger.
 
 ```html
 <script type="text/javascript" src="./tenvoy.min.js"></script>
