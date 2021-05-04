@@ -2,6 +2,7 @@ const openpgp = require('../openpgpjs/dist/openpgp.js');
 const nacl = require('../tweetnacljs/nacl.js');
 const sjcl = require('../sjcl/sjcl.js');
 
+var TogaTech = {};
 
 function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl) {
 	let _openpgp = openpgpRef;
@@ -15,7 +16,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl) {
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.0.4";
+			return "v6.0.5";
 		}
 	});
 	
@@ -2002,5 +2003,7 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 		}
 	}
 }
+
+TogaTech.tEnvoy = new tEnvoy(openpgp, nacl, sjcl);
 
 module.exports = {tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey};
