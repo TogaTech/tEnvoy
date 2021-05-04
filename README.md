@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/tenvoy"><img src="https://img.shields.io/npm/v/tenvoy.svg?sanitize=true" alt="Version"></a>
   <a href="https://www.npmjs.com/package/tenvoy"><img src="https://img.shields.io/npm/l/tenvoy.svg?sanitize=true" alt="Version"></a>
+  <a href="https://www.npmjs.com/package/tenvoy"><img src="https://img.shields.io/npm/dm/tenvoy.svg?sanitize=true" alt="Monthly Downloads"></a>
 </p>
 
 PGP, NaCl, and PBKDF2 in node.js and the browser (hashing, random, encryption, decryption, signatures, conversions), used by [TogaTech.org](https://togatech.org/)
