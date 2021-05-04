@@ -1,5 +1,7 @@
 # tEnvoy
 
+PGP, NaCl, and PBKDF2 in node.js and the browser (hashing, random, encryption, decryption, signatures, conversions), used by [TogaTech.org](https://togatech.org/)
+
 More details coming soon...
 
 ## Browser Import
