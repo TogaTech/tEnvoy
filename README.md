@@ -66,7 +66,8 @@ If you would like to minify the code yourself instead of using the provided `ten
 
 To install UglifyJS 3 as a command line app through NPM, run `npm install uglify-js -g`.
 
-After UglifyJS 3 has been installed, you can run the following command in your terminal:
+After UglifyJS 3 has been installed, you can run the following commands in your terminal:
 ```bash
-uglifyjs tenvoy.js -o tenvoy.min.js -c -m --source-map "filename='tenvoy.min.js.map',url='tenvoy.min.js.map'"
+uglifyjs ./tenvoy.js -o ./tenvoy.min.js -c -m --source-map "filename='./tenvoy.min.js.map',url='tenvoy.min.js.map'"
+uglifyjs ./node/tenvoy.js -o ./node/tenvoy.min.js -c -m --source-map "filename='./node/tenvoy.min.js.map',url='tenvoy.min.js.map'"
 ```
