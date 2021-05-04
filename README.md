@@ -21,6 +21,10 @@ To install tEnvoy into an NPM project, use this command instead:
 ```bash
 npm install tenvoy --save
 ```
+Make sure to run the test cases to ensure that tEnvoy works properly:
+```bash
+npm test
+```
 To include tEnvoy in your code:
 ```javascript
 const { tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey } = require("tenvoy");
@@ -30,6 +34,15 @@ const envoy = new tEnvoy();
 ## Node.js File Import
 For node.js file import, the filetree must be kept as-is without modifications. The entire repository must be cloned and placed within a directory, and `./node/tenvoy.js` or `./node/tenvoy.min.js` must be used to import the program.
 
+First, ensure that all dependencies have been installed:
+```bash
+npm install
+```
+Make sure to run the test cases to ensure that tEnvoy works properly:
+```bash
+npm test
+```
+To include tEnvoy in your code:
 ```javascript
 const { tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey } = require("./node/tenvoy.min.js");
 const envoy = new tEnvoy();
