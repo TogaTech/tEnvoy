@@ -1,8 +1,14 @@
-# tEnvoy
+<p align="center">
+  <a href="https://togatech.org/" target="_blank" rel="noopener noreferrer">
+    <img src="https://togatech.org/favicon.png" width="100" alt="TogaTech Logo">
+  </a>
+</p>
+
+<h1 align="center">tEnvoy</h1>
 
 PGP, NaCl, and PBKDF2 in node.js and the browser (hashing, random, encryption, decryption, signatures, conversions), used by [TogaTech.org](https://togatech.org/)
 
-More details coming soon...
+# Imports
 
 ## Browser Import
 For the browser, only `./tenvoy.js` or `./tenvoy.min.js` is required and has all dependencies bundled inside the single file. We recommend including `./tenvoy.min.js.map` in the same directory as `./tenvoy.min.js`, which allows a browser to reconstruct the original unminified file in the debugger.
