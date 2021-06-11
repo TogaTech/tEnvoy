@@ -47576,6 +47576,51 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			throw assertion.error;
 		}
 	}
+
+	this.encryptEphemeral = (message, nonce, password = null) => {
+		let assertion = _assertPassword("encryptEphemeral", password);
+		if(assertion.proceed) {
+			let ephemeralKeys = _tEnvoy.keyFactory.genNaClKeys({
+				password: _password,
+				passwordProtected: _passwordProtected
+			});
+			if(_type == "public") {
+				let sharedKey = this.genSharedKey(ephemeralKeys.privateKey, _password, _password);
+				return sharedKey.encrypt(message, nonce, _password) + "::" + _tEnvoy.util.bytesToHex(ephemeralKeys.publicKey.getPublic(_password));
+			} else if(_type == "private") {
+				let sharedKey = this.toPublic(_password).genSharedKey(ephemeralKeys.privateKey, _password, _password);
+				return sharedKey.encrypt(message, nonce, _password) + "::" + _tEnvoy.util.bytesToHex(ephemeralKeys.publicKey.getPublic(_password));
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for ephemeral encryption, only public or private keys can be used to encrypt ephemerally.";
+			}
+			let sharedKey = publicKey.genSharedKey(ephemeralKeys.privateKey, _password, _password);
+			return sharedKey.encrypt(message, nonce, _password) + "::" + _tEnvoy.util.bytesToHex(ephemeralKeys.publicKey.getPublic(_password));
+		} else {
+			throw assertion.error;
+		}
+	}
+
+	this.decryptEphemeral = (encryptedEphemeral, password = null) => {
+		let assertion = _assertPassword("decryptEphemeral", password);
+		if(assertion.proceed) {
+			if(encryptedEphemeral == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument encryptedEphemeral of method decryptEphemeral is required and does not have a default value.";
+			}
+			if(encryptedEphemeral.split("::").length != 3) {
+				throw "tEnvoyNaClKey Fatal Error: Invalid ephemeral encrypted message.";
+			}
+			let encrypted = encryptedEphemeral.split("::").slice(0, 2).join("::");
+			let ephemeralKey = new tEnvoyNaClKey(_tEnvoy.util.hexToBytes(encryptedEphemeral.split("::")[2]), "public", _password, _passwordProtected, _tEnvoy);
+			if(_type == "private") {
+				let sharedKey = this.genSharedKey(ephemeralKey, _password, _password);
+				return sharedKey.decrypt(encrypted);
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for ephemeral decryption, only private keys can be used to decrypt ephemerally.";
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
 	
 	this.genSigningKeys = (password = null) => {
 		let assertion = _assertPassword("genSigningKey", password);
@@ -47613,7 +47658,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 					throw "tEnvoyNaClKey Fatal Error: Incompatible key types, one key should be public, and the other should be private.";
 				}
 			} else {
-				throw "tEnvoyNaClKey Fatal Error: Incompatible key types, both keys shoulkd be of type tEnvoyNaClKey.";
+				throw "tEnvoyNaClKey Fatal Error: Incompatible key types, both keys should be of type tEnvoyNaClKey.";
 			}
 		} else {
 			throw assertion.error;
@@ -47641,7 +47686,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 		_passwordProtected = [];
 		let protectable = [];
 		if(_type == "private" || _type == "shared" || _type == "secret") {
-			protectable = ["getPublic", "encrypt", "decrypt", "genSigningKey", "genSharedKey", "sign", "verify"];
+			protectable = ["getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
 		} else if(_type == "public") {
 			protectable = ["encrypt", "genSharedKey", "verify"];
 		}
@@ -47681,12 +47726,12 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 					if(password == null) {
 						return {
 							proceed: false,
-							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and no password was specified"
+							error: "tEnvoyNaClKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified"
 						};
 					} else if(!compareConstant(password, _password)) {
 						return {
 							proceed: false,
-							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+							error: "tEnvoyNaClKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
 						};
 					} else {
 						return {
@@ -47932,12 +47977,12 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 					if(password == null) {
 						return {
 							proceed: false,
-							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected, and no password was specified."
+							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified."
 						};
 					} else if(!compareConstant(password, _password)) {
 						return {
 							proceed: false,
-							error: "tEnvoyNaClKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
 						}
 					} else {
 						return {
