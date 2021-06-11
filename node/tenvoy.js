@@ -1,14 +1,12 @@
 const openpgp = require('../openpgpjs/dist/openpgp.js');
 const nacl = require('../tweetnacljs/nacl.js');
-const sjcl = require('../sjcl/sjcl.js');
 const sha256 = require('../fast-sha256-js');
 
 var TogaTech = {};
 
-function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref = sha256) {
+function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 	let _openpgp = openpgpRef;
 	let _nacl = naclRef;
-	let _sjcl = sjclRef;
 	let _sha256 = sha256Ref;
 	
 	
@@ -18,7 +16,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.1.0";
+			return "v7.0.0";
 		}
 	});
 	
@@ -32,11 +30,6 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 	Object.defineProperty(this.core, "nacl", {
 		get: () => {
 			return _nacl;
-		}
-	});
-	Object.defineProperty(this.core, "sjcl", {
-		get: () => {
-			return _sjcl;
 		}
 	});
 	Object.defineProperty(this.core, "sha256", {
@@ -767,67 +760,6 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 	
 	this.keyFactory = {};
 	
-	this.keyFactory.pbkdf2_legacy = (password, salt, rounds = 25000, size = 32 * 8) => {
-		if(password == null) {
-			throw "tEnvoy Fatal Error: argument password of method keyFactory.pbkdf2_legacy is required and does not have a default value.";
-		}
-		if(salt == null) {
-			throw "tEnvoy Fatal Error: argument salt of method keyFactory.pbkdf2_legacy is required and does not have a default value.";
-		}
-		if(rounds == null) {
-			rounds = 25000;
-		}
-		if(isNaN(parseInt(rounds))) {
-			rounds = 25000;
-		} else {
-			rounds = parseInt(rounds);
-		}
-		if(size == null) {
-			size = 32 * 8;
-		}
-		if(isNaN(parseInt(size))) {
-			size = 32 * 8;
-		} else {
-			size = parseInt(size);
-		}
-		return _sjcl.misc.pbkdf2(password, salt, rounds, size);
-	}
-	
-	this.keyFactory.pbkdf2hex_legacy = (password, salt, rounds = 25000, size = 32 * 8) => {
-		return new Promise(async (resolve, reject) => {
-			let seed = this.keyFactory.pbkdf2_legacy(password, salt, rounds, size);
-			let stringSeed = seed.join(",");
-			let shaSeed = await this.hash.sha512(stringSeed);
-			resolve(shaSeed);
-		});
-	}
-	
-	this.keyFactory.genSeedFromCredentials_legacy = (username, password, rounds = 25000, size = 32) => {
-		return new Promise(async (resolve, reject) => {
-			if(username == null) {
-				reject("tEnvoy Fatal Error: argument username of method keyFactory.genSeedFromCredentials_legacy is required and does not have a default value.");
-			}
-			if(password == null) {
-				reject("tEnvoy Fatal Error: argument password of method keyFactory.genSeedFromCredentials_legacy is required and does not have a default value.");
-			}
-			if(size == null) {
-				size = 32;
-			}
-			if(isNaN(parseInt(size))) {
-				size = 32;
-			} else {
-				size = parseInt(size);
-			}
-			let shaSeed = await this.keyFactory.pbkdf2hex_legacy(password, username, rounds, 32 * 8);
-			while(shaSeed.length < size * 2) {
-				shaSeed += await this.hash.sha512(shaSeed);
-			}
-			let encoded = this.util.hexToBytes(shaSeed);
-			let sliced = encoded.slice(0, size);
-			resolve(sliced);
-		});
-	}
-	
 	this.keyFactory.pbkdf2 = (password, salt, rounds = 150000, size = 32) => {
 		if(password == null) {
 			throw "tEnvoy Fatal Error: argument password of method keyFactory.pbkdf2 is required and does not have a default value.";
@@ -851,13 +783,10 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 		} else {
 			size = parseInt(size);
 		}
+		password = this.util.mixedToUint8Array(password, false);
+		salt = this.util.mixedToUint8Array(salt, false);
 		return _sha256.pbkdf2(password, salt, rounds, size);
 	}
-	
-	this.keyFactory.pbkdf2hex = (password, salt, rounds = 150000, size = 32) => {
-		return this.util.bytesToHex(this.keyFactory.pbkdf2(password, salt, rounds, size));
-	}
-	
 	this.keyFactory.genSeedFromCredentials = (username, password, rounds = 150000, size = 32) => {
 		if(username == null) {
 			reject("tEnvoy Fatal Error: argument username of method keyFactory.genSeedFromCredentials is required and does not have a default value.");
@@ -873,7 +802,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 		} else {
 			size = parseInt(size);
 		}
-		return this.keyFactory.pbkdf2(username, password, rounds, size);
+		return this.keyFactory.pbkdf2(password, username, rounds, size);
 	}
 	
 	this.keyFactory.genPGPKeys = (args) => {
@@ -2009,6 +1938,6 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 }
 
 
-TogaTech.tEnvoy = new tEnvoy(openpgp, nacl, sjcl, sha256);
+TogaTech.tEnvoy = new tEnvoy(openpgp, nacl, sha256);
 
 module.exports = {tEnvoy, tEnvoyPGPKey, tEnvoyNaClKey, tEnvoyNaClSigningKey};
