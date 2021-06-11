@@ -4,6 +4,10 @@ const sha256 = require('../fast-sha256-js');
 
 var TogaTech = {};
 
+if(window.TogaTech == null) {
+	window.TogaTech = {};
+}
+
 function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 	let _openpgp = openpgpRef;
 	let _nacl = naclRef;
@@ -94,11 +98,11 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		if(hex == null) {
 			throw "tEnvoy Fatal Error: argument hex of method util.hexToString is required and does not have a default value.";
 		}
-		let bytes = new Uint8Array(hex.length / 2);
+		let string = "";
 		for(let i = 0; i < hex.length; i += 2) {
-			bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+			string += String.fromCharCode(parseInt(hex.substring(i, i + 2), 16));
 		}
-		return bytes;
+		return string;
 	}
 	
 	this.util.bytesToHex = (bytes) => {
