@@ -46099,7 +46099,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v6.1.0";
+			return "v7.0.0";
 		}
 	});
 	
@@ -46932,13 +46932,14 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 		} else {
 			size = parseInt(size);
 		}
+		password = this.util.mixedToUint8Array(password, false);
+		salt = this.util.mixedToUint8Array(salt, false);
 		return _sha256.pbkdf2(password, salt, rounds, size);
 	}
 	
 	this.keyFactory.pbkdf2hex = (password, salt, rounds = 150000, size = 32) => {
 		return this.util.bytesToHex(this.keyFactory.pbkdf2(password, salt, rounds, size));
 	}
-	
 	this.keyFactory.genSeedFromCredentials = (username, password, rounds = 150000, size = 32) => {
 		if(username == null) {
 			reject("tEnvoy Fatal Error: argument username of method keyFactory.genSeedFromCredentials is required and does not have a default value.");
@@ -46954,7 +46955,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sjclRef = sjcl, sha256Ref 
 		} else {
 			size = parseInt(size);
 		}
-		return this.keyFactory.pbkdf2(username, password, rounds, size);
+		return this.keyFactory.pbkdf2(password, username, rounds, size);
 	}
 	
 	this.keyFactory.genPGPKeys = (args) => {
