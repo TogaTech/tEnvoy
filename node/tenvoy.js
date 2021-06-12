@@ -4,10 +4,6 @@ const sha256 = require('../fast-sha256-js');
 
 var TogaTech = {};
 
-if(window.TogaTech == null) {
-	window.TogaTech = {};
-}
-
 function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 	let _openpgp = openpgpRef;
 	let _nacl = naclRef;
