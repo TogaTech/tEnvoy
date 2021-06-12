@@ -47027,7 +47027,32 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 	}
 	
 	this.getPasswordProtected = () => {
-		return _passwordProtected;
+		return _tEnvoy.util.arrayDeepCopy(_passwordProtected);
+	}
+
+	this.setPasswordProtected = (passwordProtected, password = null) => {
+		let assertion = _assertPassword("setPasswordProtected", password);
+		if(assertion.proceed) {
+			_passwordProtected = [];
+			let protectable = [];
+			if(_type == "private") {
+				protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
+			} else if(_type == "public") {
+				protectable = ["getId", "encrypt", "verify"];
+			} else if(_type == "aes") {
+				protectable = ["encrypt", "decrypt"];
+			}
+			if(passwordProtected == null) {
+				passwordProtected = [];
+			}
+			for(let i = 0; i < passwordProtected.length; i++) {
+				if(protectable.includes(passwordProtected[i])) {
+					_passwordProtected.push(passwordProtected[i]);
+				}
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 	
 	this.getId = (password = null) => {
@@ -47471,7 +47496,30 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 	}
 	
 	this.getPasswordProtected = () => {
-		return _passwordProtected;
+		return _tEnvoy.util.arrayDeepCopy(_passwordProtected);
+	}
+
+	this.setPasswordProtected = (passwordProtected, password = null) => {
+		let assertion = _assertPassword("setPasswordProtected", password);
+		if(assertion.proceed) {
+			_passwordProtected = [];
+			let protectable = [];
+			if(_type == "private" || _type == "shared" || _type == "secret") {
+				protectable = ["getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
+			} else if(_type == "public") {
+				protectable = ["encrypt", "genSharedKey", "verify"];
+			}
+			if(passwordProtected == null) {
+				passwordProtected = [];
+			}
+			for(let i = 0; i < passwordProtected.length; i++) {
+				if(protectable.includes(passwordProtected[i])) {
+					_passwordProtected.push(passwordProtected[i]);
+				}
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 	
 	this.getPrivate = (password = null) => {
@@ -47829,7 +47877,30 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 	}
 	
 	this.getPasswordProtected = () => {
-		return _passwordProtected;
+		return _tEnvoy.util.arrayDeepCopy(_passwordProtected);
+	}
+
+	this.setPasswordProtected = (passwordProtected, password = null) => {
+		let assertion = _assertPassword("setPasswordProtected", password);
+		if(assertion.proceed) {
+			_passwordProtected = [];
+			let protectable = [];
+			if(_type == "private") {
+				protectable = ["getPublic", "sign", "verify"];
+			} else if(_type == "public") {
+				protectable = ["verify"];
+			}
+			if(passwordProtected == null) {
+				passwordProtected = [];
+			}
+			for(let i = 0; i < passwordProtected.length; i++) {
+				if(protectable.includes(passwordProtected[i])) {
+					_passwordProtected.push(passwordProtected[i]);
+				}
+			}
+		} else {
+			throw assertion.error;
+		}
 	}
 	
 	this.getPrivate = (password = null) => {
