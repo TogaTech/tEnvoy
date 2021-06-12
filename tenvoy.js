@@ -47527,7 +47527,11 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 		if(assertion.proceed) {
 			if(_type == "private" || _type == "secret" || _type == "shared") {
 				if(_password == null) {
-					return _tEnvoy.util.arrayDeepCopy(_key);
+					if(_key instanceof Array || _key instanceof Uint8Array) {
+						return _tEnvoy.util.arrayDeepCopy(_key);
+					} else {
+						return _key;
+					}
 				} else {
 					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
