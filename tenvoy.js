@@ -46148,6 +46148,24 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		}
 		return bytes;
 	}
+
+	this.util.arrayDeepCopy = (array) => {
+		if(array == null) {
+			throw "tEnvoy Fatal Error: argument array of method util.arrayDeepCopy is required and does not have a default value.";
+		}
+		let copy;
+		if(array instanceof Uint8Array) {
+			copy = new Uint8Array(array.length);
+		} else if(array instanceof Array) {
+			copy = new Array(array.length);
+		} else {
+			throw "tEnvoy Fatal Error: argument array of method util.arrayDeepCopy is invalid, array must be of type Uint8Array or Array.";
+		}
+		for(let i = 0; i < array.length; i++) {
+			copy[i] = array[i];
+		}
+		return copy;
+	}
 	
 	this.util.mixedToUint8Array = (mixed, includeType = false, length = null) => {
 		if(mixed == null) {
@@ -46835,13 +46853,13 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 			let privateArmored;
 			let publicArmored;
 			if(args.keyArmored != null) {
-				let key = new tEnvoyPGPKey(args.keyArmored, null, args.password, args.passwordProtected, this);
+				let key = new tEnvoyPGPKey(args.keyArmored, null, null, [], this);
 				let type = key.getType();
 				if(type == "private") {
-					privateArmored = key.getPrivateArmored(args.password);
-					publicArmored = key.getPublicArmored(args.password);
+					privateArmored = await key.getPrivateArmored(args.password);
+					publicArmored = await key.getPublicArmored(args.password);
 				} else if(type == "public") {
-					publicArmored = key.getPublicArmored(args.password);
+					publicArmored = await key.getPublicArmored(args.password);
 				} else {
 					reject("tEnvoy Fatal Error: argument key of object args of method keyFactory.genPGPKeys must either be public or private. For aes keys, use keyFactory.genPGPSymmetricKey instead.");
 				}
@@ -46881,7 +46899,6 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 				}
 				publicKey = new tEnvoyPGPKey(publicArmored, "public", args.password, args.passwordProtected, this);
 			} else {
-				console.log(0);
 				if(privateArmored != null) {
 					let encryptedPrivateKey = await _openpgp.encrypt({
 						message: await _openpgp.message.fromText(privateArmored),
@@ -46889,20 +46906,15 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 					}).catch((err) => {
 						reject(err);
 					});
-					console.log(1);
 					privateKey = new tEnvoyPGPKey(this.util.fixArmor(encryptedPrivateKey.data), "private", args.password, args.passwordProtected, this);
-					console.log(2);
 				}
-				console.log(3);
 				let encryptedPublicKey = await _openpgp.encrypt({
 					message: await _openpgp.message.fromText(publicArmored),
 					passwords: [args.password]
 				}).catch((err) => {
 					reject(err);
 				});
-				console.log(4);
 				publicKey = new tEnvoyPGPKey(this.util.fixArmor(encryptedPublicKey.data), "public", args.password, args.passwordProtected, this);
-				console.log(5);
 			}
 			resolve({
 				privateKey: privateKey,
@@ -47012,6 +47024,10 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 	
 	this.getType = () => {
 		return _type;
+	}
+	
+	this.getPasswordProtected = () => {
+		return _passwordProtected;
 	}
 	
 	this.getId = (password = null) => {
@@ -47401,9 +47417,9 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 			} else {
 				let alwaysProtected;
 				if(_type == "private") {
-					alwaysProtected = ["getPrivate", "setPrivate"];
+					alwaysProtected = ["getPrivate", "setPrivate", "setPasswordProtected"];
 				} else if(_type == "public") {
-					alwaysProtected = ["getPublic", "setPublic"];
+					alwaysProtected = ["getPublic", "setPublic", "setPasswordProtected"];
 				} else if(_type == "aes") {
 					alwaysProtected = ["getKey"];
 				}
@@ -47411,12 +47427,12 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 					if(password == null) {
 						return {
 							proceed: false,
-							error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and no password was specified."
+							error: "tEnvoyPGPKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified."
 						};
 					} else if(!compareConstant(password, _password)) {
 						return {
 							proceed: false,
-							error: "tEnvoyPGPKey Fatal Error: Key is password-protected, and an incorrect password was specified."
+							error: "tEnvoyPGPKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
 						};
 					} else {
 						return {
@@ -47454,12 +47470,16 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 		return _type;
 	}
 	
+	this.getPasswordProtected = () => {
+		return _passwordProtected;
+	}
+	
 	this.getPrivate = (password = null) => {
 		let assertion = _assertPassword("getPrivate", password);
 		if(assertion.proceed) {
 			if(_type == "private" || _type == "secret" || _type == "shared") {
 				if(_password == null) {
-					return _key;
+					return _tEnvoy.util.arrayDeepCopy(_key);
 				} else {
 					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
@@ -47508,7 +47528,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				return _nacl.box.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
 			} else if(_type == "public") {
 				if(_password == null) {
-					return _key;
+					return _tEnvoy.util.arrayDeepCopy(_key);
 				} else {
 					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
@@ -47760,9 +47780,9 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			} else {
 				let alwaysProtected;
 				if(_type == "private" || _type == "shared" || _type == "secret") {
-					alwaysProtected = ["getPrivate", "setPrivate"];
+					alwaysProtected = ["getPrivate", "setPrivate", "setPasswordProtected"];
 				} else if(_type == "public") {
-					alwaysProtected = ["getPublic", "setPublic"];
+					alwaysProtected = ["getPublic", "setPublic", "setPasswordProtected"];
 				}
 				if(alwaysProtected.includes(methodName) || _passwordProtected.includes(methodName)) {
 					if(password == null) {
@@ -47808,12 +47828,16 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 		return _type;
 	}
 	
+	this.getPasswordProtected = () => {
+		return _passwordProtected;
+	}
+	
 	this.getPrivate = (password = null) => {
 		let assertion = _assertPassword("getPrivate", password);
 		if(assertion.proceed) {
 			if(_type == "private") {
 				if(_password == null) {
-					return _key;
+					return _tEnvoy.util.arrayDeepCopy(_key);
 				} else {
 					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
@@ -47862,7 +47886,7 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				return _nacl.sign.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
 			} else if(_type == "public") {
 				if(_password == null) {
-					return _key;
+					return _tEnvoy.util.arrayDeepCopy(_key);
 				} else {
 					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
@@ -48011,9 +48035,9 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 			} else {
 				let alwaysProtected;
 				if(_type == "private") {
-					alwaysProtected = ["getPrivate", "setPrivate"];
+					alwaysProtected = ["getPrivate", "setPrivate", "setPasswordProtected"];
 				} else if(_type == "public") {
-					alwaysProtected = ["getPublic", "setPublic"];
+					alwaysProtected = ["getPublic", "setPublic", "setPasswordProtected"];
 				}
 				if(alwaysProtected.includes(methodName) || _passwordProtected.includes(methodName)) {
 					if(password == null) {
