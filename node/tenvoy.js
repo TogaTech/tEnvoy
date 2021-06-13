@@ -149,6 +149,25 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		}
 		return copy;
 	}
+
+	this.util.compareConstant = (inputted, original) => {
+		if(inputted == null) {
+			throw "tEnvoy Fatal Error: argument inputted of method util.compareConstant is required and does not have a default value.";
+		}
+		if(original == null) {
+			throw "tEnvoy Fatal Error: argument original of method util.compareConstant is required and does not have a default value.";
+		}
+		let result = true;
+		for(let i = 0; i < inputted.length; i++) {
+			if(i >= original.length || inputted[i] != original[i]) {
+				result = false;
+			}
+		}
+		if(inputted.length != original.length) {
+			result = false;
+		}
+		return result;
+	}
 	
 	this.util.mixedToUint8Array = (mixed, includeType = false, length = null) => {
 		if(mixed == null) {
@@ -1433,18 +1452,6 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 			}
 		}
 		_assertPassword = (methodName, password) => {
-			let compareConstant = (inputted, original) => {
-				let result = true;
-				for(let i = 0; i < inputted.length; i++) {
-					if(i >= original.length || inputted[i] != original[i]) {
-						result = false;
-					}
-				}
-				if(inputted.length != original.length) {
-					result = false;
-				}
-				return result;
-			}
 			if(_password == null) {
 				return {
 					proceed: true
@@ -1464,7 +1471,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 							proceed: false,
 							error: "tEnvoyPGPKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified."
 						};
-					} else if(!compareConstant(password, _password)) {
+					} else if(!_tEnvoy.util.compareConstant(password, _password)) {
 						return {
 							proceed: false,
 							error: "tEnvoyPGPKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
@@ -1860,18 +1867,6 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			}
 		}
 		_assertPassword = (methodName, password = null) => {
-			let compareConstant = (inputted, original) => {
-				let result = true;
-				for(let i = 0; i < inputted.length; i++) {
-					if(i >= original.length || inputted[i] != original[i]) {
-						result = false;
-					}
-				}
-				if(inputted.length != original.length) {
-					result = false;
-				}
-				return result;
-			}
 			if(_password == null) {
 				return {
 					proceed: true
@@ -1889,7 +1884,7 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 							proceed: false,
 							error: "tEnvoyNaClKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified"
 						};
-					} else if(!compareConstant(password, _password)) {
+					} else if(!_tEnvoy.util.compareConstant(password, _password)) {
 						return {
 							proceed: false,
 							error: "tEnvoyNaClKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
@@ -2172,18 +2167,6 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 			}
 		}
 		_assertPassword = (methodName, password = null) => {
-			let compareConstant = (inputted, original) => {
-				let result = true;
-				for(let i = 0; i < inputted.length; i++) {
-					if(i >= original.length || inputted[i] != original[i]) {
-						result = false;
-					}
-				}
-				if(inputted.length != original.length) {
-					result = false;
-				}
-				return result;
-			}
 			if(_password == null) {
 				return {
 					proceed: true
@@ -2201,7 +2184,7 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 							proceed: false,
 							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected for method " + methodName + ", and no password was specified."
 						};
-					} else if(!compareConstant(password, _password)) {
+					} else if(!_tEnvoy.util.compareConstant(password, _password)) {
 						return {
 							proceed: false,
 							error: "tEnvoyNaClSigningKey Fatal Error: Key is password-protected for method " + methodName + ", and an incorrect password was specified."
