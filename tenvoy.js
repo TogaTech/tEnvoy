@@ -46968,8 +46968,12 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 					publicKey = privateKey.toPublic();
 				} else if(args.keyType == "public") {
 					publicKey = new tEnvoyNaClKey(args.key, "public", args.password, args.passwordProtected, this);
+				} else if(args.keyType == "privateSigning") {
+					privateSigningKey = new tEnvoyNaClSigningKey(args.key, "private", args.password, args.passwordProtected, this);
+				} else if(args.keyType == "publicSigning") {
+					publicSigningKey = new tEnvoyNaClSigningKey(args.key, "public", args.password, args.passwordProtected, this);
 				} else {
-					throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys must either be public or private. For secret (or shared) keys, use keyFactory.genNaClSymmetricKey instead.";
+					throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys must either be private, public, privateSigning, or publicSigning. For secret (or shared) keys, use keyFactory.genNaClSymmetricKey instead.";
 				}
 			} else {
 				throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys is required when using args.key and does not have a default value.";
