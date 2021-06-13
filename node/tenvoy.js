@@ -846,6 +846,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 				} else {
 					reject("tEnvoy Fatal Error: argument key of object args of method keyFactory.genPGPKeys must either be public or private. For aes keys, use keyFactory.genPGPSymmetricKey instead.");
 				}
+				key.destroy();
 			} else {
 				if(args.options == null) {
 					args.options = {
@@ -998,8 +999,24 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 	let _passwordProtected;
 	let _type;
 	let _assertPassword;
+	let _getKey;
+	let _setKey;
 	let _tEnvoy = tEnvoy;
 	let _openpgp = _tEnvoy.core.openpgp;
+
+	this.destroy = (password = null) => {
+		let assertion = _assertPassword("destroy", password);
+		if(assertion.proceed) {
+			for(let i = 0; i < _keyArmored.length; i++) {
+				_keyArmored[i] = 0;
+			}
+			for(method in this) {
+				delete this[method];
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
 	
 	this.toString = () => {
 		return `[tEnvoyPGPKey ${_type}]`;
@@ -1019,11 +1036,11 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 			_passwordProtected = [];
 			let protectable = [];
 			if(_type == "private") {
-				protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
+				protectable = ["destroy", "getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
 			} else if(_type == "public") {
-				protectable = ["getId", "encrypt", "verify"];
+				protectable = ["destroy", "getId", "encrypt", "verify"];
 			} else if(_type == "aes") {
-				protectable = ["encrypt", "decrypt"];
+				protectable = ["destroy", "encrypt", "decrypt"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -1058,12 +1075,12 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 		return new Promise(async (resolve, reject) => {
 			if(_type == "aes") {
 				if(_password == null) {
-					resolve(_keyArmored);
+					resolve(_getKey());
 				} else {
 					let assertion = _assertPassword("getKey", password);
 					if(assertion.proceed) {
 						let decryptedKey = await _openpgp.decrypt({
-							message: await _openpgp.message.readArmored(_keyArmored),
+							message: await _openpgp.message.readArmored(_getKey()),
 							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
@@ -1104,7 +1121,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 		return new Promise(async (resolve, reject) => {
 			if(_type == "private") {
 				if(_password == null) {
-					resolve(_keyArmored);
+					resolve(_getKey());
 				} else {
 					let assertion = _assertPassword("getPrivate", password);
 					if(assertion.proceed) {
@@ -1133,7 +1150,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 				}
 				keyArmored = _tEnvoy.util.fixArmor(keyArmored);
 				if(_password == null) {
-					_keyArmored = keyArmored;
+					_setKey(keyArmored);
 					resolve();
 				} else {
 					let assertion = _assertPassword("setPrivate", password);
@@ -1144,7 +1161,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 						}).catch((err) => {
 							reject(err);
 						});
-						_keyArmored = _tEnvoy.util.fixArmor(privateKeyEncrypted.data);
+						_setKey(_tEnvoy.util.fixArmor(privateKeyEncrypted.data));
 						resolve();
 					} else {
 						reject(assertion.error);
@@ -1166,10 +1183,10 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 				} else if(_type == "public") {
 					let publicKeyArmored;
 					if(_password == null) {
-						publicKeyArmored = _keyArmored;
+						publicKeyArmored = _getKey();
 					} else {
 						let decryptedKey = await _openpgp.decrypt({
-							message: await _openpgp.message.readArmored(_keyArmored),
+							message: await _openpgp.message.readArmored(_getKey()),
 							passwords: [_password]
 						}).catch((err) => {
 							reject(err);
@@ -1195,7 +1212,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 			if(assertion.proceed) {
 				if(_type == "public") {
 					if(_password == null) {
-						_keyArmored = publicKey.armor();
+						_setKey(_tEnvoy.util.fixArmor(publicKey.armor()));
 						resolve();
 					} else {
 						let publicKeyEncrypted = await _openpgp.encrypt({
@@ -1204,7 +1221,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 						}).catch((err) => {
 							reject(err);
 						});
-						_keyArmored = _tEnvoy.util.fixArmor(publicKeyEncrypted.data);
+						_setKey(_tEnvoy.util.fixArmor(publicKeyEncrypted.data));
 						resolve();
 					}
 				} else if(_type == "private") {
@@ -1232,9 +1249,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 			if(keyArmored == null) {
 				reject("tEnvoyPGPKey Fatal Error: argument keyArmored of method setPublicArmored is required and does not have a default value.");
 			} else {
-				keyArmored = _tEnvoy.util.fixArmor(keyArmored).catch((err) => {
-					reject(err);
-				});
+				keyArmored = _tEnvoy.util.fixArmor(keyArmored);
 				let openpgpkey = await _openpgp.key.readArmored(keyArmored).catch((err) => {
 					reject(err);
 				});
@@ -1386,16 +1401,24 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 	if(!["public", "private", "aes"].includes(_type)) {
 		throw "tEnvoyPGPKey Fatal Error: argument type of method constructor is invalid.";
 	} else {
+		_getKey = () => {
+			return _tEnvoy.util.unpack(_keyArmored);
+		}
+
+		_setKey = (newKey) => {
+			_keyArmored = _tEnvoy.util.pack(newKey);
+		}
+
 		_password = password;
-		_keyArmored = keyArmored;
+		_setKey(keyArmored);
 		_passwordProtected = [];
 		let protectable = [];
 		if(_type == "private") {
-			protectable = ["getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
+			protectable = ["destroy", "getId", "getPublic", "encrypt", "decrypt", "sign", "verify"];
 		} else if(_type == "public") {
-			protectable = ["getId", "encrypt", "verify"];
+			protectable = ["destroy", "getId", "encrypt", "verify"];
 		} else if(_type == "aes") {
-			protectable = ["encrypt", "decrypt"];
+			protectable = ["destroy", "encrypt", "decrypt"];
 		}
 		if(passwordProtected == null) {
 			passwordProtected = [];
@@ -1454,6 +1477,7 @@ function tEnvoyPGPKey(keyArmored, type = "aes", password = null, passwordProtect
 				}
 			}
 		}
+
 		if(_type != "aes") {
 			this.getPublic(_password);
 		}
@@ -1467,8 +1491,24 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 	let _passwordProtected;
 	let _type;
 	let _assertPassword;
+	let _getKey;
+	let _setKey;
 	let _tEnvoy = tEnvoy;
 	let _nacl = _tEnvoy.core.nacl;
+
+	this.destroy = (password = null) => {
+		let assertion = _assertPassword("destroy", password);
+		if(assertion.proceed) {
+			for(let i = 0; i < _key.length; i++) {
+				_key[i] = 0;
+			}
+			for(method in this) {
+				delete this[method];
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
 	
 	this.toString = () => {
 		return `[tEnvoyNaClKey ${_type}]`;
@@ -1488,9 +1528,9 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			_passwordProtected = [];
 			let protectable = [];
 			if(_type == "private" || _type == "shared" || _type == "secret") {
-				protectable = ["getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
+				protectable = ["destroy", "getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
 			} else if(_type == "public") {
-				protectable = ["encrypt", "genSharedKey", "verify"];
+				protectable = ["destroy", "encrypt", "genSharedKey", "verify"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -1510,13 +1550,15 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 		if(assertion.proceed) {
 			if(_type == "private" || _type == "secret" || _type == "shared") {
 				if(_password == null) {
-					if(_key instanceof Array || _key instanceof Uint8Array) {
-						return _tEnvoy.util.arrayDeepCopy(_key);
+					if(_getKey() instanceof Array || _getKey() instanceof Uint8Array) {
+						return _tEnvoy.util.arrayDeepCopy(_getKey());
 					} else {
-						return _key;
+						return _getKey();
 					}
 				} else {
-					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					let decryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					let decrypted = decryptionKey.decrypt(_getKey());
+					decryptionKey.destroy();
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
@@ -1543,10 +1585,12 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			}
 			if(_type == "private" || _type == "secret" || _type == "shared") {
 				if(_password == null) {
-					_key = privateKey;
+					_setKey(privateKey);
 				} else {
 					_nonce = _nacl.randomBytes(12);
-					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(privateKey, _nonce);
+					let encryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					_setKey(encryptionKey.encrypt(privateKey, _nonce));
+					encryptionKey.destroy();
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key does not have a private, secret, or shared component.";
@@ -1563,9 +1607,11 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				return _nacl.box.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
 			} else if(_type == "public") {
 				if(_password == null) {
-					return _tEnvoy.util.arrayDeepCopy(_key);
+					return _tEnvoy.util.arrayDeepCopy(_getKey());
 				} else {
-					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					let decryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					let decrypted = decryptionKey.decrypt(_getKey());
+					decryptionKey.destroy();
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
@@ -1594,10 +1640,12 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component.";
 			} else if(_type == "public") {
 				if(_password == null) {
-					_key = publicKey;
+					_setKey(publicKey);
 				} else {
 					_nonce = _nacl.randomBytes(12);
-					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(publicKey, _nonce);
+					let encryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					_setKey(encryptionKey.encrypt(publicKey, _nonce));
+					encryptionKey.destroy();
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key does not have a public component.";
@@ -1710,8 +1758,10 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 			let ephemeralKey = new tEnvoyNaClKey(_tEnvoy.util.hexToBytes(encryptedEphemeral.split("::")[2]), "public", _password, _passwordProtected, _tEnvoy);
 			if(_type == "private") {
 				let sharedKey = this.genSharedKey(ephemeralKey, _password, _password);
+				ephemeralKey.destroy();
 				return sharedKey.decrypt(encrypted);
 			} else {
+				ephemeralKey.destroy();
 				throw "tEnvoyNaClKey Fatal Error: Key cannot be used for ephemeral decryption, only private keys can be used to decrypt ephemerally.";
 			}
 		} else {
@@ -1769,23 +1819,33 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 	if(!["public", "private", "secret", "shared"].includes(type)) {
 		throw "tEnvoyNaClKey Fatal Error: argument type of method constructor is invalid.";
 	} else {
+		_getKey = () => {
+			return _tEnvoy.util.unpack(_key);
+		}
+
+		_setKey = (newKey) => {
+			_key = _tEnvoy.util.pack(newKey);
+		}
+
 		_password = password;
 		if(_type == "secret") {
 			key = _tEnvoy.util.pack(key, 32);
 		}
 		if(password == null) {
-			_key = key;
+			_setKey(key);
 		} else {
 			_nonce = _nacl.randomBytes(12);
-			_key = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy).encrypt(key, _nonce);
+			let encryptionKey = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy);
+			_setKey(encryptionKey.encrypt(key, _nonce));
+			encryptionKey.destroy();
 		}
 		_type = type;
 		_passwordProtected = [];
 		let protectable = [];
 		if(_type == "private" || _type == "shared" || _type == "secret") {
-			protectable = ["getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
+			protectable = ["destroy", "getPublic", "encrypt", "decrypt", "encryptEphemeral", "decryptEphemeral", "genSigningKey", "genSharedKey", "sign", "verify"];
 		} else if(_type == "public") {
-			protectable = ["encrypt", "genSharedKey", "verify"];
+			protectable = ["destroy", "encrypt", "genSharedKey", "verify"];
 		}
 		if(passwordProtected == null) {
 			passwordProtected = [];
@@ -1852,8 +1912,24 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 	let _passwordProtected;
 	let _type;
 	let _assertPassword;
+	let _getKey;
+	let _setKey;
 	let _tEnvoy = tEnvoy;
 	let _nacl = _tEnvoy.core.nacl;
+
+	this.destroy = (password = null) => {
+		let assertion = _assertPassword("destroy", password);
+		if(assertion.proceed) {
+			for(let i = 0; i < _key.length; i++) {
+				_key[i] = 0;
+			}
+			for(method in this) {
+				delete this[method];
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
 	
 	this.toString = () => {
 		return `[tEnvoyNaClSigningKey ${_type}]`;
@@ -1873,9 +1949,9 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 			_passwordProtected = [];
 			let protectable = [];
 			if(_type == "private") {
-				protectable = ["getPublic", "sign", "verify"];
+				protectable = ["destroy", "getPublic", "sign", "verify"];
 			} else if(_type == "public") {
-				protectable = ["verify"];
+				protectable = ["destroy", "verify"];
 			}
 			if(passwordProtected == null) {
 				passwordProtected = [];
@@ -1895,9 +1971,11 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 		if(assertion.proceed) {
 			if(_type == "private") {
 				if(_password == null) {
-					return _tEnvoy.util.arrayDeepCopy(_key);
+					return _tEnvoy.util.arrayDeepCopy(_getKey());
 				} else {
-					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					let decryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					let decrypted = decryptionKey.decrypt(_getKey());
+					decryptionKey.destroy();
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
@@ -1924,10 +2002,12 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 			}
 			if(_type == "private") {
 				if(_password == null) {
-					_key = privateKey;
+					_setKey(privateKey);
 				} else {
 					_nonce = _nacl.randomBytes(12);
-					_key = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).encrypt(privateKey, _nonce);
+					let encryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					_setKey(encryptionKey.encrypt(privateKey, _nonce));
+					encryptionKey.destroy();
 				}
 			} else {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a private component.";
@@ -1944,9 +2024,11 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				return _nacl.sign.keyPair.fromSecretKey(this.getPrivate(_password)).publicKey;
 			} else if(_type == "public") {
 				if(_password == null) {
-					return _tEnvoy.util.arrayDeepCopy(_key);
+					return _tEnvoy.util.arrayDeepCopy(_getKey());
 				} else {
-					let decrypted = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy).decrypt(_key);
+					let decryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					let decrypted = decryptionKey.decrypt(_getKey());
+					decryptionKey.destroy();
 					if(_tEnvoy.util.bytesToHex(decrypted.nonce) == _tEnvoy.util.bytesToHex(_nonce)) {
 						return decrypted.message;
 					} else {
@@ -1975,10 +2057,12 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				throw "tEnvoyNaClSigningKey Fatal Error: Key has a public component that depends on the private component.";
 			} else if(_type == "public") {
 				if(_password == null) {
-					_key = publicKey;
+					_setKey(publicKey);
 				} else {
 					_nonce = _nacl.randomBytes(12);
-					_key = new tEnvoyNaClSigningKey(_password, "secret", null, [], _tEnvoy).encrypt(publicKey, _nonce);
+					let encryptionKey = new tEnvoyNaClKey(_password, "secret", null, [], _tEnvoy);
+					_setKey(encryptionKey.encrypt(publicKey, _nonce));
+					encryptionKey.destroy();
 				}
 			} else {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a public component.";
@@ -2050,20 +2134,30 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 	if(!["public", "private"].includes(type)) {
 		throw "tEnvoyNaClSigningKey Fatal Error: argument type of method constructor is invalid.";
 	} else {
+		_getKey = () => {
+			return _tEnvoy.util.unpack(_key);
+		}
+
+		_setKey = (newKey) => {
+			_key = _tEnvoy.util.pack(newKey);
+		}
+
 		_password = password;
 		if(password == null) {
-			_key = key;
+			_setKey(key);
 		} else {
 			_nonce = _nacl.randomBytes(12);
-			_key = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy).encrypt(key, _nonce);
+			let encryptionKey = new tEnvoyNaClKey(password, "secret", null, [], _tEnvoy);
+			_setKey(encryptionKey.encrypt(key, _nonce));
+			encryptionKey.destroy();
 		}
 		_type = type;
 		_passwordProtected = [];
 		let protectable = [];
 		if(_type == "private") {
-			protectable = ["getPublic", "sign", "verify"];
+			protectable = ["destroy", "getPublic", "sign", "verify"];
 		} else if(_type == "public") {
-			protectable = ["verify"];
+			protectable = ["destroy", "verify"];
 		}
 		if(passwordProtected == null) {
 			passwordProtected = [];
