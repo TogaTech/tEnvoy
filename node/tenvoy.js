@@ -963,8 +963,20 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		let privateSigningKey;
 		let publicSigningKey;
 		let naclKeyPair;
-		if(args.key != null) {
+		if(args.key != null || args.backup != null) {
 			if(args.keyType != null) {
+				if(args.key == null) {
+					let backupKey = this.keyFactory.genNaClKeys({
+						password: args.password,
+						passwordProtected: args.passwordProtected
+					})[args.keyType + "Key"];
+					backupKey.fromBackup(args.backup, args.password);
+					if(args.keyType.startsWith("private")) {
+						args.key = backupKey.getPrivate(args.password);
+					} else {
+						args.key = backupKey.getPublic(args.password);
+					}
+				}
 				if(args.keyType == "private") {
 					privateKey = new tEnvoyNaClKey(args.key, "private", args.password, args.passwordProtected, this);
 					publicKey = privateKey.toPublic();
@@ -972,13 +984,14 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 					publicKey = new tEnvoyNaClKey(args.key, "public", args.password, args.passwordProtected, this);
 				} else if(args.keyType == "privateSigning") {
 					privateSigningKey = new tEnvoyNaClSigningKey(args.key, "private", args.password, args.passwordProtected, this);
+					publicSigningKey = privateSigningKey.toPublic();
 				} else if(args.keyType == "publicSigning") {
 					publicSigningKey = new tEnvoyNaClSigningKey(args.key, "public", args.password, args.passwordProtected, this);
 				} else {
 					throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys must either be private, public, privateSigning, or publicSigning. For secret (or shared) keys, use keyFactory.genNaClSymmetricKey instead.";
 				}
 			} else {
-				throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys is required when using args.key and does not have a default value.";
+				throw "tEnvoy Fatal Error: argument keyType of object args of method keyFactory.genNaClKeys is required when using either args.key or args.backup and does not have a default value.";
 			}
 		} else {
 			if(args.seed == null) {
