@@ -1,6 +1,6 @@
 {
   "name": "tenvoy",
-  "version": "7.0.4",
+  "version": "7.0.5",
   "description": "PGP, NaCl, and PBKDF2 in node.js and the browser (hashing, random, encryption, decryption, signatures, conversions), used by TogaTech.org",
   "main": "./node/tenvoy.min.js",
   "browser": {
