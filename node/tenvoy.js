@@ -1617,8 +1617,8 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				throw "tEnvoyNaClKey Fatal Error: argument privateKey of method setPrivate is required and does not have a default value.";
 			}
 			privateKey = _tEnvoy.util.mixedToUint8Array(privateKey, false);
-			if(privateKey.length != 32) {
-				throw "tEnvoyNaClKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be 32 (was " + privateKey.length + ").";
+			if(privateKey.length != nacl.box.secretKeyLength) {
+				throw "tEnvoyNaClKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be " + nacl.box.secretKeyLength + " (was " + privateKey.length + ").";
 			}
 			if(_type == "private" || _type == "secret" || _type == "shared") {
 				if(_getPassword() == null) {
@@ -1670,8 +1670,8 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				throw "tEnvoyNaClKey Fatal Error: argument publicKey of method setPublic is required and does not have a default value.";
 			}
 			publicKey = _tEnvoy.util.mixedToUint8Array(publicKey, false);
-			if(publicKey.length != 32) {
-				throw "tEnvoyNaClKey Fatal Error: argument publicKey of method setPublic is invalid, length should be 32 (was " + publicKey.length + ").";
+			if(publicKey.length != nacl.box.publicKeyLength) {
+				throw "tEnvoyNaClKey Fatal Error: argument publicKey of method setPublic is invalid, length should be " + nacl.box.publicKeyLength + " (was " + publicKey.length + ").";
 			}
 			if(_type == "private") {
 				throw "tEnvoyNaClKey Fatal Error: Key has a public component that depends on the private component.";
@@ -1686,6 +1686,112 @@ function tEnvoyNaClKey(key, type = "secret", password = null, passwordProtected 
 				}
 			} else {
 				throw "tEnvoyNaClKey Fatal Error: Key does not have a public component.";
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
+
+	this.backup = (password = null) => {
+		let assertion = _assertPassword("getPrivate", password);
+		if(assertion.proceed) {
+			let keyList;
+			if(_type == "private") {
+				keyList = this.getPrivate(_getPassword());
+			} else if(_type == "public") {
+				keyList = this.getPublic(_getPassword());
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: Only private and public keys can be converted into a backup.";
+			}
+			if(keyList instanceof Uint8Array) {
+				keyArray = new Array(keyList.length);
+				for(let i = 0; i < keyList.length; i++) {
+					keyArray[i] = keyList[i];
+				}
+				let chunks = [];
+				while(keyArray.length > 0) {
+					chunks.push(keyArray.splice(0, 4));
+				}
+				let indices = [];
+				for(let i = 0; i < chunks.length; i++) {
+					let chunk = chunks[i];
+					let num = chunk[0] + (chunk[1] * 255) + (chunk[2] * 255 * 255) + (chunk[3] * 255 * 255 * 255);
+					indices.push(Math.floor(num / (2048 * 2048)));
+					num -= (Math.floor(num / (2048 * 2048)) * (2048 * 2048));
+					indices.push(Math.floor(num / 2048));
+					num -= (Math.floor(num / 2048) * 2048);
+					indices.push(num);
+				}
+				let words = [];
+				for(let i = 0; i < indices.length; i++) {
+					words.push(_tEnvoy.wordsList[indices[i]]);
+				}
+				return words.join(" ");
+			} else {
+				throw "tEnvoyNaClKey Fatal Error: The key is invalid and therefore cannot be converted into a backup. The key must be of type Uint8Array.";
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
+
+	this.fromBackup = (backup, password = null) => {
+		let assertion = _assertPassword("setPrivate", password);
+		if(assertion.proceed) {
+			if(backup == null) {
+				throw "tEnvoyNaClKey Fatal Error: argument backup of method fromBackup is required and does not have a default value.";
+			} else {
+				let backupList = backup.split(" ");
+				let indices = [];
+				for(let i = 0; i < backupList.length; i++) {
+					let index = _tEnvoy.wordsList.findIndex(w => w == backupList[i]);
+					if(index > -1) {
+						indices.push(index);
+					} else {
+						throw "tEnvoyNaClKey Fatal Error: argument backup of method fromBackup is invalid.";
+					}
+				}
+				let indexGroups = [];
+				while(indices.length > 0) {
+					indexGroups.push(indices.splice(0, 3));
+				}
+				let nums = [];
+				for(let i = 0; i < indexGroups.length; i++) {
+					let group = indexGroups[i];
+					let num = (group[0] * (2048 * 2048)) + (group[1] * 2048) + group[2];
+					nums.push(num);
+				}
+				let chunks = [];
+				for(let i = 0; i < nums.length; i++) {
+					let num = nums[i];
+					let chunk = new Array(4);
+					chunk[3] = Math.floor(num / (255 * 255 * 255));
+					num -= chunk[3] * (255 * 255 * 255);
+					chunk[2] = Math.floor(num / (255 * 255));
+					num -= chunk[2] * (255 * 255);
+					chunk[1] = Math.floor(num / 255);
+					num -= chunk[1] * 255;
+					chunk[0] = num;
+					chunks.push(chunk);
+				}
+				let keyArray = [];
+				for(let i = 0; i < chunks.length; i++) {
+					let chunk = chunks[i];
+					for(let j = 0; j < chunk.length; j++) {
+						keyArray.push(chunk[j]);
+					}
+				}
+				let keyList = new Uint8Array(keyArray.length);
+				for(let i = 0; i < keyArray.length; i++) {
+					keyList[i] = keyArray[i];
+				}
+				if(_type == "private") {
+					this.setPrivate(keyList, _getPassword());
+				} else if(_type == "public") {
+					this.setPublic(keyList, _getPassword());
+				} else {
+					throw "tEnvoyNaClKey Fatal Error: Only private and public keys can be loaded from a backup.";
+				}
 			}
 		} else {
 			throw assertion.error;
@@ -2039,8 +2145,8 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				throw "tEnvoyNaClSigningKey Fatal Error: argument privateKey of method setPrivate is required and does not have a default value.";
 			}
 			privateKey = _tEnvoy.util.mixedToUint8Array(privateKey, false);
-			if(privateKey.length != 32) {
-				throw "tEnvoyNaClSigningKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be 32 (was " + privateKey.length + ").";
+			if(privateKey.length != nacl.sign.secretKeyLength) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument privateKey of method setPrivate is invalid, length should be " + nacl.sign.secretKeyLength + " (was " + privateKey.length + ").";
 			}
 			if(_type == "private") {
 				if(_getPassword() == null) {
@@ -2092,8 +2198,8 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				throw "tEnvoyNaClSigningKey Fatal Error: argument publicKey of method setPublic is required and does not have a default value.";
 			}
 			publicKey = _tEnvoy.util.mixedToUint8Array(publicKey, false);
-			if(publicKey.length != 32) {
-				throw "tEnvoyNaClSigningKey Fatal Error: argument publicKey of method setPublic is invalid, length should be 32 (was " + publicKey.length + ").";
+			if(publicKey.length != nacl.sign.publicKeyLength) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument publicKey of method setPublic is invalid, length should be " + nacl.sign.publicKeyLength + " (was " + publicKey.length + ").";
 			}
 			if(_type == "private") {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key has a public component that depends on the private component.";
@@ -2108,6 +2214,112 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 				}
 			} else {
 				throw "tEnvoyNaClSigningKey Fatal Error: Key does not have a public component.";
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
+
+	this.backup = (password = null) => {
+		let assertion = _assertPassword("getPrivate", password);
+		if(assertion.proceed) {
+			let keyList;
+			if(_type == "private") {
+				keyList = this.getPrivate(_getPassword());
+			} else if(_type == "public") {
+				keyList = this.getPublic(_getPassword());
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: Only private and public keys can be converted into a backup.";
+			}
+			if(keyList instanceof Uint8Array) {
+				keyArray = new Array(keyList.length);
+				for(let i = 0; i < keyList.length; i++) {
+					keyArray[i] = keyList[i];
+				}
+				let chunks = [];
+				while(keyArray.length > 0) {
+					chunks.push(keyArray.splice(0, 4));
+				}
+				let indices = [];
+				for(let i = 0; i < chunks.length; i++) {
+					let chunk = chunks[i];
+					let num = chunk[0] + (chunk[1] * 255) + (chunk[2] * 255 * 255) + (chunk[3] * 255 * 255 * 255);
+					indices.push(Math.floor(num / (2048 * 2048)));
+					num -= (Math.floor(num / (2048 * 2048)) * (2048 * 2048));
+					indices.push(Math.floor(num / 2048));
+					num -= (Math.floor(num / 2048) * 2048);
+					indices.push(num);
+				}
+				let words = [];
+				for(let i = 0; i < indices.length; i++) {
+					words.push(_tEnvoy.wordsList[indices[i]]);
+				}
+				return words.join(" ");
+			} else {
+				throw "tEnvoyNaClSigningKey Fatal Error: The key is invalid and therefore cannot be converted into a backup. The key must be of type Uint8Array.";
+			}
+		} else {
+			throw assertion.error;
+		}
+	}
+
+	this.fromBackup = (backup, password = null) => {
+		let assertion = _assertPassword("setPrivate", password);
+		if(assertion.proceed) {
+			if(backup == null) {
+				throw "tEnvoyNaClSigningKey Fatal Error: argument backup of method fromBackup is required and does not have a default value.";
+			} else {
+				let backupList = backup.split(" ");
+				let indices = [];
+				for(let i = 0; i < backupList.length; i++) {
+					let index = _tEnvoy.wordsList.findIndex(w => w == backupList[i]);
+					if(index > -1) {
+						indices.push(index);
+					} else {
+						throw "tEnvoyNaClSigningKey Fatal Error: argument backup of method fromBackup is invalid.";
+					}
+				}
+				let indexGroups = [];
+				while(indices.length > 0) {
+					indexGroups.push(indices.splice(0, 3));
+				}
+				let nums = [];
+				for(let i = 0; i < indexGroups.length; i++) {
+					let group = indexGroups[i];
+					let num = (group[0] * (2048 * 2048)) + (group[1] * 2048) + group[2];
+					nums.push(num);
+				}
+				let chunks = [];
+				for(let i = 0; i < nums.length; i++) {
+					let num = nums[i];
+					let chunk = new Array(4);
+					chunk[3] = Math.floor(num / (255 * 255 * 255));
+					num -= chunk[3] * (255 * 255 * 255);
+					chunk[2] = Math.floor(num / (255 * 255));
+					num -= chunk[2] * (255 * 255);
+					chunk[1] = Math.floor(num / 255);
+					num -= chunk[1] * 255;
+					chunk[0] = num;
+					chunks.push(chunk);
+				}
+				let keyArray = [];
+				for(let i = 0; i < chunks.length; i++) {
+					let chunk = chunks[i];
+					for(let j = 0; j < chunk.length; j++) {
+						keyArray.push(chunk[j]);
+					}
+				}
+				let keyList = new Uint8Array(keyArray.length);
+				for(let i = 0; i < keyArray.length; i++) {
+					keyList[i] = keyArray[i];
+				}
+				if(_type == "private") {
+					this.setPrivate(keyList, _getPassword());
+				} else if(_type == "public") {
+					this.setPublic(keyList, _getPassword());
+				} else {
+					throw "tEnvoyNaClSigningKey Fatal Error: Only private and public keys can be loaded from a backup.";
+				}
 			}
 		} else {
 			throw assertion.error;
