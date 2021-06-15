@@ -2166,7 +2166,7 @@ function tEnvoyNaClSigningKey(key, type = "secret", password = null, passwordPro
 			throw "tEnvoyNaClSigningKey Fatal Error: Invalid signature.";
 		}
 		let hash = _tEnvoy.util.hexToBytes(signed.split("::")[0]);
-		return this.verify(signed, password) && _tEnvoy.util.bytesToHex(_nacl.hash(_tEnvoy.util.pack(message))) == _tEnvoy.util.bytesToHex(hash);
+		return this.verify(signed, password).verified && _tEnvoy.util.bytesToHex(_nacl.hash(_tEnvoy.util.pack(message))) == _tEnvoy.util.bytesToHex(hash);
 	}
 	
 	this.toPublic = (password = null) => {
