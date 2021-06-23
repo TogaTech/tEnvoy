@@ -16,7 +16,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v7.0.6";
+			return "v7.0.7";
 		}
 	});
 	
@@ -204,6 +204,21 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		}
 		if(mixed == null) {
 			throw "tEnvoy Fatal Error: argument mixed of method util.mixedToUint8Array is required and does not have a default value.";
+		}
+		let isObjectArray = true;
+		if(typeof mixed == "object" && mixed.constructor == Object) {
+			let keys = Object.keys(mixed);
+			let returnUint8Array = new Uint8Array(keys.length);
+			for(let i = 0; i < keys.length && isObjectArray; i++) {
+				if(keys[i] != i || !Number.isInteger(mixed[keys[i]]) || mixed[keys[i]] < 0 || mixed[keys[i]] > 255) {
+					isObjectArray = false;
+				} else {
+					returnUint8Array[i] = mixed[keys[i]];
+				}
+			}
+			if(isObjectArray) {
+				return returnUint8Array;
+			}
 		}
 		if(mixed instanceof Uint8Array) {
 			if(includeType) {
