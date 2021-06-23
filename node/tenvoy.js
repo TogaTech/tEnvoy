@@ -16,7 +16,7 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 	
 	Object.defineProperty(this, "version", {
 		get: () => {
-			return "v7.0.5";
+			return "v7.0.6";
 		}
 	});
 	
