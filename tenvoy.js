@@ -46382,6 +46382,17 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		if(uint8Array == null) {
 			return null;
 		}
+		if(typeof uint8Array == "object" && uint8Array.constructor == Object) {
+			let keys = Object.keys(uint8Array);
+			let newUint8Array = new Uint8Array(keys.length);
+			for(let i = 0; i < keys.length; i++) {
+				if(keys[i] != i || !Number.isInteger(uint8Array[keys[i]]) || uint8Array[keys[i]] < 0 || uint8Array[keys[i]] > 255) {
+					return null;
+				}
+				newUint8Array[i] = uint8Array[keys[i]];
+			}
+			uint8Array = newUint8Array;
+		}
 		if(includeType) {
 			let paddingOver = false;
 			let startIndex = 0;
