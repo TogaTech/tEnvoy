@@ -769,10 +769,11 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 			} else {
 				max = parseFloat(max);
 			}
-			let random = await this.random.bytes(1).catch((err) => {
+			let bytes = await this.random.bytes(4).catch((err) => {
 				reject(err);
 			});
-			resolve((random[0] / 255) * (max - min) + min);
+			let random = (new Uint32Array(bytes.buffer))[0] / 0x100000000;
+			resolve(random * (max - min) + min);
 		});
 	}
 	
