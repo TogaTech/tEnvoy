@@ -22,6 +22,7 @@ PGP, NaCl, and PBKDF2 in node.js and the browser (hashing, random, encryption, d
 	- [Node.js File Import](#nodejs-file-import)
 - [Minify](#minify)
 - [Dependencies](#dependencies)
+- [Contributing](#contributing)
 - [Quickstart](#quickstart)
 - [Documentation](#documentation)
 	- [General](#general)
@@ -96,6 +97,8 @@ uglifyjs ./node/tenvoy.js -o ./node/tenvoy.min.js -c -m --source-map "filename='
 
 # Dependencies
 
+# Contributing
+
 # Quickstart
 
 # Documentation
@@ -116,7 +119,7 @@ const envoy = window.TogaTech.tEnvoy; // tEnvoy {...}
 - nacl (optional, default: `nacl`): Object (`nacl`) - a valid instance of TweetNaCl.js (https://github.com/dchest/tweetnacl-js), `nacl` is added by default in `tenvoy.js`, but this parameter can be used to provide a modified version of `nacl` or a polyfill
 - sha256 (optional, default: `sha256`): Object (`sha256`) - a valid instance of fasth-sha256-js (https://github.com/dchest/fast-sha256-js), `sha256` is added by default in `tenvoy.js`, but this parameter can be used to provide a modified version of `sha256` or a polyfill
 
-**Return Type:** tEnvoy (`tEnvoy {...}`)
+**Returns:** tEnvoy (`tEnvoy {...}`) - the instance of tEnvoy
 
 ### wordsList
 Gets or sets the [BIP39 English wordlist](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt) as an array of 2048 words, used to generate random words or back up/restore NaCl-based keys
@@ -161,12 +164,48 @@ let sha256 = envoy.core.sha256; // {...}
 ## Utilities
 
 ### util.utf8encode
+Encodes a string into a UTF-8 bytes array
+```javascript
+let bytes = envoy.util.utf8encode("test") // Uint8Array(4) [116, 101, 115, 116]
+```
+**Parameters:**
+- string (required): string (`"test"`) - the string to encode
+
+**Returns:** Uint8Array (`Uint8Array(4) [116, 101, 115, 116]`) - the UTF-8 encoded bytes
 
 ### util.utf8decode
+Decodes a UTF-8 bytes array into a string
+```javascript
+let string = envoy.util.utf8decode(new Uint8Array([116, 101, 115, 116])) // "test"
+```
+**Parameters:**
+- bytes (required): Uint8Array (`Uint8Array(4) [116, 101, 115, 116]`) - the bytes to decode
+
+**Returns:** string (`"test"`) - the UTF-8 decoded string
 
 ### util.stringToBytes
+Encodes a string into a bytes array
+```javascript
+let bytes = envoy.util.stringToBytes("test") // Uint8Array(4) [116, 101, 115, 116]
+```
+**Parameters:**
+- string (required): string (`"test"`) - the string to encode
+
+**Returns:** Uint8Array (`Uint8Array(4) [116, 101, 115, 116]`) - the encoded bytes
+
+**Warning: While this method is similar to [util.utf8encode](#util-utf8encode), it does not handle UTF-8 encoding for characters outside of the 8 byte range, causing unexpected outputs for UTF-8 characters.**
 
 ### util.bytesToString
+Decodes a bytes array into a string
+```javascript
+let string = envoy.util.utf8decode(new Uint8Array([116, 101, 115, 116])) // "test"
+```
+**Parameters:**
+- bytes (required): Uint8Array (`Uint8Array(4) [116, 101, 115, 116]`) - the bytes to decode
+
+**Returns:** string (`"test"`) - the decoded string
+
+**Warning: While this method is similar to [util.utf8decode](#util-utf8decode), it does not handle UTF-8 decoding for characters outside of the 8 byte range, causing unexpected outputs for UTF-8 characters.**
 
 ### util.stringToHex
 
