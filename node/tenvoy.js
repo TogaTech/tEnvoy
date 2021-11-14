@@ -142,10 +142,10 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		} else if(array instanceof Array) {
 			copy = new Array(array.length);
 		} else {
-			throw "tEnvoy Fatal Error: argument array of method util.arrayDeepCopy is invalid, array must be of type Uint8Array or Array.";
+			return array;
 		}
 		for(let i = 0; i < array.length; i++) {
-			copy[i] = array[i];
+			copy[i] = this.util.arrayDeepCopy(array[i]);
 		}
 		return copy;
 	}
@@ -202,9 +202,6 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 				return returnArray;
 			}
 		}
-		if(mixed == null) {
-			throw "tEnvoy Fatal Error: argument mixed of method util.mixedToUint8Array is required and does not have a default value.";
-		}
 		let isObjectArray = true;
 		if(typeof mixed == "object" && mixed.constructor == Object) {
 			let keys = Object.keys(mixed);
@@ -217,7 +214,17 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 				}
 			}
 			if(isObjectArray) {
-				return returnUint8Array;
+				if(includeType) {
+					let oldReturnUint8Array = returnUint8Array;
+					returnUint8Array = new Uint8Array(oldReturnUint8Array.length + 1);
+					returnUint8Array[0] = 0;
+					for(let i = 0; i < oldReturnUint8Array.length; i++) {
+						returnUint8Array[i + 1] = oldReturnUint8Array[i];
+					}
+					return pad(returnUint8Array, length);
+				} else {
+					return returnUint8Array;
+				}
 			}
 		}
 		if(mixed instanceof Uint8Array) {
@@ -365,7 +372,11 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 			let mixedAsUint8Array = this.util.utf8encode(mixed.toString());
 			if(includeType) {
 				let returnUint8Array = new Uint8Array(mixedAsUint8Array.length + 1);
-				returnUint8Array[0] = 254;
+				if(typeof mixed == "function") {
+					returnUint8Array[0] = 10;
+				} else {
+					returnUint8Array[0] = 254;
+				}
 				for(let i = 0; i < mixedAsUint8Array.length; i++) {
 					returnUint8Array[i + 1] = mixedAsUint8Array[i];
 				}
@@ -454,6 +465,9 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 				return parseFloat(this.util.utf8decode(returnUint8Array));
 			} else if(uint8Array[0] == 9) {
 				return Infinity;
+			} else if(uint8Array[0] == 10) {
+				let fakeDecoded = this.util.utf8decode(fakeUint8Array);
+				return eval("(" + this.util.utf8decode(returnUint8Array) + ")");
 			} else if(uint8Array[0] == 254) {
 				let fakeDecoded = this.util.utf8decode(fakeUint8Array);
 				return this.util.utf8decode(returnUint8Array);
@@ -477,108 +491,23 @@ function tEnvoy(openpgpRef = openpgp, naclRef = nacl, sha256Ref = sha256) {
 		return this.util.uint8ArrayToMixed(packed, true);
 	}
 	
-	this.util.objectEquals = (object1, object2) => {
-		let deepCompare = () => {
-			var i, l, leftChain, rightChain;
-			let compare2Objects = (x, y) => {
-				var p;
-				// remember that NaN === NaN returns false
-				// and isNaN(undefined) returns true
-				if(isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
-					return true;
-				}
-				
-				// Compare primitives and functions.
-				// Check if both arguments link to the same object.
-				// Especially useful on the step where we compare prototypes
-				if(x === y) {
-					return true;
-				}
-				
-				// Works in case when functions are created in constructor.
-				// Comparing dates is a common scenario. Another built-ins?
-				// We can even handle functions passed across iframes
-				if((typeof x === 'function' && typeof y === 'function') ||
-				   (x instanceof Date && y instanceof Date) ||
-				   (x instanceof RegExp && y instanceof RegExp) ||
-				   (x instanceof String && y instanceof String) ||
-				   (x instanceof Number && y instanceof Number)) {
-					return x.toString() === y.toString();
-				}
-				
-				// At last checking prototypes as good as we can
-				if(!(x instanceof Object && y instanceof Object)) {
-					return false;
-				}
-				
-				if(x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
-					return false;
-				}
-				
-				if(x.constructor !== y.constructor) {
-					return false;
-				}
-				
-				if(x.prototype !== y.prototype) {
-					return false;
-				}
-				
-				// Check for infinitive linking loops
-				if(leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
-					return false;
-				}
-				
-				// Quick checking of one object being a subset of another.
-				// todo: cache the structure of arguments[0] for performance
-				for(p in y) {
-					if(y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-						return false;
-					} else if(typeof y[p] !== typeof x[p]) {
-						return false;
-					}
-				}
-				
-				for(p in x) {
-					if(y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
-						return false;
-					} else if(typeof y[p] !== typeof x[p]) {
-						return false;
-					}
-					
-					switch(typeof (x[p])) {
-						case 'object':
-						case 'function':
-							leftChain.push(x);
-							rightChain.push(y);
-							if(!compare2Objects (x[p], y[p])) {
-								return false;
-							}
-							leftChain.pop();
-							rightChain.pop();
-							break;
-						default:
-							if(x[p] !== y[p]) {
-								return false;
-							}
-							break;
-					}
-				}
-				return true;
-			}
-			if(arguments.length < 1) {
-				throw "need two or more arguments to compare";
-			}
-			for(i = 1, l = arguments.length; i < l; i++) {
-				leftChain = []; //Todo: this can be cached
-				rightChain = [];
-				if(!compare2Objects(arguments[0], arguments[i])) {
-					return false;
+	this.util.objectEquals = (inputted, original) => {
+		if(typeof inputted == "object" && typeof original == "object") {
+			let result = true;
+			let keys_inputted = Object.keys(inputted);
+			let keys_original = Object.keys(original);
+			for(let i = 0; i < keys_inputted.length; i++) {
+				if(!this.util.objectEquals(inputted[keys_inputted[i]], original[keys_inputted[i]])) {
+					result = false;
 				}
 			}
-			return true;
+			if(keys_inputted.length != keys_original.length) {
+				result = false;
+			}
+			return result;
+		} else {
+			return inputted == original;
 		}
-		
-		return deepCompare(object1, object2);
 	}
 	
 	this.util.fixArmor = (armored) => {
