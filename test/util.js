@@ -385,8 +385,8 @@ describe("Utility Tests", function() {
 		let actual8 = envoy.util.unpack(new Uint8Array([3, 1, 0]));
 		assert.deepEqual(expected8, actual8);
 
-		let expected9 = NaN;
-		let actual9 = envoy.util.unpack(new Uint8Array([7, 0]));
+		let expected9 = true;
+		let actual9 = isNaN(envoy.util.unpack(new Uint8Array([7, 0])));
 		assert.deepEqual(expected9, actual9);
 
 		let expected10 = 1.1;
