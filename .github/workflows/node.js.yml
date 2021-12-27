@@ -16,9 +16,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 14.x, 15.x]
+        node-version: [10.x, 12.x, 14.x, 15.x, 16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-        # TODO: add 12.x when https://github.com/nodejs/node/issues/26115 is resolved
 
     steps:
     - uses: actions/checkout@v2
