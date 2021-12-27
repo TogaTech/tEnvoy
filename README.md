@@ -278,8 +278,8 @@ let equals7 = envoy.util.compareConstant("test", "testing"); // false
 Converts any type to a Uint8Array
 ```javascript
 let uint8array1 = envoy.util.mixedToUint8Array(null); // null
-let uint8array3 = envoy.util.mixedToUint8Array(new Uint8Array([1, 2])); // Uint8Array(2) [1, 2]
-let uint8array2 = envoy.util.mixedToUint8Array({0: 1, 1: 2}); // Uint8Array(2) [1, 2]
+let uint8array2 = envoy.util.mixedToUint8Array(new Uint8Array([1, 2])); // Uint8Array(2) [1, 2]
+let uint8array3 = envoy.util.mixedToUint8Array({0: 1, 1: 2}); // Uint8Array(2) [1, 2]
 let uint8array4 = envoy.util.mixedToUint8Array([1, 2]); // Uint8Array(2) [1, 2]
 let uint8array5 = envoy.util.mixedToUint8Array(1); // Uint8Array(1) [1]
 let uint8array6 = envoy.util.mixedToUint8Array(256); // Uint8Array(2) [1, 0]
@@ -373,8 +373,11 @@ Alias of `util.uint8ArrayToMixed(mixed, true)`
 ### util.objectEquals
 Check whether two JSON objects are equal in almost constant time
 ```javascript
-let equals1 = envoy.util.objectEquals({"t": "e", "s": "t", "i": {"n": "g"}}, {"i": {"n": "g"}, "s": "t", "t": "e"}); // true
-let equals2 = envoy.util.objectEquals({"t": "e", "s": "t", "i": {"n": "g"}}, {"i": {"n": "g"}, "t": "e"}); // false
+let equals1 = envoy.util.objectEquals({"t": "e", "s": "t"}, {"t": "e", "s": "t"}); // true
+let equals2 = envoy.util.objectEquals({"t": "e", "s": "t", "i": {"n": "g"}}, {"i": {"n": "g"}, "s": "t", "t": "e"}); // true
+let equals3 = envoy.util.objectEquals({"t": "e", "s": "t", "i": {"n": "g"}}, {"i": {"n": "g"}, "t": "e"}); // false
+let equals4 = envoy.util.objectEquals({"i": {"n": "g"}, "t": "e"}, {"t": "e", "s": "t", "i": {"n": "g"}}); // false
+let equals5 = envoy.util.objectEquals({"t": "e", "s": "t", "i": {"n": "g"}}, {"t": "e", "s": "t", "i": {"n": "o"}}); // false
 ```
 **Parameters:**
 - inputted (optional, default: `null`): object (`{"t": "e", "s": "t", "i": {"n": "g"}}`) - the user-inputted argument for comparison
