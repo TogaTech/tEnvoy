@@ -6,6 +6,11 @@ describe("Utility Tests", function() {
 	let i = 0;
 
 	i++;
+	it(`${i}: util - exists`, function() {
+		assert.notEqual(envoy.util, null);
+	});
+
+	i++;
 	it(`${i}: util.utf8encode - exists`, function() {
 		assert.notEqual(envoy.util.utf8encode, null);
 	});

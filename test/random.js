@@ -6,6 +6,11 @@ describe("Random Tests", function() {
 	let i = 0;
 
 	i++;
+	it(`${i}: random - exists`, function() {
+		assert.notEqual(envoy.random, null);
+	});
+
+	i++;
 	it(`${i}: random.bytes - exists`, function() {
 		assert.notEqual(envoy.random.bytes, null);
 	});
